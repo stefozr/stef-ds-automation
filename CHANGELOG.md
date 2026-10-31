@@ -8,8 +8,7 @@ All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM
 - The Automation window, the custom automation editor and the coverage report are now called **Smart Automation**:
   in the settings, the README and the docs.
 - API: `api.smartAutomation` (`openItem`, `openActor`, `coverage`, `coverageData`, `customizedItems` and the classes
-  `ItemSmartAutomation`, `ActorSmartAutomation`, `CoverageReport`); the hook `dsAuto.smartAutomationApplied`. The
-  earlier names `api.medkit` and `dsAuto.medkitApplied` keep working.
+  `ItemSmartAutomation`, `ActorSmartAutomation`, `CoverageReport`); the hook `dsAuto.smartAutomationApplied`.
 
 ## [1.0.0] - 2026-10-31
 
