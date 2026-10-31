@@ -1,6 +1,6 @@
 # Generic feature automation
 
-Implementation: core 0.11.0, library and Medkit 0.6.0. Stored rules use
+Implementation: core 0.11.0, library and Smart Automation 0.6.0. Stored rules use
 `flags.stef-ds-automation.automation = {version: 1, rules: [...]}`. Existing native data, detached entries,
 resource-gain rules and Black Ash Teleport remain supported. An absent flag needs no migration;
 existing library effects can be copied into the editor's draft. Unknown versions are rejected.
@@ -40,7 +40,7 @@ Barbed Tail integration, modifier preservation, performance activation/moving au
 resource expiry and centered area targeting. Existing regression harnesses cover the engine,
 delegation, saving throws, resource gains, zones and Black Ash Teleport.
 
-Live validation remains necessary after reloading Foundry: check short-height Medkit windows,
+Live validation remains necessary after reloading Foundry: check short-height Smart Automation windows,
 player-owned prompts, native roll dialogs for Take Two/Acrobatics, DSCT cover/concealment pills,
 Moonlight turns with Death Tracker, and any third-party terrain-cost integration. No live result
 for this change is claimed by the offline harnesses.

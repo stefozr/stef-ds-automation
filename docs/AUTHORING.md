@@ -129,7 +129,7 @@ stays manual, shown on the card), `native.suppress` (power roll effect ids the o
 data defects such as an applied effect meant for the user), `native.filter` (`"enemies"` or `"allies"`:
 the system's own rows, damage included, only for targets of that side; the others stay on the card as
 skipped. Awe: "if you target an enemy, you make a power roll"), `config` (options per item, set in the
-medkit), `choices`, `effects`, `triggers`, `trackers` (below). `monster` (a list of monster keys: the
+Smart Automation), `choices`, `effects`, `triggers`, `trackers` (below). `monster` (a list of monster keys: the
 compendium uuid of the monster, or its name slug) makes an overlay monster-specific; its texts are linted
 against that monster's ability. List the uuid **and** the slug: the uuid survives renamed adventure actors
 (the Delian Tomb's "Queen Bargnot" is a Goblin Monarch), the slug covers hand-made copies. Delian Tomb
@@ -380,7 +380,7 @@ From 0.8.0: `src/overlays/kits/weakening-brand.json` (modifier), `src/overlays/e
 
 An overlay can provide `automation: {version: 1, rules: [...]}` with an empty `effects` list.
 Use `feature:<dsid>`, `ancestryTrait:<dsid>` or `ability:<dsid>` as appropriate. The common rule schema
-and supported modifier keys live in core's `scripts/library/custom.mjs`. The Medkit editor provides
+and supported modifier keys live in core's `scripts/library/custom.mjs`. Smart Automation's editor provides
 item-local authoring and world presets without changing compendiums. Use the existing monster key
 list (or explicit NPC opt-in) for monster content. Validate and rebuild after changing overlays;
 `dist/coverage.md` includes a feature-rule section.

@@ -37,7 +37,8 @@ export const HOOKS = Object.freeze({
   preSave: "dsAuto.preSave",
   save: "dsAuto.save",
   preOngoing: "dsAuto.preOngoing",
-  // Milestone 4: the medkit changed an item's automation.
+  // Milestone 4: Smart Automation changed an item's automation (medkitApplied: its name before 1.0.1, still fired).
+  smartAutomationApplied: "dsAuto.smartAutomationApplied",
   medkitApplied: "dsAuto.medkitApplied",
   // Milestone 5: triggered actions and trackers (active GM).
   preTrigger: "dsAuto.preTrigger",

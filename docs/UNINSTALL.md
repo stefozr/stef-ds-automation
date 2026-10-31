@@ -2,7 +2,7 @@
 
 The module writes a little data into the world: a section on chat cards, a few flags, areas on the canvas, effects
 with a special end, summoned creatures and their folder, and (only when you detached library automation in the
-medkit) special effects on items. If you disable the module without preparing, the world keeps working, but:
+Smart Automation) special effects on items. If you disable the module without preparing, the world keeps working, but:
 
 - ability cards show without their Automation section, and each card logs one console error at load;
 - cards that consist only of our section (damage, trigger, resource gain, Malice, summon and area cards) **vanish
@@ -40,7 +40,7 @@ ours) | `"keep"`; `removeFlags` (default true); `olderThanDays` (only older card
 | Areas (regions with the "Automation Zone" behavior) | count | `zones: "dismiss"` (default): ends each area and deletes its region |
 | Effects that end "until ..." (`duration.expiry` `dsAutoUntil`) | count | `untilEffects: "convert"` (default): a normal effect that stays until removed by hand |
 | Summoned creatures (tokens with `flags["stef-ds-automation"].summon`) | list | `summons: "dismiss"`: dismisses each (tokens removed) |
-| Items with automation detached by the medkit (`dsAuto.*` special effects, `flags["stef-ds-automation"]`) | list per actor and item | `items: "remove"`: removes those entries and flags (your customizations are lost) |
+| Items with automation detached by Smart Automation (`dsAuto.*` special effects, `flags["stef-ds-automation"]`) | list per actor and item | `items: "remove"`: removes those entries and flags (your customizations are lost) |
 | The actor folder "Summons (ds-auto)" | report | `folders: "delete"`: only when it is empty |
 | Frightened, taunted and grabbed effects made by the core | count | left as they are: they are the system's own representation and keep working |
 
@@ -71,7 +71,7 @@ ui.notifications.info(`Stripped ${updates.length} chat card(s), deleted ${toDele
 
 Running it a second time finds 0 cards when everything is clean.
 
-## The library and the medkit
+## The library and Smart Automation
 
-The library content and the medkit store nothing of their own: the library only registers overlays at load, the medkit writes through
+The library content and Smart Automation store nothing of their own: the library only registers overlays at load, Smart Automation writes through
 the core (item flags and `dsAuto.*` entries, covered by `api.cleanup` above).

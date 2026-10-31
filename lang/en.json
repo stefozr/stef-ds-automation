@@ -1378,11 +1378,11 @@
     },
     "Settings": {
       "medkitRole": {
-        "name": "Medkit: who may open it",
+        "name": "Smart Automation: who may open it",
         "hint": "Users at or above this role see the Automation windows and badges' click. Changing an item's automation also needs ownership of the item."
       },
       "showBadge": {
-        "name": "Medkit: status badge on ability sheets",
+        "name": "Smart Automation: status badge on ability sheets",
         "hint": "Show how stef-ds-automation automates an ability as a small badge in the sheet's title bar."
       }
     },
@@ -1623,7 +1623,7 @@
     },
     "Maintenance": {
       "coverage": "Automation coverage",
-      "coverageHint": "Per ability compendium, how many abilities the library, the system, or nothing automates (the medkit's coverage report).",
+      "coverageHint": "Per ability compendium, how many abilities the library, the system, or nothing automates (the Smart Automation coverage report).",
       "customized": "Customized items",
       "customizedHint": "Items whose automation is stored on the item (detached or edited, also outdated ones): a library update does not reach them, and the suite's cleanup can remove them.",
       "customizedNone": "No item in this world has customized automation."

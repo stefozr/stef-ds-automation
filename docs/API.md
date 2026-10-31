@@ -53,7 +53,7 @@ the older `false` result for players; local prompt inspection/release simply ope
 
 Every member below is on `api.library`. Registry operations are synchronous and local to the calling client;
 register a source on every client from `Hooks.once("dsAuto.init", api => ...)`. Item writes return promises and
-require the caller to own the item; they fire `dsAuto.medkitApplied` after completion.
+require the caller to own the item; they fire `dsAuto.smartAutomationApplied` after completion.
 
 | Member | Signature | Result / permission |
 |---|---|---|
@@ -136,7 +136,7 @@ Names are in `HOOKS` (`scripts/constants.mjs`). "Vetoable" hooks are called with
 | `dsAuto.preSave` | `(effect, {policy})` | active GM | yes: no save |
 | `dsAuto.save` | `(effect, result)` | active GM | no |
 | `dsAuto.preOngoing` | `(effect, spec, context)` | active GM | yes: no tick |
-| `dsAuto.medkitApplied` | `(item, {action, overlay, result})` | the client that changed the item | no |
+| `dsAuto.smartAutomationApplied` | `(item, {action, overlay, result})` | the client that changed the item | no |
 | `dsAuto.preTrigger` | `(event, candidate)` | active GM | yes: that reactor is not asked |
 | `dsAuto.trigger` | `(event, decision)` | active GM, once the outcome is final | no |
 | `dsAuto.trackerZero` | `(info, outcome)` | active GM | no |
@@ -167,8 +167,8 @@ Names are in `HOOKS` (`scripts/constants.mjs`). "Vetoable" hooks are called with
 
 - `game.modules.get("stef-ds-automation").api.content`: `overlays` (a frozen copy of the built overlays), `count`,
   `reregister()`.
-- `game.modules.get("stef-ds-automation").api.medkit`: `openItem(itemOrUuid)`, `openActor(actorOrUuid)`, `coverage()`,
-  `coverageData()` (async), and the classes `ItemMedkit`, `ActorMedkit`, `CoverageReport`.
+- `game.modules.get("stef-ds-automation").api.smartAutomation`: `openItem(itemOrUuid)`, `openActor(actorOrUuid)`, `coverage()`,
+  `coverageData()` (async), and the classes `ItemSmartAutomation`, `ActorSmartAutomation`, `CoverageReport`.
 
 Cleanup row reports include the selected action, count and completed count; list-bearing rows also contain labels.
 Native targeted effects are reported only. Errors are collected per action.

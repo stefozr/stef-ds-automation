@@ -48,9 +48,12 @@ medkitInit();
 Hooks.on = onOrig;
 assert.ok(hooks.getHeaderControlsDrawSteelItemSheet && hooks.getHeaderControlsDrawSteelActorSheet && hooks.renderDrawSteelItemSheet);
 assert.equal(registered.length, 1, "coverage report menu");
-// Since 1.0.0 the medkit's API is `api.medkit` of the suite, set on `dsAuto.init`.
+// Smart Automation's API is `api.smartAutomation` of the suite, set on `dsAuto.init`; `api.medkit` is its old alias.
 medkitApi(api);
-const medkit = api.medkit;
+const medkit = api.smartAutomation;
+assert.equal(api.medkit.openItem, medkit.openItem, "api.medkit alias");
+assert.equal(api.medkit.ItemMedkit, medkit.ItemSmartAutomation, "old class name on the alias");
+assert.equal(api.medkit.ActorMedkit, medkit.ActorSmartAutomation, "old class name on the alias");
 
 const shipped = (await import(fileUrl(path.join(LIBRARY, "dist", "overlays.mjs")))).default;
 api.library.registerSource({ id: "stef-ds-automation.library", overlays: shipped, priority: 50 });
@@ -110,7 +113,7 @@ function ownedAbility(name) {
 
 /* ---------- item window: context and actions ---------- */
 {
-  const { ItemMedkit } = medkit;
+  const { ItemSmartAutomation: ItemMedkit } = medkit;
   const item = ownedAbility("Catch Breath");
   const app = new ItemMedkit({ item });
   let ctx = await app._prepareContext();
@@ -139,7 +142,7 @@ function ownedAbility(name) {
 
 /* ---------- actor window and coverage ---------- */
 {
-  const { ActorMedkit } = medkit;
+  const { ActorSmartAutomation: ActorMedkit } = medkit;
   const a = ownedAbility("Catch Breath");
   const b = ownedAbility("Defend");
   const c = ownedAbility("Plain Strike");
@@ -165,7 +168,7 @@ function ownedAbility(name) {
 }
 /* ---------- triggers, trackers and the triggered-action line (library 0.2.0, core 0.7.0) ---------- */
 {
-  const { ItemMedkit, ActorMedkit } = medkit;
+  const { ItemSmartAutomation: ItemMedkit, ActorSmartAutomation: ActorMedkit } = medkit;
   // Parry: a trigger-only overlay (effects: []) still counts as automated.
   const parry = ownedAbility("Parry");
   parry.system.type = "triggered";
@@ -222,7 +225,7 @@ function ownedAbility(name) {
 }
 /* ---------- summons (library 0.3.0, core 0.8.0) ---------- */
 {
-  const { ItemMedkit, ActorMedkit } = medkit;
+  const { ItemSmartAutomation: ItemMedkit, ActorSmartAutomation: ActorMedkit } = medkit;
   // Summon Source of Earth: one summon line, the stat block named from the pack index, no "the user" bit.
   const savedPacks = game.packs;
   game.packs = new Map([["draw-steel.monsters", { index: new Map([["o7qp5KCUuRgfCko6", { name: "Source of Earth" }]]) }]]);
@@ -278,7 +281,7 @@ function ownedAbility(name) {
 }
 /* ---------- resource gains, areas, villain actions (library 0.4.0, core 0.9.0) ---------- */
 {
-  const { ItemMedkit, ActorMedkit } = medkit;
+  const { ItemSmartAutomation: ItemMedkit, ActorSmartAutomation: ActorMedkit } = medkit;
   const feature = (name, dsid) => ({
     uuid: `${hero.uuid}.Item.ft${dsid.replace(/\W/g, "").padEnd(14, "0").slice(0, 14)}`, name, img: "f.png", documentName: "Item", type: "feature",
     system: { _dsid: dsid }, actor: hero, flags: {}, isOwner: true,

@@ -13,7 +13,7 @@ One module, three parts:
 - **The ability library**: 175 ability and feature entries that add what the system's own data leaves out
   (conditions written in the ability text, triggered actions such as Parry or Inertial Shield, summons, resource
   gains, areas such as Wall of Fire). No rules text is shipped: entries are structured data keyed by ability name.
-- **The medkit**: an **Automation** window on item and actor sheets (status per ability, disable / lock / detach,
+- **Smart Automation**: an **Automation** window on item and actor sheets (status per ability, disable / lock / detach,
   a custom automation editor with presets), a coverage report and maintenance entries.
 
 Everything is applied by the Director's client; players see the results and use the card's buttons.
@@ -41,7 +41,7 @@ Then enable **Stef's Automation Suite for Draw Steel** (and libWrapper) in your 
 | Draw Steel: Triggers | keep disabled | The suite's own triggered actions and gains replace it. |
 | [Stef's Auto FX for Draw Steel](https://github.com/stefozr/stef-ds-fx) | optional | An animation per target at the tier the suite resolved. |
 | [Stef's Quality of Life Improvements for Draw Steel](https://github.com/stefozr/stef-ds-qol) | optional | Compact ability cards and table fixes; its teleport fix hands abilities the library teleports to the suite. |
-| Draw Steel Plus | optional | Its item sheet gets the medkit's badge and Automation control too. |
+| Draw Steel Plus | optional | Its item sheet gets Smart Automation's badge and Automation control too. |
 
 Everything degrades cleanly without the recommended modules; `game.modules.get("stef-ds-automation").api.selfCheck()`
 reports what was detected.
@@ -147,7 +147,7 @@ Forced movement:
     for macros and the ability library (M4). Combat Tools' own teleport effects keep their own buttons.
 
 Ability library (content comes from the built-in **ability library**, the user interface
-from the **medkit**):
+from **Smart Automation**):
 
 17. **Overlays** describe what an ability does beyond the system's own power roll effects: conditions from
     the ability text (statuses or the ability's own effects, with potency, ends and "until the start / end
@@ -171,7 +171,7 @@ from the **medkit**):
     a successful Hide grants one surge. Hide, the surge and teleport are recorded for Undo.
 22. **Combat Tools first**: where an ability carries Combat Tools' own automation of a kind (its heal,
     cleanse, teleport... buttons), the library leaves that kind to it.
-23. **Detach** (medkit): the library's automation can be copied onto an item as editable `dsAuto.*`
+23. **Detach** (Smart Automation): the library's automation can be copied onto an item as editable `dsAuto.*`
     special effects; they survive Combat Tools' enhanced-ability refresh and the system's Update Source.
     Per item: options, disable, lock, re-sync, reset.
 24. A card nobody prepared (its author's client failed) is taken over by the Director when the library
@@ -332,7 +332,7 @@ every target of that tier.
 
 ## Homebrew and feature automation
 
-Open an item's **Automation** window and choose **Edit automation** in the Medkit. Add a rule,
+Open an item's **Automation** window and choose **Edit automation** in Smart Automation. Add a rule,
 choose when it runs and whom it affects, then add damage, healing, conditions, resource gains,
 movement or modifiers. Formulas use the item's roll data (`@M`, `@A`, `@R`, `@I`, `@P`, `@tier`,
 `@spend` and `@target.*`). Save writes only that item's version 1 automation flag. World presets are
@@ -363,7 +363,7 @@ master switch and the four client options (prompt dialog, compact automation car
 cards, debug logging).
 
 Each settings tab can reset its options to defaults. Maintenance offers the self-check, Prepare to uninstall,
-a Cleanup report and entries supplied by the medkit. The cleanup report counts data; the API performs cleanup.
+a Cleanup report and entries supplied by Smart Automation. The cleanup report counts data; the API performs cleanup.
 
 ## Mode by creature type
 
@@ -494,7 +494,7 @@ adventures' actors when those modules are installed (see `AUTHORING.md`). `dist/
 first line holds the version and a hash of `src/overlays`, so rebuild after every overlay or version change
 (`dist-check.mjs` fails otherwise).
 
-## The medkit
+## Smart Automation
 
 - **Edit automation**: build rules as **When → Who → What**, with damage, healing, movement, conditions,
   resources and modifiers. Advanced settings contain filters, duration, costs and trigger requirements;
@@ -539,7 +539,7 @@ special effects.
 ### Maintenance entries
 
 With Stef's Automation Suite 0.10.0 the core's settings window (**Configure Settings > Draw Steel: Automation
-Core > Automation settings**) has a **Maintenance** tab, and the medkit adds two entries there:
+Core > Automation settings**) has a **Maintenance** tab, and Smart Automation adds two entries there:
 
 - **Automation coverage**: the coverage report above.
 - **Customized items**: the world's items and the actors' items whose automation is stored on the item (Customized,
@@ -548,10 +548,10 @@ Core > Automation settings**) has a **Maintenance** tab, and the medkit adds two
 
 With an older core nothing changes: the coverage report stays in the settings list.
 
-### Medkit settings
+### Smart Automation settings
 
-- **Medkit: who may open it** (world, default Assistant GM). Changing an item also needs ownership.
-- **Medkit: status badge on ability sheets** (client).
+- **Smart Automation: who may open it** (world, default Assistant GM). Changing an item also needs ownership.
+- **Smart Automation: status badge on ability sheets** (client).
 
 ## Coexistence
 
@@ -703,7 +703,7 @@ list); otherwise the effect text is read (setting "Ongoing damage: read effect t
 Card actions are relayed to the active Director and authorized there. Registry reads and registration are
 client-local; item actions use the caller's ownership permissions. See the API reference for each member.
 
-Hooks: `dsAuto.init(api)` (content modules register overlays here), `dsAuto.medkitApplied(item, {action,
+Hooks: `dsAuto.init(api)` (content modules register overlays here), `dsAuto.smartAutomationApplied(item, {action,
 overlay, result})` (0.6.0), `dsAuto.preResolve(message, record, plan)` (return `false` to make the card
 manual), `dsAuto.resolved(message, record, {reason})`, `dsAuto.preApplyOp(message, op)` (return `false` to
 skip an op), `dsAuto.applyOp(message, op, patch)`, `dsAuto.undoOp(message, op, patch)`; Milestone 2:
@@ -764,14 +764,14 @@ message part `system.parts.dsAutoResolve000` of type `dsAutoResolution`. If the 
 old cards log one console error per stored part at load; the rest of the card renders normally. The
 same goes for detached `dsAuto.*` special effects on items (one error per entry; the ability still works).
 
-The library content and the medkit have small APIs of their own under the suite's API:
+The library content and Smart Automation have small APIs of their own under the suite's API:
 
 ```js
 const api = game.modules.get("stef-ds-automation").api;
 api.content.overlays;      // the built library entries: a frozen copy
 api.content.reregister();  // register them again (after unregisterSource, say)
-api.medkit.openItem(itemOrUuid); api.medkit.openActor(actorOrUuid); api.medkit.coverage();
-api.medkit.customizedItems(); // items whose automation is stored on the item
+api.smartAutomation.openItem(itemOrUuid); api.smartAutomation.openActor(actorOrUuid); api.smartAutomation.coverage();
+api.smartAutomation.customizedItems(); // items whose automation is stored on the item
 ```
 
 Other modules can add library entries the same way:

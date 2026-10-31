@@ -166,16 +166,18 @@ Hooks.once("init", () => {
   Hooks.on(SETTINGS_MENU_HOOK, addMaintenance);
 });
 
-// The suite's API exists once the core part has initialized (`dsAuto.init`); the medkit's own methods sit under `api.medkit`.
+// The suite's API exists once the core part has initialized (`dsAuto.init`); Smart Automation's own methods sit under
+// `api.smartAutomation`. `api.medkit` (its name before 1.0.1) stays as an alias with the old class names.
 Hooks.once("dsAuto.init", api => {
   if (api) {
-    api.medkit = {
+    api.smartAutomation = {
       openItem: item => openItemMedkit(typeof item === "string" ? fromUuidSync(item) : item),
       openActor: actor => openActorMedkit(typeof actor === "string" ? fromUuidSync(actor) : actor),
       coverage: () => new CoverageReport().render({ force: true }),
       coverageData,
       customizedItems: () => customizedItems(),
-      ItemMedkit, ActorMedkit, CoverageReport,
+      ItemSmartAutomation: ItemMedkit, ActorSmartAutomation: ActorMedkit, CoverageReport,
     };
+    api.medkit = { ...api.smartAutomation, ItemMedkit, ActorMedkit };
   }
 });

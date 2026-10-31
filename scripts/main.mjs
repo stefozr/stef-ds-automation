@@ -187,11 +187,13 @@ import { legacy } from "./maintenance/legacy.mjs";
 const partRegisteredAtImport = registerResolutionPart();
 registerEntryTypes();
 
-/** Run a medkit action and announce it (`dsAuto.medkitApplied`). */
+/** Run a Smart Automation action and announce it (`dsAuto.smartAutomationApplied`, and its old name). */
 const medkitAction = (action, fn) => async (item, ...args) => {
   const doc = typeof item === "string" ? await fromUuid(item) : item;
   const result = await fn(doc, ...args);
-  Hooks.callAll(HOOKS.medkitApplied, doc, { action, overlay: findOverlay(doc), result });
+  const payload = { action, overlay: findOverlay(doc), result };
+  Hooks.callAll(HOOKS.smartAutomationApplied, doc, payload);
+  Hooks.callAll(HOOKS.medkitApplied, doc, payload);
   return result;
 };
 

@@ -2,6 +2,15 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.0.1] - 2026-10-31
+
+### Changed
+- The Automation window, the custom automation editor and the coverage report are now called **Smart Automation**:
+  in the settings, the README and the docs.
+- API: `api.smartAutomation` (`openItem`, `openActor`, `coverage`, `coverageData`, `customizedItems` and the classes
+  `ItemSmartAutomation`, `ActorSmartAutomation`, `CoverageReport`); the hook `dsAuto.smartAutomationApplied`. The
+  earlier names `api.medkit` and `dsAuto.medkitApplied` keep working.
+
 ## [1.0.0] - 2026-10-31
 
 First public release.
@@ -18,17 +27,16 @@ First public release.
   with a countdown, Judgement and Mark trackers, summons placed by the summoner's player, heroic resource gains from
   events, Malice and villain-action tracking, lasting areas such as Wall of Fire, target picks and Persistent
   abilities.
-- Medkit: an Automation window on ability, feature and actor sheets, a custom automation editor with world presets,
+- Smart Automation: an Automation window on ability, feature and actor sheets, a custom automation editor with world presets,
   a coverage report and Maintenance entries.
 - Settings window with twelve tabs, mode per creature type, self-check, Prepare to uninstall and a cleanup report.
 
 ### Changed
-- Settings window: the Other modules tab lists Stef's Auto FX and Stef's Quality of Life Improvements instead of the
-  library and medkit modules (they are built in now).
+- Settings window: the Other modules tab lists Stef's Auto FX and Stef's Quality of Life Improvements.
 - Release: one `module.json` and `module.zip` per GitHub release, built by `.github/workflows/release.yml`.
 
 ### Fixed
-- Medkit Automation window: the Library line showed "Â·" between the source and its version instead of "·".
+- Smart Automation window: the Library line showed "Â·" between the source and its version instead of "·".
 
 ## Before 1.0 (private development)
 
