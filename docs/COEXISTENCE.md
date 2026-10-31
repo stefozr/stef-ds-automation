@@ -6,7 +6,7 @@ then writes its own data), and locks or annotates buttons in the chat card only 
 `api.selfCheck()` prints the other modules' settings that matter (the "foreign" table).
 
 Source contracts reviewed (M8 live coexistence testing remains pending): Combat Tools 1.2.3, ctlib 1.2.1, Target Damage 1.0.8, Death Tracker 1.1.3, Battle Log 1.3.0,
-Local Fixes 1.8.0, on Draw Steel 1.1.2 and Foundry 14.368.
+Stef's Quality of Life Improvements 1.0.0, on Draw Steel 1.1.2 and Foundry 14.368.
 
 ## Draw Steel: Combat Tools (`draw-steel-combat-tools`)
 
@@ -59,7 +59,7 @@ Local Fixes 1.8.0, on Draw Steel 1.1.2 and Foundry 14.368.
 |---|---|
 | Stands down | With it active our resource gains are off (it owns them; the self-check says so). |
 
-## Draw Steel: Local Fixes (`ds-local-fixes`)
+## Stef's Quality of Life Improvements (`stef-ds-qol`)
 
 | | |
 |---|---|

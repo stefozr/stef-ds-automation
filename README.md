@@ -57,23 +57,6 @@ reports what was detected.
   `move.before` trigger). On systems that expose it, `AbilityModel#performSummon` is MIXED behind
   **Intercept native summons**. Without libWrapper the Milestone 2 and 5 features are off and selfCheck says so.
 
-## Upgrading from the Draw Steel automation modules
-
-Before 1.0.0 this suite was three modules: **Draw Steel: Automation Core** (`ds-auto-core`), **Draw Steel:
-Automation Library** (`ds-auto-library`) and **Draw Steel: Automation Medkit** (`ds-auto-medkit`).
-
-1. Install this module and enable it; disable the three old modules in the same step.
-2. On the first load, the active Director's client imports the old data once: every world and user setting of the
-   three modules (the card ledger included, so old cards stay signed), every flag stored under `ds-auto-core` on
-   chat cards, combats, combatants, tokens, regions, actors, items, effects, users and folders, and the zone
-   region behaviors (recreated with the new type). Each client also copies its own client settings. A
-   notification says what was imported; reload once afterwards.
-3. Remove the old modules.
-
-To see what would be imported, or to run it again:
-`game.modules.get("stef-ds-automation").api.migrateLegacy({ dryRun: true })` (report only) or
-`migrateLegacy({ force: true })`.
-
 ## Who does what
 
 | Client | Job |
@@ -332,7 +315,7 @@ by hand on a sheet is a correction, not damage; areas ignore line of effect; dif
 the viewed scene only (core's terrain costs), and overlapping difficult zones multiply; areas are refused on
 gridless and hexagonal scenes, and only the Director moves or reshapes one; a region created over creatures does not
 count as entering (a "displace" move does); areas are sized in squares, so the scene's grid distance must be 1
-square, as the system's own templates expect (the self-check warns); Local Fixes' "Undo Last Activation" restores
+square, as the system's own templates expect (the self-check warns); Stef's Quality of Life Improvements' "Undo Last Activation" restores
 the heroic resource to its old value even when a gain row stays applied: undo the gain row first, or afterwards add
 the erased amount back on the sheet and leave the row as it is. Monster abilities that only borrowed a hero overlay (Overwatch,
 Inspiring Strike, Soul Burn, Psychic Pulse) are manual now: monsters only get monster overlays.
@@ -389,8 +372,7 @@ summons and objects. The category is the **target** of a result; our summon toke
 other category. A feature set to Off stays off. Player-card restrictions and safety downgrades can still make a
 card more restrictive. The overrides also apply to ongoing damage and area hits.
 
-The active Director migrates the old hero override once. `heroOverride` remains a readable fallback for this minor
-version; use the settings window for new changes. `api.modeFor(creature, "damage")` reports the category and world
+`api.modeFor(creature, "damage")` reports the category and world
 mode, before per-card restrictions.
 
 ## Targeted conditions
@@ -574,7 +556,7 @@ With an older core nothing changes: the coverage report stays in the settings li
 ## Coexistence
 
 See [the coexistence contract](docs/COEXISTENCE.md) for the settings and APIs read from Combat Tools,
-ctlib, Target Damage, Death Tracker, Battle Log, Triggers, Resources UI, Local Fixes and Draw Steel Plus.
+ctlib, Target Damage, Death Tracker, Battle Log, Triggers, Resources UI, Stef's Quality of Life Improvements and Draw Steel Plus.
 
 **Verified family versions:** Combat Tools 1.2.8, ctlib 1.5.1, Death Tracker 1.2.2, Target Damage 1.0.8,
 Battle Log 1.5.0; Draw Steel: Triggers is meant to stay disabled (the suite's triggered actions and gains run instead).

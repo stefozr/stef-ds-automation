@@ -4,22 +4,7 @@ All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM
 
 ## [1.0.0] - 2026-10-31
 
-First public release. The three private modules **Draw Steel: Automation Core** (`ds-auto-core` 0.18.1),
-**Draw Steel: Automation Library** (`ds-auto-library` 0.8.1) and **Draw Steel: Automation Medkit**
-(`ds-auto-medkit` 0.7.0) are now one module, **Stef's Automation Suite for Draw Steel** (`stef-ds-automation`).
-
-### Upgrading
-- Enable this module and disable the three old ones. On the first load the active Director's client imports their
-  data once: world, user and client settings (the card ledger included, so existing cards stay signed and their undo
-  keeps working), every flag stored under `ds-auto-core` on chat cards, combats, combatants, tokens, regions,
-  actors, items, effects, users and folders, and zone region behaviors (recreated as `stef-ds-automation.zone`).
-  A notification lists what was imported; reload once afterwards.
-- `api.migrateLegacy({dryRun: true})` reports what would be imported; `api.migrateLegacy({force: true})` runs it
-  again.
-- API: `game.modules.get("stef-ds-automation").api` replaces `game.modules.get("ds-auto-core").api` with the same
-  methods. The library's API moved to `api.content` (`overlays`, `count`, `reregister()`) and the medkit's to
-  `api.medkit` (`openItem`, `openActor`, `coverage`, `coverageData`, `customizedItems`). The `dsAuto.*` hooks are
-  unchanged. Library entries register as the source `stef-ds-automation.library`.
+First public release.
 
 ### What the suite does
 - Per-target resolution of ability cards: damage, healing, temporary Stamina and conditions at each target's own
@@ -413,7 +398,6 @@ Known limits:
 All notable changes to this module are documented here, following
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 #### [0.12.2] - 2026-10-09
 
 - Clear the previous card reference when reserving a new turn's optional feature opportunity, preventing Gravitic Disruption from being blocked before movement selection.
@@ -439,7 +423,6 @@ All notable changes to this module are documented here, following
 - Remove temporary-Stamina-dependent effects when their pool is depleted or replaced; record restoration for Undo and Green Shield explosion damage.
 - Add regression coverage in harness13; preserve installed system and Combat Tools files.
 
-
 ##### Added
 
 - Version 1 item-local feature rules and independent world presets: on use, passive, damage taken,
@@ -449,7 +432,6 @@ All notable changes to this module are documented here, following
   areas, replacement of stale targets, and cancellation cleanup.
 - Feature and performance lifecycle, owner choices, shared Malice costs, frequency claims, temporary
   heroic-resource credits, and native roll/target restrictions for supported performances.
-
 
 ##### Fixed
 
@@ -1259,14 +1241,12 @@ Milestone 9. Requires ds-auto-core 0.14.0; 175 overlays.
 - Include feature items stored in the abilities compendium when indexing; regenerate the 165-overlay distribution.
 - Require Automation Core 0.12.0.
 
-
 ##### Added
 
 - 27 feature-rule overlays: Barbed Tail, the 12 installed Wards, Goblin Mode, and the 13 installed
   Troubadour performances. Goblin Mode pays 3 Malice once and grants encounter goblins +2 speed until
   round end. Barbed Tail's optional once-per-round damage is added before mitigation.
 - Expanded ancestry and monster-feature indexing and feature-rule coverage in generated reports.
-
 
 ##### Fixed
 
@@ -1435,7 +1415,6 @@ Wave 1.
 - Preserve new aura gates and temporary-Stamina dependencies when editing automation.
 - Require Automation Core 0.12.0.
 
-
 #### [0.6.1] - 2026-10-08
 
 ##### Changed
@@ -1462,7 +1441,6 @@ Wave 1.
 ##### Fixed
 
 - The complete Automation window scrolls within the viewport, including its bottom controls.
-
 
 #### [0.5.0] - 2026-10-08
 
