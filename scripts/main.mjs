@@ -104,6 +104,7 @@ import { getResolution } from "./engine/record.mjs";
 import { partActions, registerResolutionPart } from "./parts/resolution-part.mjs";
 import { registerRelay, requestOp } from "./relay/queries.mjs";
 import { registerDstdLock } from "./ui/dstd-lock.mjs";
+import { registerTestCardLock } from "./ui/test-card-lock.mjs";
 import { loadDsctHandlerProbes as dsctHandlerProbes } from "./compat/dsct.mjs";
 import { registerDstdFold } from "./ui/dstd-fold.mjs";
 import { registerTeleportMessageFold } from "./ui/teleport-message-fold.mjs";
@@ -697,6 +698,7 @@ Hooks.once("init", () => {
   safely("registerHeroTokenSpend", registerHeroTokenSpend);
   detectCompat();
   registerDstdLock();
+  registerTestCardLock();
   // 0.13.0: Target Damage's panel folded under "Details"; Combat Tools' teleport messages for our rows folded.
   safely("registerDstdFold", registerDstdFold);
   safely("registerTeleportMessageFold", registerTeleportMessageFold);

@@ -2,6 +2,20 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.1.0] - 2026-11-01
+
+### Added
+- **Reactive tests.** Abilities whose targets each make a test ("each enemy in the area makes an Intuition test")
+  are automated. The card lists the targets as waiting for their tests; when a target rolls (from Target Damage's
+  Reactive Tests panel), its tier's damage, conditions, forced movement and resources are applied from the ability
+  card and can be undone there. A rerolled test replaces that target's result: its applied rows are undone and the
+  new tier applies. The test card's own apply buttons are locked once the ability card has that target's rows.
+  Needs Draw Steel: Target Damage; setting **Automate reactive tests** (on by default).
+
+### Fixed
+- Frightened and taunted applied through Combat Tools 1.2.8 failed with "Combat Tools created no effect": Combat
+  Tools now records the source as a change on the status effect instead of a flag, and reuses the status's id.
+
 ## [1.0.1] - 2026-10-31
 
 ### Changed

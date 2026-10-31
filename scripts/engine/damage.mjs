@@ -33,8 +33,8 @@ export function opRoll(message, op) {
 export function opSource(message, op) {
   let src;
   // Synthetic cards, library rows (Milestone 4) and hero-token heals (Milestone 7: the recovery value, no roll) carry
-  // their amount in the GM-signed record.
-  if (op.synthetic || op.lib || op.heroToken) {
+  // their amount in the GM-signed record. 1.1.0: so do reactive rows (the tier value of the target's test, no card roll).
+  if (op.synthetic || op.lib || op.heroToken || op.reactive) {
     src = {
       total: Number(op.rawAmount ?? op.amount ?? 0), type: op.type ?? "", ignoredImmunities: [...(op.ignoredImmunities ?? [])],
       aoe: !!op.aoe, isHeal: op.kind === "heal" || op.kind === "temp", temp: op.kind === "temp",

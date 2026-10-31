@@ -13,6 +13,7 @@ import { dsctConditionEnabled, dsctConditionsOn } from "../compat/dsct.mjs";
 import { forcedDelegate, needsPick, sizeBonus, stabilityOf } from "../delegation/forced-movement.mjs";
 import { setting } from "../settings.mjs";
 import { opId } from "./keys.mjs";
+import { REACTIVE_PART } from "./reactive.mjs";
 import { areaOnly, pickedOnly } from "./record.mjs";
 import { effectDisplay, effectStatuses, nativeEffects } from "./native.mjs";
 import { effectShows } from "../library/choose-compat.mjs";
@@ -196,7 +197,8 @@ export function buildPlan({
     // Milestone 9: a picked or area-only creature gets library rows only (no native rows, no "no tier" warning).
     if (pickedOnly(t) || areaOnly(t)) continue;
     if (t.tier == null) {
-      if (!noPowerRoll) warnings.push({ code: "noTier", targetKey: key });
+      // 1.1.0: a reactive target waiting for its test is no warning (the row says so).
+      if (!noPowerRoll && !t.awaitingTest) warnings.push({ code: "noTier", targetKey: key });
       continue;
     }
     const actor = fromUuidSync(t.actorUuid);
@@ -208,11 +210,14 @@ export function buildPlan({
     const filteredOut = !!nativeFilter && (nativeFilter === "allies") !== isAlly(t, userRecord);
     const firstOwn = new Set(Object.keys(ops));
     if (t.ambiguous) warnings.push({ code: "ambiguousTier", targetKey: key });
-    const part = message.system.parts.get(t.partId);
+    // 1.1.0: a reactive target's damage comes from its test's tier (reactive.mjs), kept on the target record.
+    const reactive = t.partId === REACTIVE_PART;
+    const part = reactive ? null : message.system.parts.get(t.partId);
+    const rolls = reactive ? t.reactiveRolls : part?.rolls;
 
     // Damage, healing and temporary stamina: one op per damage roll in the target's tier part.
     for (const rollIndex of t.damageRollIndexes ?? []) {
-      const roll = part?.rolls?.[rollIndex];
+      const roll = rolls?.[rollIndex];
       if (!roll) continue;
       const kind = roll.isHeal ? (roll.type === "value" ? "heal" : "temp") : "damage";
       let mode = decideMode(kind, actor, t.tokenUuid);
@@ -221,7 +226,7 @@ export function buildPlan({
       const base = {
         kind, mode, partId: t.partId, rollIndex, tier: t.tier,
         nativeSurges: Number(roll.options?.dsAutoNativeSurges ?? 0), amount: roll.total, type: roll.type ?? "", ignoredImmunities: [...(roll.ignoredImmunities ?? [])],
-        aoe: !!roll.aoe, status: OP_STATUS.PENDING,
+        aoe: !!roll.aoe, status: OP_STATUS.PENDING, ...(reactive ? { reactive: true } : {}),
       };
       const squad = squadOf(actor);
       if (squad && filteredOut) continue;

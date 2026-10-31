@@ -103,15 +103,19 @@ async function applyTargeted(message, res, op, item, actor, target) {
   const nativeCopy = actor.effects.get(statusConfig(op.effectId)?._id) ?? null;
   const replacedExtra = nativeCopy && nativeCopy.id !== prior?._id ? [nativeCopy.toObject()] : [];
   if (replacedExtra.length) await actor.deleteEmbeddedDocuments("ActiveEffect", [nativeCopy.id]);
+  let made = null;
   try {
-    await fn(targetDoc, sourceActor, sourceTokenId, endStr);
+    made = await fn(targetDoc, sourceActor, sourceTokenId, endStr);
   } catch (err) {
     await restoreEffects(actor, replacedExtra);
     throw err;
   }
 
-  const ae = dsctFlaggedEffect(actor, op.effectId);
-  if (!ae || ae.id === prior?._id) {
+  // Combat Tools 1.2.8 no longer flags its effect (the source is a `system.statuses.<id>.sources` change on the
+  // static-id status effect, deleted above as a native copy): the effect it returns is the one it made.
+  const ae = (made?.id && actor.effects.get(made.id)) || dsctFlaggedEffect(actor, op.effectId);
+  const same = ae && prior && ae.id === prior._id && (ae._stats?.createdTime ?? null) === (prior._stats?.createdTime ?? null);
+  if (!ae || same) {
     await restoreEffects(actor, replacedExtra);
     return { status: OP_STATUS.FAILED, reason: "delegateNoEffect" };
   }

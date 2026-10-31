@@ -74,6 +74,7 @@ import { opId } from "./keys.mjs";
 import { integrity, sign } from "./ledger.mjs";
 import { buildPlan } from "./plan.mjs";
 import { assignCard, readCard, rollCounts } from "./readers.mjs";
+import { REACTIVE_PART, cardOfTest, changedResultKeys, isReactiveItem, prepareReactiveTargets, reactiveEnabled, reactiveSignature, sameSignature, testPartOf } from "./reactive.mjs";
 import {
   PLACED_KINDS, effectiveUntil, getResolution, hasPart, isApplied, nextSeq, ownButtonOnly, partSource, realTargets, recordPath, selfOnly,
   targetedOps, areaOnly, pickedOnly,
@@ -875,6 +876,9 @@ export async function resolveMessage(message, { force = false, targets: newTarge
     const { shape, parts } = read;
     const tiers = assignCard(targets, read);
     for (const [key, t] of Object.entries(targets)) Object.assign(t, tiers[key] ?? { tier: null, partId: null, damageRollIndexes: [] });
+    // 1.1.0: a reactive ability's targets take the tier of their own test (Target Damage's results, reactive.mjs).
+    const reactive = isReactiveItem(item) && reactiveEnabled();
+    if (reactive) await prepareReactiveTargets(message, item, targets, res.targets);
 
     // Library (Milestone 4): what the ability does beyond its native effects, and its user's row.
     const lib = resolveAbility(item);
@@ -886,7 +890,8 @@ export async function resolveMessage(message, { force = false, targets: newTarge
       if (targets[selfKey]) Object.assign(targets[selfKey], { self: true, alsoTarget: true });
       else targets[selfKey] = { ...self, self: true, tier: null, partId: null, damageRollIndexes: [] };
     }
-    const noPowerRoll = shape !== "unknown" && !parts.length && item.system?.power?.roll?.enabled === false;
+    // A reactive card is not "no power roll": its targets wait for their tests instead of being dropped.
+    const noPowerRoll = !reactive && shape !== "unknown" && !parts.length && item.system?.power?.roll?.enabled === false;
 
     const isPrivate = !contentVisibleToMe(message);
     const warnings = (res.warnings ?? []).filter(w => w.code === "targetsChanged" || w.code === "adoptedCard");
@@ -904,8 +909,10 @@ export async function resolveMessage(message, { force = false, targets: newTarge
     // Ops already applied in an earlier resolution stay as history and are never rebuilt.
     // "external" ops are rebuilt instead: applyOpList checks Target Damage's records again.
     // Milestone 7: gain rows (any status: a waiting gain row is no plan product) and hero-token heals are history too.
+    // `rebuildUndone` may name target keys (1.1.0: a rerolled reactive test rebuilds only that target's rows).
+    const rebuilds = op => rebuildUndone === true || (rebuildUndone instanceof Set && (op.targetKeys ?? []).some(k => rebuildUndone.has(k)));
     const kept = fresh ? {} : Object.fromEntries(Object.entries(res.ops ?? {}).filter(([, op]) => op.status === OP_STATUS.APPLIED
-      || (op.status === OP_STATUS.UNDONE && !rebuildUndone) || op.kind === "gain" || !!op.heroToken));
+      || (op.status === OP_STATUS.UNDONE && !rebuilds(op)) || op.kind === "gain" || !!op.heroToken));
     const startOrder = fresh ? 0 : Math.max(0, ...Object.values(res.ops ?? {}).map(o => (o.order ?? 0) + 1));
     const plan = buildPlan({
       message, item, targets, forceManual: shape === "unknown" || isPrivate, startOrder,
@@ -1046,6 +1053,9 @@ export async function resolveMessage(message, { force = false, targets: newTarge
       ...identity, shape, modes: plan.modes, targets: writeTargets, ops: writeOps, warnings, choices: writeChoices,
       library: { layer: lib.layer, key: lib.key, version: lib.version, notes: lib.notes ?? null },
       noPowerRoll,
+      // 1.1.0: the test results this resolve saw (onUpdateChatMessage re-resolves when Target Damage's change).
+      // A string, so a result that disappears is not kept by the update merge.
+      ...(reactive ? { reactive: { signature: JSON.stringify(reactiveSignature(message)) } } : res.reactive ? { reactive: ForcedDeletion() } : {}),
       // Milestone 9 (docs/M9-DESIGN.md §C.3): the Persistent use (null clears a stale one); a re-roll is matched here.
       persistent: persistentRecord({ lib, item, message, res, fresh }),
       rollCounts: rollCounts(parts), resolvedAt: Date.now(), resolvedBy: game.userId,
@@ -1707,6 +1717,12 @@ export function onUpdateChatMessage(message, changed, options, userId) {
   }
   if (!setting("enabled")) return;
   const res = getResolution(message);
+  // 1.1.0: a reactive ability's test card changed (a Hero Token reroll appends to its part): its card follows.
+  if (!res && testPartOf(message)) {
+    const card = cardOfTest(message.id);
+    if (card) reactiveUpdate(card.message).catch(err => error("reactive", err, { messageId: card.message.id }));
+    return;
+  }
   // Rolls appended to a tier part after resolution: new manual ops for that part's targets. Queued behind the
   // card's lock before the resolvedAt test: a fresh card held for triggered actions (Milestone 5) is still
   // unresolved here, and the call then runs after the resolve's write (it re-checks resolvedAt inside the lock).
@@ -1721,6 +1737,12 @@ export function onUpdateChatMessage(message, changed, options, userId) {
     if (!p || typeof p !== "object" || !("potencies" in p)) continue;
     if (message.system?.parts?.get?.(partId)?.type !== "targetResult") continue;
     replanPotency(message, partId).catch(err => error("potency.replan", err, { messageId: message.id, partId }));
+  }
+
+  // 1.1.0: a reactive card follows Target Damage's test results and target list (never the late-targets path).
+  if (res.reactive && changed?.flags?.[DSTD_ID]?.state) {
+    reactiveUpdate(message).catch(err => error("reactive", err, { messageId: message.id }));
+    return;
   }
 
   // Late targets: Target Damage rewrote its target list (area auto-targeting) and we have none yet.
@@ -1738,6 +1760,30 @@ export function onUpdateChatMessage(message, changed, options, userId) {
     reconcileExternal(message).catch(err => error("reconcile", err));
   }
 
+}
+
+/**
+ * 1.1.0: Target Damage recorded a test result (or a reroll, or new area targets) on a reactive card: resolve it
+ * again. A target whose result changed after its rows were applied has them undone first, as a hero-token reroll
+ * does, and only that target's undone rows are rebuilt from the new tier.
+ */
+async function reactiveUpdate(message) {
+  message = game.messages.get(message.id) ?? message;
+  const res = getResolution(message);
+  if (stripping() || !res?.resolvedAt || !res.reactive || !reactiveEnabled() || integrity(message) !== "ok") return;
+  let before = null;
+  try {
+    before = JSON.parse(res.reactive.signature ?? "null");
+  } catch (_err) { /* rebuilt below */ }
+  const after = reactiveSignature(message);
+  if (before && sameSignature(before, after)) return;
+  const changedKeys = changedResultKeys(before, after);
+  const stale = Object.values(res.ops ?? {}).filter(op => op.status === OP_STATUS.APPLIED && op.partId === REACTIVE_PART
+    && (op.targetKeys ?? []).some(k => changedKeys.includes(k))).map(op => op.opId);
+  if (stale.length) await undoOps(message, stale, { userId: res.resolvedBy ?? game.userId });
+  log("reactive.update", { messageId: message.id, changed: changedKeys, undone: stale.length });
+  const why = "reactiveResult";   // the resolve's log reason (not a row reason)
+  await resolveMessage(game.messages.get(message.id) ?? message, { force: true, reason: why, rebuildUndone: new Set(changedKeys) });
 }
 
 /**

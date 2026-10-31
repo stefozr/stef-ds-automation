@@ -6,6 +6,9 @@
       "NoTier": "No tier",
       "TierShort": "T{tier}",
       "NoTierShort": "—",
+      "AwaitingTest": "Waiting for their test",
+      "AwaitingTestShort": "…",
+      "TestTier": "Tier {tier} (test {total})",
       "Details": "Details",
       "DetailsShow": "Show Target Damage's panel (dice, edges and banes, Combat Tools rows, Update Targets)",
       "DetailsHide": "Hide Target Damage's panel",
@@ -43,6 +46,7 @@
       },
       "PersistentFree": "Kept Persistent: rolled again, no essence spent.",
       "NothingToApply": "Nothing to apply automatically for these targets.",
+      "AwaitingTests": "Waiting for the targets' tests: each result applies here when it is rolled.",
       "PotencyFailsHidden": "{chr} {value}: fails",
       "PotencyResistsHidden": "{chr} {value}: resists",
       "UnresolvedAuthor": "This card was not resolved yet. Ask the Director's client to resolve it now.",
@@ -293,6 +297,7 @@
       "potencyAdjusted": "Potency was already adjusted on the card"
     },
     "Lock": {
+      "TestCard": "Applied from the ability card: use its row (and Undo there).",
       "AlreadyApplied": "Already applied by Automation Suite. Undo it on the Automation section first.",
       "Tooltip": "Already applied by Automation Suite",
       "AlreadyMoved": "Automation Suite already moved targets of this result. Undo it on the Automation section first.",
@@ -390,6 +395,10 @@
       "respectDstdApplications": {
         "name": "Respect Target Damage applications",
         "hint": "Results already applied from Draw Steel: Target Damage are marked 'applied elsewhere' and not applied again."
+      },
+      "reactiveTests": {
+        "name": "Automate reactive tests",
+        "hint": "Abilities whose targets each make a test (\"each enemy in the area makes an Intuition test\"): when a target's test is rolled, its tier's damage, conditions and forced movement are applied from the ability card and can be undone there. A rerolled test replaces that target's result. The test card's own apply buttons are locked. Needs Draw Steel: Target Damage."
       },
       "reviveOnHeal": {
         "name": "Revive when healed",

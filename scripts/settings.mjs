@@ -127,6 +127,8 @@ const DEFINITIONS = {
     },
   },
   respectDstdApplications: { menu: "compat", scope: "world", type: Boolean, default: true },
+  // 1.1.0: reactive tests (engine/reactive.mjs): each target's rolled test tiers its rows on the ability card.
+  reactiveTests: { menu: "compat", scope: "world", type: Boolean, default: true },
   // Milestone 1.5: hardening.
   reviveOnUndo: { menu: "general", scope: "world", type: Boolean, default: true },
   // 0.17.0: healing a defeated creature above 0 revives it (resources/revive-on-heal.mjs).

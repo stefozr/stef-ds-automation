@@ -28,8 +28,9 @@ Stef's Quality of Life Improvements 1.0.0, on Draw Steel 1.1.2 and Foundry 14.36
 
 | | |
 |---|---|
-| Reads | Its message flags (`state`: targets after area auto-targeting, applications) and settings `hideSystemButtons`, `aoeTargeting`. |
+| Reads | Its message flags (`state`: targets after area auto-targeting, applications, and the per-target test results `reactiveResults` of reactive abilities) and settings `hideSystemButtons`, `aoeTargeting`. |
 | Locks | Its row buttons for results our rows applied; results it applied first are shown as "applied elsewhere" on our card (setting **Respect Target Damage applications**). |
+| Reactive tests | A target's rolled test (recorded by Target Damage) tiers that target's rows on the ability card; the system's apply buttons on that test card (and Combat Tools' forced movement button there) are locked once our card has the target's rows (setting **Automate reactive tests**). |
 | Overlaps | Its own hold limit: damage from its rows waits at most 13 s for a triggered action (it gives up after 15 s). On Draw Steel 1.2 its behaviour depends on its own 1.2 update (not tested). |
 
 ## Draw Steel: Death Tracker (`draw-steel-death-tracker`)

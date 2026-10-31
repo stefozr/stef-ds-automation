@@ -781,10 +781,14 @@ export function buildView(message, res) {
       tierLabel: t.dropped ? loc("DSAUTO.Card.PreviousTarget")
         : selfOnly ? loc("DSAUTO.Card.Self")
           : gainOnly ? loc("DSAUTO.Card.GainRow")
-            : (t.tier ? loc("DSAUTO.Card.Tier", { tier: t.tier }) : (res.noPowerRoll ? "" : loc("DSAUTO.Card.NoTier"))),
+            // 1.1.0: a reactive target shows its test's total, or that it has not rolled yet.
+            : t.awaitingTest ? loc("DSAUTO.Card.AwaitingTest")
+              : (t.tier && t.reactive ? loc("DSAUTO.Card.TestTier", { tier: t.tier, total: t.reactive.total })
+                : (t.tier ? loc("DSAUTO.Card.Tier", { tier: t.tier }) : (res.noPowerRoll ? "" : loc("DSAUTO.Card.NoTier")))),
     };
     row.tierShort = (t.dropped || selfOnly || gainOnly) ? row.tierLabel
-      : (t.tier ? loc("DSAUTO.Card.TierShort", { tier: t.tier }) : (res.noPowerRoll ? "" : loc("DSAUTO.Card.NoTierShort")));
+      : t.awaitingTest ? loc("DSAUTO.Card.AwaitingTestShort")
+        : (t.tier ? loc("DSAUTO.Card.TierShort", { tier: t.tier }) : (res.noPowerRoll ? "" : loc("DSAUTO.Card.NoTierShort")));
     // A target of a power-roll card without a tier (added after the roll): the chip is a dash, styled as text.
     row.noTier = !t.dropped && !selfOnly && !gainOnly && !t.tier && !res.noPowerRoll;
     rows.push(row);
@@ -934,5 +938,7 @@ export function buildView(message, res) {
     notes,
     synthetic: !!res.synthetic,
     empty: resolved && !visibleRows.some(r => r.ops.length) && !noTargets,
+    // 1.1.0: a reactive card whose targets have not rolled their tests yet.
+    emptyText: loc(res.reactive && Object.values(res.targets ?? {}).some(t => t.awaitingTest && !t.dropped) ? "DSAUTO.Card.AwaitingTests" : "DSAUTO.Card.NothingToApply"),
   };
 }

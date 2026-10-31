@@ -14,7 +14,7 @@ const STEPS = [
   ["check", "tests", "check.cjs"],
   ["i18n-audit", "tests", "i18n-audit.cjs"],
   ["harness", "tests", "harness.mjs"],
-  ...[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map(n => [`harness${n}`, "tests", `harness${n}.mjs`]),
+  ...[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(n => [`harness${n}`, "tests", `harness${n}.mjs`]),
   ["medkit:check", "tests/medkit", "check.cjs"],
   ["medkit:harness", "tests/medkit", "harness.mjs"],
   ["library:dist-check", "tools", "dist-check.mjs"],
