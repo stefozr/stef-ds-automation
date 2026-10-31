@@ -1,0 +1,28 @@
+{
+  "key": "ability:materialize",
+  "version": "1.0.0",
+  "name": "Materialize",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-self",
+      "type": "damage",
+      "value": "@R",
+      "ignoredImmunities": [
+        "all"
+      ],
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "targets": "self",
+      "id": "strain-blast",
+      "type": "note",
+      "text": "Strained: creatures next to the target (not targeted) take Reason damage from the blast; apply it by hand.",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

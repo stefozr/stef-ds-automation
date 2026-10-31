@@ -1,0 +1,171 @@
+/*
+ * stef-ds-automation: triggered-action dialog, waiting indicator and roll lock (Milestone 5,
+ * docs/M5-DESIGN.md §2.1 WP-B). Variables are declared on `.ds-auto-trigger-dialog`,
+ * `.ds-auto-trigger-indicator` and `.ds-auto-roll-lock-overlay` (the card's variables are scoped to
+ * `.ds-auto-resolution`). All rules are .ds-auto-* scoped.
+ */
+
+.ds-auto-trigger-dialog,
+.ds-auto-trigger-indicator,
+.ds-auto-roll-lock-overlay {
+  --ds-auto-ok: #3f9b4a;
+  --ds-auto-wait: #b7892a;
+  --ds-auto-bad: #b43c3c;
+  --ds-auto-muted: color-mix(in srgb, currentColor 55%, transparent);
+  --ds-auto-border: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* ---------- Owner's prompt (DialogV2) ---------- */
+
+.ds-auto-trigger-dialog .ds-auto-trigger-intro { margin: 0 0 6px; }
+
+.ds-auto-trigger-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ds-auto-trigger-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 0;
+  border-top: 1px solid var(--ds-auto-border);
+}
+.ds-auto-trigger-option:first-child { border-top: none; }
+
+.ds-auto-trigger-choice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ds-auto-trigger-choice input[type="radio"] { flex: 0 0 auto; margin: 0; }
+
+.ds-auto-trigger-label {
+  font-style: italic;
+  font-size: var(--font-size-12, 12px);
+}
+
+.ds-auto-trigger-cost {
+  color: var(--ds-auto-muted);
+  font-size: var(--font-size-12, 12px);
+}
+
+.ds-auto-trigger-spend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ds-auto-trigger-spend input[type="checkbox"] { flex: 0 0 auto; margin: 0; }
+.ds-auto-trigger-spend-label {
+  color: var(--ds-auto-muted);
+  font-size: var(--font-size-12, 12px);
+}
+
+.ds-auto-trigger-bleeding {
+  color: var(--ds-auto-bad);
+  font-size: var(--font-size-12, 12px);
+}
+
+.ds-auto-countdown {
+  margin: 6px 0 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-auto-wait);
+}
+
+/* ---------- Waiting indicator (GM rows, requester line) ---------- */
+
+.ds-auto-trigger-indicator {
+  position: fixed;
+  right: calc(var(--sidebar-width, 300px) + 16px);
+  bottom: 16px;
+  z-index: 100;
+  min-width: 220px;
+  max-width: 360px;
+  padding: 6px 8px;
+  border: 1px solid var(--ds-auto-wait);
+  border-radius: 6px;
+  background: rgba(11, 10, 19, 0.88);
+  color: #f0eee6;
+  font-size: var(--font-size-12, 12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.ds-auto-trigger-indicator-title {
+  margin-bottom: 4px;
+  font-weight: bold;
+  color: var(--ds-auto-wait);
+}
+
+.ds-auto-trigger-indicator-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ds-auto-trigger-indicator-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+.ds-auto-trigger-indicator-text {
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ds-auto-trigger-release {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 1px 8px;
+  line-height: 1.4;
+  font-size: var(--font-size-11, 11px);
+}
+
+/* ---------- Roll lock (AbilityConfigurationDialog) ---------- */
+
+.ds-auto-roll-locked .window-content,
+.ds-auto-roll-locked footer.form-footer {
+  pointer-events: none;
+  opacity: .6;
+}
+
+/* Bottom-centred card: above Combat Tools' own lock overlay (z-index 50), whose reasons list ours too. */
+.ds-auto-roll-lock-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ds-auto-roll-lock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 92%;
+  padding: 10px 14px;
+  border: 1px solid var(--ds-auto-wait);
+  border-radius: 4px;
+  background: rgba(20, 18, 30, 0.96);
+  color: #f0eee6;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  pointer-events: auto;
+}
+
+.ds-auto-roll-lock-reason { font-weight: bold; }
+.ds-auto-roll-lock-card .ds-auto-countdown { margin: 0; text-align: center; }
+.ds-auto-roll-lock-card button {
+  pointer-events: auto;
+  width: auto;
+}

@@ -1,0 +1,17 @@
+{
+  "key": "ability:no-more-than-a-breeze",
+  "name": "No More Than a Breeze",
+  "version": "1.0.0",
+  "notes": "Ending a turn inside solid matter: move the target out where it entered and end the effect by hand.",
+  "effects": [
+    {
+      "id": "breeze",
+      "type": "condition",
+      "effect": "LA17VDt3bDbNwIJs",
+      "until": "yourNextTurnStart"
+    }
+  ],
+  "persistent": {
+    "keep": "extend"
+  }
+}

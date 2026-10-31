@@ -1,0 +1,75 @@
+{
+  "key": "ability:riders-on-the-storm",
+  "name": "Riders on the Storm",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "storm",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "damage",
+            "type": "damage",
+            "value": "2*@M",
+            "damageType": "cold"
+          }
+        ],
+        "filter": "enemies",
+        "require": {
+          "subject": "self"
+        }
+      },
+      {
+        "id": "source-fly",
+        "event": "aura.continuous",
+        "targets": "self",
+        "effects": [
+          {
+            "id": "fly",
+            "type": "condition",
+            "effect": "t7CYKliC6xtRG9gk",
+            "stacking": true
+          }
+        ]
+      },
+      {
+        "id": "ally-start",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "fly",
+            "type": "condition",
+            "effect": "t7CYKliC6xtRG9gk"
+          }
+        ],
+        "filter": "allies",
+        "end": "nextTurnStart"
+      },
+      {
+        "id": "ally-end",
+        "event": "turn.end",
+        "targets": "subject",
+        "effects": [
+          {
+            "id": "fly",
+            "type": "condition",
+            "effect": "t7CYKliC6xtRG9gk"
+          }
+        ],
+        "filter": "allies",
+        "end": "nextTurnStart"
+      }
+    ],
+    "suppress": [
+      "t7CYKliC6xtRG9gk"
+    ]
+  }
+}

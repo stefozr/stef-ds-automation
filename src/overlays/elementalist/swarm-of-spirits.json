@@ -1,0 +1,68 @@
+{
+  "key": "ability:swarm-of-spirits",
+  "name": "Swarm of Spirits",
+  "version": "1.2.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "sourceNextTurnEnd"
+    },
+    "rules": [
+      {
+        "id": "protect",
+        "event": "aura.continuous",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "save",
+            "type": "modifier",
+            "key": "system.combat.save.bonus",
+            "value": 1
+          },
+          {
+            "id": "might",
+            "type": "modifier",
+            "key": "system.characteristics.might.resist",
+            "value": 1
+          },
+          {
+            "id": "agility",
+            "type": "modifier",
+            "key": "system.characteristics.agility.resist",
+            "value": 1
+          },
+          {
+            "id": "reason",
+            "type": "modifier",
+            "key": "system.characteristics.reason.resist",
+            "value": 1
+          },
+          {
+            "id": "intuition",
+            "type": "modifier",
+            "key": "system.characteristics.intuition.resist",
+            "value": 1
+          },
+          {
+            "id": "presence",
+            "type": "modifier",
+            "key": "system.characteristics.presence.resist",
+            "value": 1
+          }
+        ],
+        "filter": "allies"
+      }
+    ],
+    "suppress": [
+      "BE6pdvzaGxrzjtCH"
+    ]
+  },
+  "persistent": {
+    "keep": [
+      "reroll",
+      "extend"
+    ],
+    "targets": "area"
+  }
+}

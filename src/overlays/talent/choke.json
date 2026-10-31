@@ -1,0 +1,9 @@
+{
+  "key": "ability:choke",
+  "version": "1.0.0",
+  "name": "Choke",
+  "notes": "Ignores stability when the target was restrained by it.",
+  "effects": [
+    { "id": "lift", "type": "forced", "movement": "pull", "vertical": true, "distance": 2, "manual": true, "label": "Vertical pull 2" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "key": "ability:im-no-threat",
+  "version": "1.0.0",
+  "name": "I'm No Threat",
+  "notes": "Remove both effects by hand when the illusion ends. The disguise from the spend option is narrative.",
+  "effects": [
+    {
+      "id": "edge",
+      "type": "condition",
+      "targets": "self",
+      "effect": "DnVjn9uwuzhIZO5w"
+    },
+    {
+      "id": "disengage",
+      "type": "condition",
+      "targets": "self",
+      "effect": "QxuE5FbdA84eu4ca"
+    },
+    {
+      "id": "surge",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 1,
+      "manual": true,
+      "label": "Illusion broken by harming a foe"
+    }
+  ]
+}

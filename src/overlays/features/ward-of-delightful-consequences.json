@@ -1,0 +1,25 @@
+{
+  "key": "feature:ward-of-delightful-consequences",
+  "version": "1.0.0",
+  "name": "Ward of Delightful Consequences",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "self",
+        "effects": [
+          {
+            "id": "resource",
+            "type": "resource",
+            "resource": "surge",
+            "value": "1"
+          }
+        ],
+        "once": "round"
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "key": "ability:spirit-sword",
+  "version": "1.0.0",
+  "name": "Spirit Sword",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "surge",
+      "type": "resource",
+      "resource": "surge",
+      "value": 1
+    },
+    {
+      "id": "strain-target",
+      "type": "damage",
+      "value": 3,
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "targets": "self",
+      "id": "strain-self",
+      "type": "damage",
+      "value": 3,
+      "ignoredImmunities": [
+        "all"
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

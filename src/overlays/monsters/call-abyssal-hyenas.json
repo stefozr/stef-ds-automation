@@ -1,0 +1,21 @@
+{
+  "key": "ability:call-abyssal-hyenas",
+  "monster": ["Compendium.draw-steel.monsters.Actor.mNtGL8Wbj8mqpCzy", "gnoll-abyssal-summoner"],
+  "version": "1.0.0",
+  "name": "Call Abyssal Hyenas",
+  "effects": [
+    {
+      "id": "hyenas",
+      "type": "summon",
+      "targets": "self",
+      "actors": [{ "uuid": "Compendium.draw-steel.monsters.Actor.5oS4rixqbIcsziNm" }],
+      "quantity": "2",
+      "origin": "self",
+      "side": "summoner",
+      "turn": "own",
+      "actsThisRound": true,
+      "squad": "join",
+      "lasts": ["encounterEnd"]
+    }
+  ]
+}

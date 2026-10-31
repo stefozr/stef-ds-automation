@@ -1,0 +1,106 @@
+{
+  "key": "ability:primordial-bane",
+  "version": "1.0.0",
+  "name": "Primordial Bane",
+  "choices": [
+    {
+      "id": "element",
+      "label": "Element",
+      "options": [
+        {
+          "id": "acid",
+          "label": "Acid"
+        },
+        {
+          "id": "cold",
+          "label": "Cold"
+        },
+        {
+          "id": "corruption",
+          "label": "Corruption"
+        },
+        {
+          "id": "fire",
+          "label": "Fire"
+        },
+        {
+          "id": "lightning",
+          "label": "Lightning"
+        },
+        {
+          "id": "poison",
+          "label": "Poison"
+        },
+        {
+          "id": "sonic",
+          "label": "Sonic"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "acid",
+      "type": "condition",
+      "effect": "MGQmrgFa7IchnX8z",
+      "choice": {
+        "group": "element",
+        "option": "acid"
+      }
+    },
+    {
+      "id": "cold",
+      "type": "condition",
+      "effect": "Z25OIEpHpelUvKWe",
+      "choice": {
+        "group": "element",
+        "option": "cold"
+      }
+    },
+    {
+      "id": "corruption",
+      "type": "condition",
+      "effect": "Tp4YLa282D8CY9eX",
+      "choice": {
+        "group": "element",
+        "option": "corruption"
+      }
+    },
+    {
+      "id": "fire",
+      "type": "condition",
+      "effect": "GZkQv6kUtb5gccNI",
+      "choice": {
+        "group": "element",
+        "option": "fire"
+      }
+    },
+    {
+      "id": "lightning",
+      "type": "condition",
+      "effect": "2SJ7L3LBeALSQ4JA",
+      "choice": {
+        "group": "element",
+        "option": "lightning"
+      }
+    },
+    {
+      "id": "poison",
+      "type": "condition",
+      "effect": "d12CIjzP0dulOpUI",
+      "choice": {
+        "group": "element",
+        "option": "poison"
+      }
+    },
+    {
+      "id": "sonic",
+      "type": "condition",
+      "effect": "twQIogmZMlG19c4n",
+      "choice": {
+        "group": "element",
+        "option": "sonic"
+      }
+    }
+  ]
+}

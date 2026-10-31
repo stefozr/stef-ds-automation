@@ -1,0 +1,8 @@
+{
+  "key": "ability:dance-of-blows",
+  "version": "1.0.0",
+  "name": "Dance of Blows",
+  "effects": [
+    { "id": "slide", "type": "forced", "movement": "slide", "distance": "@I", "manual": true, "label": "One adjacent enemy only" }
+  ]
+}

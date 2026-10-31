@@ -1,0 +1,61 @@
+{
+  "key": "ability:time-bomb",
+  "version": "1.0.0",
+  "name": "Time Bomb",
+  "notes": "Bigger cube and bonus surges (insight spent, rounds waited) are tracked by hand; those surges go only into this damage.",
+  "choices": [
+    {
+      "id": "type",
+      "label": "Damage type",
+      "options": [
+        {
+          "id": "acid",
+          "label": "Acid"
+        },
+        {
+          "id": "fire",
+          "label": "Fire"
+        },
+        {
+          "id": "poison",
+          "label": "Poison"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "acid",
+      "type": "damage",
+      "filter": "enemies",
+      "value": "@A",
+      "damageType": "acid",
+      "choice": {
+        "group": "type",
+        "option": "acid"
+      }
+    },
+    {
+      "id": "fire",
+      "type": "damage",
+      "filter": "enemies",
+      "value": "@A",
+      "damageType": "fire",
+      "choice": {
+        "group": "type",
+        "option": "fire"
+      }
+    },
+    {
+      "id": "poison",
+      "type": "damage",
+      "filter": "enemies",
+      "value": "@A",
+      "damageType": "poison",
+      "choice": {
+        "group": "type",
+        "option": "poison"
+      }
+    }
+  ]
+}

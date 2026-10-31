@@ -1,0 +1,32 @@
+{
+  "key": "ability:blessing-of-the-faithful",
+  "name": "Blessing of the Faithful",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "surges",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "surges",
+            "type": "resource",
+            "resource": "surge",
+            "value": 1
+          }
+        ],
+        "filter": "selfAlly",
+        "require": {
+          "subject": "self"
+        }
+      }
+    ],
+    "suppress": []
+  }
+}

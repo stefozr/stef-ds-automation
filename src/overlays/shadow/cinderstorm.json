@@ -1,0 +1,14 @@
+{
+  "key": "ability:cinderstorm",
+  "version": "1.0.0",
+  "name": "Cinderstorm",
+  "notes": "Target your own token too if you teleport. Fire damage to enemies next to a start or end square, and hiding, are by hand.",
+  "effects": [
+    {
+      "id": "teleport",
+      "type": "teleport",
+      "filter": "allies",
+      "distance": 5
+    }
+  ]
+}

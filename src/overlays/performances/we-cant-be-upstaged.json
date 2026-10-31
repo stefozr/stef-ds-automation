@@ -1,0 +1,28 @@
+{
+  "key": "ability:we-cant-be-upstaged",
+  "version": "1.0.0",
+  "name": "We Can't Be Upstaged!",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "system.movement.disengage",
+            "value": "@P",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd"
+      }
+    ],
+    "performance": true
+  }
+}

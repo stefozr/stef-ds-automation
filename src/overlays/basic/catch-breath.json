@@ -1,0 +1,13 @@
+{
+  "key": "ability:catch-breath",
+  "version": "1.0.0",
+  "name": "Catch Breath",
+  "effects": [
+    {
+      "id": "recovery",
+      "type": "heal",
+      "targets": "self",
+      "recoveries": 1
+    }
+  ]
+}

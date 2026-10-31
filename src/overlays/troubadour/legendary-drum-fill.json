@@ -1,0 +1,15 @@
+{
+  "key": "ability:legendary-drum-fill",
+  "version": "1.0.0",
+  "name": "Legendary Drum Fill",
+  "notes": "Target your own token too to gain a surge. The surge at each later round start is given by hand.",
+  "effects": [
+    {
+      "id": "surge",
+      "type": "resource",
+      "filter": "allies",
+      "resource": "surge",
+      "value": 1
+    }
+  ]
+}

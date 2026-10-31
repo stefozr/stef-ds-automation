@@ -1,0 +1,26 @@
+{
+  "key": "feature:paragon-judgement-benefit",
+  "version": "1.0.0",
+  "name": "Paragon Judgement Benefit",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "judgement",
+        "event": "judgement.applied",
+        "optional": true,
+        "once": "turn",
+        "effects": [
+          {
+            "id": "pull",
+            "type": "forced",
+            "movement": "pull",
+            "distance": "2*@P",
+            "vertical": true
+          }
+        ]
+      }
+    ]
+  }
+}

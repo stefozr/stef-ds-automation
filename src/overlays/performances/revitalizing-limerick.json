@@ -1,0 +1,30 @@
+{
+  "key": "ability:revitalizing-limerick",
+  "version": "1.0.0",
+  "name": "Revitalizing Limerick",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "heal",
+            "type": "heal",
+            "recoveries": 1
+          }
+        ],
+        "filter": "selfAlly",
+        "limit": "@P",
+        "special": "recoveryChoices",
+        "require": {
+          "subject": "self"
+        }
+      }
+    ],
+    "performance": true
+  }
+}

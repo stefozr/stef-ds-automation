@@ -1,0 +1,23 @@
+{
+  "key": "ability:soul-burn",
+  "version": "1.0.0",
+  "name": "Soul Burn",
+  "notes": "Strained: the 2d6 self damage and the +1 potency on the daze stay by hand.",
+  "effects": [
+    {
+      "id": "burned",
+      "type": "condition",
+      "effect": "XseuhaepGh2DaQgB"
+    },
+    {
+      "targets": "self",
+      "id": "strain-surge",
+      "type": "resource",
+      "resource": "surge",
+      "value": 3,
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

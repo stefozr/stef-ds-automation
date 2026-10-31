@@ -1,0 +1,14 @@
+{
+  "key": "feature:insight",
+  "version": "1.0.0",
+  "name": "Insight",
+  "notes": "The cheaper cost with an edge stays by hand.",
+  "effects": [],
+  "gains": [
+    {
+      "id": "surge-damage", "event": "damage", "taker": "creature", "dealer": "self", "minSurges": 1, "once": "round",
+      "amount": 1, "amountBy": [{ "feature": "surge-of-insight", "amount": 2 }, { "feature": "death-pool", "amount": 3 }],
+      "label": "Damage with a surge, first this round"
+    }
+  ]
+}

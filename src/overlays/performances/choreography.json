@@ -1,0 +1,28 @@
+{
+  "key": "ability:choreography",
+  "version": "1.0.0",
+  "name": "Choreography",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "system.movement.value",
+            "value": "2",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd"
+      }
+    ],
+    "performance": true
+  }
+}

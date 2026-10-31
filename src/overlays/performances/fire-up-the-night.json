@@ -1,0 +1,28 @@
+{
+  "key": "ability:fire-up-the-night",
+  "version": "1.0.0",
+  "name": "\u201cFire Up the Night\u201d",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:concealment",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd"
+      }
+    ],
+    "performance": true
+  }
+}

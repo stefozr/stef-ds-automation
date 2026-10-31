@@ -1,0 +1,23 @@
+{
+  "key": "ability:the-green-defends-its-servants",
+  "name": "The Green Defends Its Servants",
+  "version": "1.2.0",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "value": 30,
+      "temporary": true
+    },
+    {
+      "id": "shield",
+      "type": "condition",
+      "effect": "Bs1Ant6ozienc9Hx",
+      "temporaryStamina": "temp",
+      "until": "yourNextTurnEnd"
+    }
+  ],
+  "persistent": {
+    "keep": "extend"
+  }
+}

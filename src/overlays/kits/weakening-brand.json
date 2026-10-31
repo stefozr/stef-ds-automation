@@ -1,0 +1,16 @@
+{
+  "key": "ability:weakening-brand",
+  "version": "1.0.0",
+  "name": "Weakening Brand",
+  "effects": [
+    {
+      "id": "weakness",
+      "type": "modifier",
+      "key": "system.damage.weaknesses.all",
+      "value": "@chr",
+      "mode": "add",
+      "end": "nextTurnEnd",
+      "label": "Damage weakness until its next turn ends"
+    }
+  ]
+}

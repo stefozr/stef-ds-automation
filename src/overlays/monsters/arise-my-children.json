@@ -1,0 +1,21 @@
+{
+  "key": "ability:arise-my-children",
+  "monster": ["Compendium.draw-steel.monsters.Actor.oGuWdlPZfrxaY0AN", "vampire-lord"],
+  "version": "1.0.0",
+  "name": "Arise, My Children",
+  "effects": [
+    {
+      "id": "vampires",
+      "type": "summon",
+      "targets": "self",
+      "actors": [{ "uuid": "Compendium.draw-steel.monsters.Actor.pNA8H0vk4EDNq4UI" }],
+      "quantity": "2",
+      "origin": "self",
+      "side": "summoner",
+      "turn": "own",
+      "actsThisRound": true,
+      "squad": "join",
+      "lasts": ["encounterEnd"]
+    }
+  ]
+}

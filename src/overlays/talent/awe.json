@@ -1,0 +1,27 @@
+{
+  "key": "ability:awe",
+  "version": "1.1.0",
+  "name": "Awe",
+  "native": {
+    "filter": "enemies"
+  },
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "filter": "allies",
+      "value": "3 * @P",
+      "temporary": true
+    },
+    {
+      "id": "end",
+      "type": "cleanse",
+      "filter": "allies",
+      "ends": [
+        "save",
+        "turn"
+      ],
+      "count": 1
+    }
+  ]
+}

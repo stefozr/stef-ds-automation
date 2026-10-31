@@ -1,0 +1,35 @@
+{
+  "key": "ability:absolute-zero",
+  "version": "1.0.0",
+  "name": "Absolute Zero",
+  "notes": "Ignoring the drawbacks of dying is tracked by hand.",
+  "effects": [
+    {
+      "id": "avatar",
+      "type": "condition",
+      "targets": "self",
+      "effect": "q923zj4PDU5lFSCw"
+    },
+    {
+      "id": "potency",
+      "type": "condition",
+      "targets": "self",
+      "effect": "7X91XBsZz11gR9NU"
+    },
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 20,
+      "temporary": true,
+      "byTier": {
+        "2": {
+          "value": 30
+        },
+        "3": {
+          "value": 40
+        }
+      }
+    }
+  ]
+}

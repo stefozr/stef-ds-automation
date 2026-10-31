@@ -1,0 +1,22 @@
+<section class="ds-medkit-body">
+  <p>{{localize "DSMEDKIT.Coverage.Intro"}}</p>
+  <p class="hint">{{localize "DSMEDKIT.Coverage.Sources"}}: {{#if sources}}{{sources}}{{else}}{{localize "DSMEDKIT.Coverage.NoSources"}}{{/if}}</p>
+  <div class="ds-medkit-table-wrap">
+    <table class="ds-medkit-table">
+      <thead><tr>
+        <th>{{localize "DSMEDKIT.Coverage.Pack"}}</th><th>{{localize "DSMEDKIT.Coverage.Abilities"}}</th>
+        <th>{{localize "DSMEDKIT.Status.automated.label"}}</th><th>{{localize "DSMEDKIT.Status.native.label"}}</th><th>{{localize "DSMEDKIT.Status.manual.label"}}</th><th>%</th>
+      </tr></thead>
+      <tbody>
+        {{#each packs as |p|}}
+        <tr>
+          <td>{{p.title}}<br><span class="ds-medkit-key">{{p.id}}</span></td>
+          <td>{{p.total}}</td><td>{{p.overlay}}</td><td>{{p.native}}</td>
+          <td>{{#if p.missing.length}}<details><summary>{{p.manual}}</summary><span class="ds-medkit-detail">{{#each p.missing as |m|}}{{m}}{{#unless @last}}, {{/unless}}{{/each}}</span></details>{{else}}0{{/if}}</td>
+          <td>{{p.pct}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</section>

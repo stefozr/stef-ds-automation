@@ -1,0 +1,18 @@
+{
+  "key": "ability:hoarfrost",
+  "version": "1.0.0",
+  "name": "Hoarfrost",
+  "notes": "Strained: a target this slows is restrained in place of slowed; swap it by hand.",
+  "effects": [
+    {
+      "id": "strain",
+      "type": "condition",
+      "targets": "self",
+      "status": "slowed",
+      "until": "yourNextTurnEnd",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

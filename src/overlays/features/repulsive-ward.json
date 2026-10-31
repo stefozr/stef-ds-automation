@@ -1,0 +1,28 @@
+{
+  "key": "feature:repulsive-ward",
+  "version": "1.0.0",
+  "name": "Repulsive Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "source",
+        "effects": [
+          {
+            "id": "forced",
+            "type": "forced",
+            "movement": "push",
+            "distance": "@R"
+          }
+        ],
+        "optional": true,
+        "require": {
+          "adjacent": true
+        }
+      }
+    ]
+  }
+}

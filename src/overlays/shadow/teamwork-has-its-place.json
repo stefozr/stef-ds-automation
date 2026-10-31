@@ -1,0 +1,17 @@
+{
+  "key": "ability:teamwork-has-its-place",
+  "version": "1.0.0",
+  "name": "Teamwork Has Its Place",
+  "notes": "Gain the surge only when an ally stands next to the target; click it before damage to use it on this strike.",
+  "effects": [
+    {
+      "id": "surge",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 1,
+      "manual": true,
+      "label": "An ally next to the target"
+    }
+  ]
+}

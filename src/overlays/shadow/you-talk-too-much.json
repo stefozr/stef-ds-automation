@@ -1,0 +1,13 @@
+{
+  "key": "ability:you-talk-too-much",
+  "version": "1.0.0",
+  "name": "You Talk Too Much",
+  "effects": [
+    {
+      "id": "silenced",
+      "type": "condition",
+      "effect": "QcDNVWsfPwbqgWbU",
+      "end": "encounter"
+    }
+  ]
+}

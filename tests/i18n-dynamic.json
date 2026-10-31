@@ -1,0 +1,153 @@
+{
+  "_comment": "Dynamic i18n keys proven from source constants (docs/M8-DESIGN.md §8.3). check.cjs verifies each list against its constant; i18n-audit.cjs reads them. M8 moves only the new M8 lists here; the older hand lists stay in check.cjs.",
+  "dynamic": [
+    {
+      "prefix": "DSAUTO.Menu.Tab.",
+      "source": "scripts/settings.mjs",
+      "constant": "MENU_TABS",
+      "values": [
+        "general",
+        "modes",
+        "players",
+        "conditions",
+        "turns",
+        "movement",
+        "library",
+        "triggers",
+        "summons",
+        "resources",
+        "compat",
+        "maintenance"
+      ]
+    },
+    {
+      "prefix": "DSAUTO.Menu.ActorType.",
+      "source": "scripts/engine/actor-category.mjs",
+      "constant": "ACTOR_CATEGORIES",
+      "values": [
+        "hero",
+        "retainer",
+        "npc",
+        "minion",
+        "summon",
+        "object"
+      ]
+    },
+    {
+      "prefix": "DSAUTO.Menu.Maintenance.Cleanup.",
+      "source": "scripts/ui/settings-menu.mjs",
+      "constant": "CLEANUP_ROWS",
+      "values": [
+        "zones",
+        "untilEffects",
+        "summons",
+        "items",
+        "folders",
+        "nativeTargeted"
+      ]
+    },
+    {
+      "prefix": "DSAUTO.SelfCheck.",
+      "source": "scripts/self-check.mjs",
+      "constant": "PROBLEM_TEXT",
+      "values": [
+        "partType",
+        "relay",
+        "queryUsers",
+        "noActiveGM",
+        "libraryInvalid",
+        "entryTypes",
+        "libWrapper",
+        "takeDamage",
+        "promptTrigger",
+        "promptUpkeep",
+        "promptPersistent",
+        "zoneType",
+        "gridDistance",
+        "gainsStandDown",
+        "wrappers",
+        "nativeWithDsct",
+        "devBuild",
+        "menu",
+        "unverifiedVersion",
+        "advancedEnrichers",
+        "autoApplyOwn",
+        "dsctHandlers"
+      ]
+    },
+    {
+      "prefix": "DSAUTO.Persistent.End.",
+      "source": "scripts/persistent/registry.mjs",
+      "constant": "PERSISTENT_END",
+      "values": [
+        "released",
+        "timedOut",
+        "cannotPay",
+        "noOwner",
+        "outOfDistance",
+        "turnEnd",
+        "encounterEnd",
+        "superseded",
+        "gone"
+      ]
+    },
+    {
+      "prefix": "DSAUTO.Persistent.Upkeep.Intro.",
+      "source": "scripts/persistent/registry.mjs",
+      "constant": "PERSISTENT_KEEP_KEYS",
+      "values": [
+        "reroll",
+        "extend",
+        "both",
+        "manual"
+      ]
+    },
+    {
+      "prefix": "DSAUTO.Card.Persistent.",
+      "source": "scripts/persistent/registry.mjs",
+      "constant": "PERSISTENT_KEEP_KEYS",
+      "values": [
+        "reroll",
+        "extend",
+        "both",
+        "manual"
+      ]
+    }
+  ],
+  "consumedByFoundry": [
+    "TYPES.SpecialEffect.dsAuto.",
+    "TYPES.RegionBehavior.stef-ds-automation.zone",
+    "DSAUTO.Zone.Behavior.FIELDS."
+  ],
+  "allowUnused": [
+    "DSAUTOLIB.Title"
+  ],
+  "crossModule": [],
+  "hardcodedAllow": [
+    {
+      "file": "stef-ds-automation/scripts/library/schema.mjs",
+      "text": "Catch Breath",
+      "why": "an ability identity (data), not UI"
+    },
+    {
+      "file": "stef-ds-automation/scripts/summons/combat.mjs",
+      "text": "group not created",
+      "why": "internal error; the relay shows DSAUTO.Relay.Failed for it (relayErrorText)"
+    },
+    {
+      "file": "stef-ds-automation/scripts/library/registry.mjs",
+      "text": "library.registerSource needs an id",
+      "why": "developer error of a content module (console)"
+    },
+    {
+      "file": "scripts/legacy-migration.mjs",
+      "text": "imported ${report.settings.length}",
+      "why": "One-time GM notice of the shared 1.0.0 legacy import (the same file in each of Stef's modules, which have no lang file of their own for it)."
+    },
+    {
+      "file": "scripts/legacy-migration.mjs",
+      "text": "only a GM can migrate",
+      "why": "Developer error of the shared 1.0.0 legacy import."
+    }
+  ]
+}

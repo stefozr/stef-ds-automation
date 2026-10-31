@@ -1,0 +1,26 @@
+{
+  "key": "feature:sanctuary-ward",
+  "version": "1.0.0",
+  "name": "Sanctuary Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "source",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:sanctuary",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "end": "nextTurnEnd"
+      }
+    ]
+  }
+}

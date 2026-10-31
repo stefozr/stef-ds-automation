@@ -1,0 +1,35 @@
+{
+  "key": "ability:aura-of-souls",
+  "name": "Aura of Souls",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "slide",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "slide",
+            "type": "forced",
+            "movement": "slide",
+            "distance": "@I"
+          }
+        ],
+        "filter": "all",
+        "require": {
+          "subject": "self"
+        },
+        "optional": true,
+        "special": "auraSouls",
+        "perTarget": true
+      }
+    ],
+    "suppress": []
+  }
+}

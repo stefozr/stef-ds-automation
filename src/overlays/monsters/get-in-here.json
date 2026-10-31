@@ -1,0 +1,21 @@
+{
+  "key": "ability:get-in-here",
+  "monster": ["Compendium.draw-steel.monsters.Actor.Vxxc0EcLHPPnpSbK", "goblin-monarch"],
+  "version": "1.0.0",
+  "name": "Get in Here!",
+  "effects": [
+    {
+      "id": "runners",
+      "type": "summon",
+      "targets": "self",
+      "actors": [{ "uuid": "Compendium.draw-steel.monsters.Actor.Xw0gZCS09gdMjaw8" }],
+      "quantity": "2",
+      "origin": "self",
+      "side": "summoner",
+      "turn": "own",
+      "actsThisRound": true,
+      "squad": "join",
+      "lasts": ["encounterEnd"]
+    }
+  ]
+}

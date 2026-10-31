@@ -1,0 +1,20 @@
+{
+  "key": "ability:expert-fencer",
+  "version": "1.0.0",
+  "name": "Expert Fencer",
+  "notes": "The tier cap below maximum distance is applied by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 3,
+      "tiers": [
+        3
+      ],
+      "manual": true,
+      "label": "Natural 17 or higher"
+    }
+  ]
+}

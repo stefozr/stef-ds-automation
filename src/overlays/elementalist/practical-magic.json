@@ -1,0 +1,42 @@
+{
+  "key": "ability:practical-magic",
+  "version": "1.0.2",
+  "name": "Practical Magic",
+  "notes": "The card follows Combat Tools' choice prompt. Without Combat Tools, Knockback is rolled by hand. Pick the creature (within 10) and the damage type when asked, or with the row's Pick button.",
+  "choices": [
+    {
+      "id": "mode",
+      "label": "Practical Magic",
+      "options": [
+        { "id": "knockback", "label": "Knockback at range", "dsctOption": "Knockback" },
+        { "id": "strike", "label": "Damage one creature", "dsctOption": "Damage" },
+        { "id": "teleport", "label": "Teleport", "dsctOption": "Teleport" }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "knockback",
+      "type": "note",
+      "text": "Knockback at Hurl Element's range, rolled with Reason. With Combat Tools the card's Knockback row pushes the target; otherwise use it by hand.",
+      "choice": { "group": "mode", "option": "knockback" }
+    },
+    {
+      "id": "strike",
+      "type": "damage",
+      "value": "@R",
+      "targets": "pick",
+      "pick": { "count": 1, "within": 10, "of": "self", "damageTypes": ["acid", "cold", "corruption", "fire", "lightning", "poison", "sonic"] },
+      "label": "Reason damage of the chosen type",
+      "choice": { "group": "mode", "option": "strike" }
+    },
+    {
+      "id": "teleport",
+      "type": "teleport",
+      "targets": "self",
+      "distance": "@R",
+      "boost": { "resource": "heroic", "per": 1, "label": "1 extra square per essence" },
+      "choice": { "group": "mode", "option": "teleport" }
+    }
+  ]
+}

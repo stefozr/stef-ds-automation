@@ -1,0 +1,21 @@
+{
+  "key": "ability:parry",
+  "monster": [
+    "Compendium.draw-steel.monsters.Actor.h0iw7LTM1djcBzn9", "human-blackguard",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.K2ehwwXOEhx1vEOL", "dame-cornelia"
+  ],
+  "version": "1.1.0",
+  "name": "Parry!",
+  "notes": "Only a strike's damage is halved; the Tactician's Parry is a different ability.",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "parry",
+      "event": "damage.before",
+      "subject": "selfOrAlly",
+      "attacker": "creature",
+      "require": { "keywords": ["strike"], "fromAbility": true },
+      "steps": [{ "type": "halve" }]
+    }
+  ]
+}

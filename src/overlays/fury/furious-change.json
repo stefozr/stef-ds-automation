@@ -1,0 +1,24 @@
+{
+  "key": "ability:furious-change",
+  "version": "1.0.0",
+  "name": "Furious Change",
+  "notes": "Shifting into animal or hybrid form is done by hand.",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": "@M",
+      "temporary": true
+    },
+    {
+      "id": "recovery",
+      "type": "heal",
+      "targets": "self",
+      "recoveries": 1,
+      "when": {
+        "spend": true
+      }
+    }
+  ]
+}

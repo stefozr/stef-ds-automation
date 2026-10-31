@@ -1,0 +1,165 @@
+/* Stef's Automation Suite: resolution section of ability cards. All rules are .ds-auto-* scoped. */
+
+.ds-auto-resolution {
+  --ds-auto-ok: #3f9b4a;
+  --ds-auto-wait: #b7892a;
+  --ds-auto-bad: #b43c3c;
+  --ds-auto-muted: color-mix(in srgb, currentColor 55%, transparent);
+  --ds-auto-border: color-mix(in srgb, currentColor 22%, transparent);
+  margin-top: 4px;
+  padding: 4px 6px 6px;
+  border: 1px solid var(--ds-auto-border);
+  border-radius: 6px;
+  font-size: var(--font-size-12, 12px);
+}
+
+.ds-auto-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.ds-auto-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  margin: 3px 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ds-auto-wait) 14%, transparent);
+}
+.ds-auto-banner--warning { background: color-mix(in srgb, var(--ds-auto-bad) 14%, transparent); }
+.ds-auto-banner--info { background: color-mix(in srgb, currentColor 8%, transparent); }
+.ds-auto-banner > span { flex: 1; }
+
+.ds-auto-empty { margin: 2px 0; color: var(--ds-auto-muted); }
+
+.ds-auto-rows,
+.ds-auto-ops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ds-auto-row {
+  padding: 3px 0;
+  border-top: 1px solid var(--ds-auto-border);
+}
+.ds-auto-row:first-child { border-top: none; }
+
+.ds-auto-target {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ds-auto-portrait {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  border: none;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ds-auto-target-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ds-auto-name { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-auto-members { color: var(--ds-auto-muted); font-size: 0.9em; }
+.ds-auto-tier { color: var(--ds-auto-muted); white-space: nowrap; }
+.ds-auto-row-warning { color: var(--ds-auto-bad); font-size: 0.9em; margin: 2px 0 0 30px; }
+
+.ds-auto-op {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0 30px;
+}
+.ds-auto-op-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ds-auto-op-detail { color: var(--ds-auto-muted); font-size: 0.9em; }
+.ds-auto-kind { width: 14px; text-align: center; }
+
+.ds-auto-status { width: 16px; text-align: center; }
+.ds-auto-op--applied .ds-auto-status,
+.ds-auto-op--external .ds-auto-status { color: var(--ds-auto-ok); }
+.ds-auto-op--pending .ds-auto-status { color: var(--ds-auto-wait); }
+.ds-auto-op--failed .ds-auto-status { color: var(--ds-auto-bad); }
+.ds-auto-op--skipped .ds-auto-op-label,
+.ds-auto-op--undone .ds-auto-op-label { text-decoration: line-through; color: var(--ds-auto-muted); }
+
+/* 0.13.0: the per-op buttons sit in one wrapper; in the classic layout it lends them to the op's flex row. */
+.ds-auto-op-actions { display: contents; }
+
+.ds-auto-icon-btn {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  padding: 0;
+  line-height: 20px;
+  font-size: 11px;
+}
+
+.ds-auto-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.ds-auto-btn {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 24px;
+  line-height: 22px;
+  padding: 0 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Target Damage rows locked because stef-ds-automation already applied the op. */
+.ds-auto-locked {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+}
+
+/* Milestone 1.5: op warnings, surge buttons, notes. */
+.ds-auto-op-warning {
+  display: block;
+  color: var(--ds-auto-bad);
+  font-size: 0.9em;
+}
+.ds-auto-surge-btn { color: var(--ds-auto-wait); }
+.ds-auto-notes {
+  margin-top: 4px;
+  color: var(--ds-auto-muted);
+}
+.ds-auto-notes > summary { cursor: pointer; }
+.ds-auto-notes > ul { margin: 2px 0 0 16px; padding: 0; }
+
+/* 0.15.0: library "choose one" groups in the system's Use Ability dialog (ui/use-choice.mjs). */
+.ability-configuration-dialog fieldset.ds-auto-use-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 6px;
+  padding: 4px 8px 6px;
+}
+.ability-configuration-dialog fieldset.ds-auto-use-choice > legend { padding: 0 4px; font-weight: bold; }
+.ability-configuration-dialog .ds-auto-use-choice-option { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.ability-configuration-dialog .ds-auto-use-choice-option > input { margin: 0; flex: 0 0 auto; }
+
+/* 0.17.0: the surge dialog's potency rows (ui/surge-choice.mjs): checkbox first, the label over the full width. */
+.ds-auto-surge-dialog .ds-auto-surge-potency { display: flex; align-items: flex-start; gap: 6px; cursor: pointer; }
+.ds-auto-surge-dialog .ds-auto-surge-potency > input { margin: 2px 0 0; flex: 0 0 auto; }

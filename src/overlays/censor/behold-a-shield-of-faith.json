@@ -1,0 +1,14 @@
+{
+  "key": "ability:behold-a-shield-of-faith",
+  "version": "1.0.0",
+  "name": "Behold a Shield of Faith!",
+  "notes": "Allies next to you are covered as well: track the bane against them by hand.",
+  "effects": [
+    {
+      "id": "shield",
+      "type": "condition",
+      "targets": "self",
+      "effect": "rPrYaYuy4HzEKSQJ"
+    }
+  ]
+}

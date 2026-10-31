@@ -1,0 +1,47 @@
+{
+  "key": "ability:stand-up",
+  "version": "1.0.0",
+  "name": "Stand Up",
+  "choices": [
+    {
+      "id": "who",
+      "label": "Who stands up",
+      "options": [
+        {
+          "id": "self",
+          "label": "The user"
+        },
+        {
+          "id": "target",
+          "label": "The targets"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "self",
+      "type": "cleanse",
+      "targets": "self",
+      "statuses": [
+        "prone"
+      ],
+      "choice": {
+        "group": "who",
+        "option": "self"
+      }
+    },
+    {
+      "id": "target",
+      "type": "cleanse",
+      "statuses": [
+        "prone"
+      ],
+      "filter": "allies",
+      "choice": {
+        "group": "who",
+        "option": "target"
+      }
+    }
+  ]
+}

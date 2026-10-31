@@ -1,0 +1,29 @@
+{
+  "key": "ability:edict-of-peace",
+  "name": "Edict of Peace",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "negate",
+        "event": "aura.continuous",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "peace",
+            "type": "modifier",
+            "key": "benefit:peace",
+            "value": 1
+          }
+        ],
+        "filter": "enemies"
+      }
+    ],
+    "suppress": []
+  }
+}

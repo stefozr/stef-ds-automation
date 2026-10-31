@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "stef-ds-automation",
+  "description": "Stef's Automation Suite for Draw Steel (Foundry VTT module): development tools and tests.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "classic-level": "^1.4.1",
+    "handlebars": "^4.7.8"
+  },
+  "scripts": {
+    "test": "node tests/run-all.mjs",
+    "test:list": "node tests/run-all.mjs --list",
+    "library:index": "node tools/index-system.mjs",
+    "library:validate": "node tools/validate.mjs",
+    "library:build": "node tools/build.mjs",
+    "library:check": "node tools/dist-check.mjs"
+  }
+}

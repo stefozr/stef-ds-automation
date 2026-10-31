@@ -1,0 +1,29 @@
+{
+  "key": "ability:wellspring-of-grace",
+  "name": "Wellspring of Grace",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "recover",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "recover",
+            "type": "heal",
+            "recoveries": 1
+          }
+        ],
+        "filter": "allies",
+        "special": "auraRecovery"
+      }
+    ],
+    "suppress": []
+  }
+}

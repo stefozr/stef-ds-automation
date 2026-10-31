@@ -1,0 +1,37 @@
+{
+  "key": "ability:blessing-of-steel",
+  "name": "Blessing of Steel",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "protection",
+        "event": "aura.continuous",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "immunity",
+            "type": "modifier",
+            "key": "system.damage.immunities.all",
+            "value": 5
+          },
+          {
+            "id": "bane",
+            "type": "modifier",
+            "key": "benefit:targetBane",
+            "value": 1
+          }
+        ],
+        "filter": "selfAlly"
+      }
+    ],
+    "suppress": [
+      "3DJ3CdpuJY871dQo"
+    ]
+  }
+}

@@ -1,0 +1,68 @@
+{{!-- Automation settings window, Maintenance tab (partial of menu.hbs; context: maintenance). --}}
+<div class="ds-auto-settings-maintenance">
+  <fieldset>
+    <legend>{{localize "DSAUTO.Menu.Maintenance.selfCheck"}}</legend>
+    <button type="button" data-action="runSelfCheck">
+      <i class="fa-solid fa-stethoscope" inert></i> <span>{{localize "DSAUTO.Menu.Maintenance.selfCheck"}}</span>
+    </button>
+    {{#if maintenance.selfCheck}}
+    {{#if maintenance.selfCheck.green}}
+    <p class="ds-auto-settings-ok"><i class="fa-solid fa-circle-check" inert></i> {{localize "DSAUTO.Menu.Maintenance.selfCheckGreen"}}</p>
+    {{else}}
+    <ul class="ds-auto-settings-problems">
+      {{#each maintenance.selfCheck.problems as |problem|}}
+      <li><i class="fa-solid fa-triangle-exclamation" inert></i> {{problem}}</li>
+      {{/each}}
+    </ul>
+    {{/if}}
+    {{/if}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DSAUTO.Menu.Maintenance.strip"}}</legend>
+    <p class="hint">{{localize "DSAUTO.Menu.Maintenance.stripHint"}}</p>
+    <div class="ds-auto-settings-buttons">
+      <button type="button" data-action="stripDry">
+        <i class="fa-solid fa-magnifying-glass" inert></i> <span>{{localize "DSAUTO.Menu.Maintenance.stripDry"}}</span>
+      </button>
+      <button type="button" data-action="stripRun">
+        <i class="fa-solid fa-broom" inert></i> <span>{{localize "DSAUTO.Menu.Maintenance.strip"}}</span>
+      </button>
+    </div>
+    {{#if maintenance.strip}}
+    <p class="ds-auto-settings-report">{{maintenance.strip.report}}</p>
+    {{#if maintenance.strip.done}}
+    <p class="ds-auto-settings-ok"><i class="fa-solid fa-circle-check" inert></i> {{localize "DSAUTO.Strip.DoneHint"}}</p>
+    {{/if}}
+    {{/if}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DSAUTO.Menu.Maintenance.cleanup"}}</legend>
+    <p class="hint">{{localize "DSAUTO.Menu.Maintenance.cleanupHint"}}</p>
+    <button type="button" data-action="cleanupDry">
+      <i class="fa-solid fa-list-check" inert></i> <span>{{localize "DSAUTO.Menu.Maintenance.cleanup"}}</span>
+    </button>
+    {{#if maintenance.cleanup}}
+    <ul class="ds-auto-settings-rows">
+      {{#each maintenance.cleanup as |row|}}
+      <li><span>{{row.text}}</span>{{#if row.list.length}}<span class="ds-auto-settings-list">{{#each row.list as |name|}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}</li>
+      {{/each}}
+    </ul>
+    {{/if}}
+  </fieldset>
+
+  {{#if maintenance.entries.length}}
+  <fieldset>
+    <legend>{{localize "DSAUTO.Menu.Maintenance.fromModules"}}</legend>
+    {{#each maintenance.entries as |entry|}}
+    <div class="ds-auto-settings-entry">
+      <button type="button" data-action="maintenanceEntry" data-entry-id="{{entry.id}}">
+        <i class="{{entry.icon}}" inert></i> <span>{{localize entry.label}}</span>
+      </button>
+      {{#if entry.hint}}<p class="hint">{{localize entry.hint}}</p>{{/if}}
+    </div>
+    {{/each}}
+  </fieldset>
+  {{/if}}
+</div>

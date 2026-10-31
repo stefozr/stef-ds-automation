@@ -1,0 +1,43 @@
+{
+  "key": "ability:inspiring-strike",
+  "version": "1.0.0",
+  "name": "Inspiring Strike",
+  "notes": "Tier 3: you and that ally each get an edge on your following ability roll, tracked by hand.",
+  "choices": [
+    {
+      "id": "who",
+      "label": "Recovery for",
+      "options": [
+        {
+          "id": "self",
+          "label": "You"
+        },
+        {
+          "id": "ally",
+          "label": "An ally within 10"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "self",
+      "type": "heal",
+      "targets": "self",
+      "recoveries": 1,
+      "choice": {
+        "group": "who",
+        "option": "self"
+      }
+    },
+    {
+      "id": "ally",
+      "type": "note",
+      "text": "The chosen ally spends a Recovery on their own sheet.",
+      "choice": {
+        "group": "who",
+        "option": "ally"
+      }
+    }
+  ]
+}

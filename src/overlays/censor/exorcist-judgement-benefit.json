@@ -1,0 +1,25 @@
+{
+  "key": "feature:exorcist-judgement-benefit",
+  "version": "1.0.0",
+  "name": "Exorcist Judgement Benefit",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "judgement",
+        "event": "judgement.applied",
+        "optional": true,
+        "once": "turn",
+        "effects": [
+          {
+            "id": "teleport",
+            "type": "teleport",
+            "targets": "self",
+            "distance": "2*@P"
+          }
+        ]
+      }
+    ]
+  }
+}

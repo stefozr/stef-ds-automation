@@ -1,0 +1,31 @@
+{
+  "key": "ability:my-life-for-yours",
+  "version": "1.1.0",
+  "name": "My Life for Yours",
+  "notes": "The turn-start trigger is used by hand. Spending Wrath in the reaction prompt opens the roll dialog with its spend already ticked.",
+  "effects": [
+    { "id": "heal", "type": "heal", "recoveries": 1, "spender": "self" },
+    {
+      "id": "cleanse",
+      "type": "cleanse",
+      "statuses": ["prone"],
+      "ends": ["save", "turn"],
+      "count": 1,
+      "when": { "spend": true },
+      "label": "Stand up, or one effect ends (save or end of turn)"
+    }
+  ],
+  "triggers": [
+    {
+      "id": "protect",
+      "event": "damage.after",
+      "subject": "selfOrAlly",
+      "require": { "recoveries": 1 },
+      "spend": { "cost": 1, "label": "Stand up, or one effect ends" },
+      "steps": [
+        { "type": "use", "targets": "subject" },
+        { "type": "note", "text": "The creature's owner chooses what ends (standing up counts).", "when": { "spend": true } }
+      ]
+    }
+  ]
+}

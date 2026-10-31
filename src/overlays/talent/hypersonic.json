@@ -1,0 +1,43 @@
+{
+  "key": "ability:hypersonic",
+  "version": "1.0.0",
+  "name": "Hypersonic",
+  "notes": "The teleport belongs before the roll: pick a square just past the far side of the line.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "teleport",
+      "type": "teleport",
+      "distance": 7,
+      "manual": true,
+      "label": "Jump past the far side of the line"
+    },
+    {
+      "targets": "self",
+      "id": "strain-self",
+      "type": "condition",
+      "status": "slowed",
+      "end": "turn",
+      "tiers": [
+        2,
+        3
+      ],
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "id": "strain-targets",
+      "type": "condition",
+      "status": "slowed",
+      "end": "turn",
+      "tiers": [
+        2,
+        3
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

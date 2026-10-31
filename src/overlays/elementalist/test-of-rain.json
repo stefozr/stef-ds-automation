@@ -1,0 +1,25 @@
+{
+  "key": "ability:test-of-rain",
+  "version": "1.0.0",
+  "name": "Test of Rain",
+  "notes": "Allies are read from the placed cube; without it, end their effects by hand.",
+  "effects": [
+    {
+      "id": "self",
+      "type": "cleanse",
+      "targets": "self",
+      "ends": ["save", "turn"],
+      "count": 1,
+      "label": "End one effect on yourself (save or end of turn)"
+    },
+    {
+      "id": "allies",
+      "type": "cleanse",
+      "targets": "area",
+      "filter": "allies",
+      "ends": ["save", "turn"],
+      "count": 1,
+      "label": "Allies in the area: one effect each ends"
+    }
+  ]
+}

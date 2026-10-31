@@ -1,0 +1,19 @@
+{
+  "key": "feature:ward-of-excellent-protection",
+  "version": "1.0.0",
+  "name": "Ward of Excellent Protection",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "passive",
+        "targets": "self",
+        "effects": [],
+        "special": "immunityChoice",
+        "end": "passive"
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "key": "ability:riposte",
+  "version": "1.0.0",
+  "name": "Riposte",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "riposte",
+      "event": "damage.after",
+      "subject": "selfOrAlly",
+      "attacker": "creature",
+      "require": { "keywords": ["melee", "strike"], "fromAbility": true, "meleeReach": true },
+      "steps": [{ "type": "freeStrike", "by": "subject" }]
+    }
+  ]
+}

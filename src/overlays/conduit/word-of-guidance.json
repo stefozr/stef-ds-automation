@@ -1,0 +1,19 @@
+{
+  "key": "ability:word-of-guidance",
+  "version": "1.0.0",
+  "name": "Word of Guidance",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "guidance",
+      "event": "roll.before",
+      "subject": "ally",
+      "require": { "damaging": true },
+      "spend": { "cost": 1 },
+      "steps": [
+        { "type": "edge", "amount": 1, "when": { "spend": false } },
+        { "type": "edge", "amount": 2, "when": { "spend": true } }
+      ]
+    }
+  ]
+}

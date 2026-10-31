@@ -1,0 +1,18 @@
+{
+  "key": "ability:gravitic-burst",
+  "version": "1.0.0",
+  "name": "Gravitic Burst",
+  "notes": "Strained: size the larger burst when placing the area.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-weakened",
+      "type": "condition",
+      "status": "weakened",
+      "end": "turn",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

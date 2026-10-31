@@ -1,0 +1,13 @@
+{
+  "key": "ability:protective-attack",
+  "version": "1.0.0",
+  "name": "Protective Attack",
+  "effects": [
+    {
+      "id": "taunted",
+      "type": "condition",
+      "status": "taunted",
+      "end": "turn"
+    }
+  ]
+}

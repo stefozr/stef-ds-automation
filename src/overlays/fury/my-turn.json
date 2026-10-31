@@ -1,0 +1,15 @@
+{
+  "key": "ability:my-turn",
+  "version": "1.0.0",
+  "name": "My Turn!",
+  "effects": [
+    {
+      "id": "recovery",
+      "type": "heal",
+      "targets": "self",
+      "recoveries": 1,
+      "manual": true,
+      "label": "Optional Recovery"
+    }
+  ]
+}

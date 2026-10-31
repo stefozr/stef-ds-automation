@@ -1,0 +1,28 @@
+{
+  "key": "ability:acrobatics",
+  "version": "1.0.0",
+  "name": "Acrobatics",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:acrobatics",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd"
+      }
+    ],
+    "performance": true
+  }
+}

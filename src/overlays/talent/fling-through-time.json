@@ -1,0 +1,21 @@
+{
+  "key": "ability:fling-through-time",
+  "version": "1.0.0",
+  "name": "Fling Through Time",
+  "notes": "Strained: roll the 2d6 self damage by hand. Taking the flung target off the map stays by hand.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-clarity",
+      "type": "resource",
+      "resource": "heroic",
+      "value": 2,
+      "tiers": [
+        3
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

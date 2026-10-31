@@ -1,0 +1,14 @@
+{
+  "key": "ability:go-now-and-speed-well",
+  "version": "1.0.0",
+  "name": "Go Now and Speed Well",
+  "notes": "The free ability with a double edge, ignored immunity and +1 potency is used by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 2
+    }
+  ]
+}

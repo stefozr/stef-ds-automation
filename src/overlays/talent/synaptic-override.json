@@ -1,0 +1,18 @@
+{
+  "key": "ability:synaptic-override",
+  "version": "1.0.0",
+  "name": "Synaptic Override",
+  "notes": "Strained: roll the 1d6 self damage by hand. Moving the target and its actions stay by hand.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-weakened",
+      "type": "condition",
+      "status": "weakened",
+      "end": "turn",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{{#with ctx.dsAuto as |v|}}
+<div class="ds-auto-resolution{{#if v.compact}} ds-auto-compact{{/if}}">
+  {{#if v.showHeader}}
+  <header class="ds-auto-header">
+    <i class="fa-solid fa-wand-magic-sparkles" inert></i>
+    <span class="ds-auto-title">{{localize "DSAUTO.Card.Title"}}{{#if v.synthetic}}: {{v.title}}{{/if}}</span>
+  </header>
+  {{/if}}
+
+  {{#each v.banners as |b|}}
+  <div class="ds-auto-banner ds-auto-banner--{{b.cls}}">
+    <i class="{{b.icon}}" inert></i>
+    <span>{{b.text}}</span>
+    {{#if b.action}}
+    <button type="button" class="ds-auto-btn" data-action="{{b.action}}">{{b.actionLabel}}</button>
+    {{/if}}
+  </div>
+  {{/each}}
+
+  {{#each v.choices as |c|}}
+  <div class="ds-auto-choice" data-group="{{c.id}}">
+    <span class="ds-auto-choice-label"><i class="fa-solid fa-code-branch" inert></i> {{c.label}}</span>
+    <span class="ds-auto-choice-options">
+      {{#each c.options as |o|}}
+      <button type="button" class="ds-auto-btn{{#if o.picked}} ds-auto-btn--picked{{/if}}" data-action="dsAutoChoose" data-group="{{c.id}}" data-option="{{o.id}}"{{#unless c.canChoose}} disabled{{/unless}}>{{#if o.picked}}<i class="fa-solid fa-check" inert></i> {{/if}}{{o.label}}</button>
+      {{/each}}
+    </span>
+  </div>
+  {{/each}}
+
+  {{#if v.empty}}
+  <p class="ds-auto-empty">{{localize "DSAUTO.Card.NothingToApply"}}</p>
+  {{/if}}
+
+  <ol class="ds-auto-rows">
+    {{#each v.rows as |row|}}
+    <li class="ds-auto-row{{#if row.single}} ds-auto-row--one{{else}} ds-auto-row--many{{/if}}{{#if row.squad}} ds-auto-row--squad{{/if}}{{#if row.self}} ds-auto-row--self{{/if}}{{#if row.rowClass}} {{row.rowClass}}{{/if}}" data-ds-auto-target="{{row.key}}">
+      <div class="ds-auto-target">
+        {{#if row.img}}<img class="ds-auto-portrait" src="{{row.img}}" alt="">{{else}}<i class="ds-auto-portrait fa-solid fa-users" inert></i>{{/if}}
+        <div class="ds-auto-target-text">
+          <span class="ds-auto-name"{{#if row.nameTooltip}} data-tooltip="{{row.nameTooltip}}"{{/if}}>{{row.name}}</span>
+          {{#if row.members}}<span class="ds-auto-members">{{row.members}}</span>{{/if}}
+        </div>
+        {{#if row.gainOnly}}<span class="ds-auto-tier ds-auto-gainonly">{{row.tierLabel}}</span>{{else}}{{#unless v.synthetic}}{{#if v.compact}}{{#if row.tierShort}}<span class="ds-auto-tier{{#if row.noTier}} ds-auto-tier--none{{/if}}" data-tooltip="{{row.tierLabel}}">{{row.tierShort}}</span>{{/if}}{{else}}<span class="ds-auto-tier">{{row.tierLabel}}</span>{{/if}}{{/unless}}{{/if}}
+      </div>
+      {{#if row.warning}}<div class="ds-auto-row-warning"><i class="fa-solid fa-triangle-exclamation" inert></i> {{row.warning}}</div>{{/if}}
+      <ul class="ds-auto-ops">
+        {{#each row.ops as |op|}}
+        <li class="ds-auto-op ds-auto-op--{{op.status}} ds-auto-op--{{op.kind}}" data-op-id="{{op.opId}}">
+          <i class="ds-auto-kind {{op.kindIcon}}" inert></i>
+          <div class="ds-auto-op-text"{{#if op.tooltip}} data-tooltip="{{op.tooltip}}"{{/if}}>
+            <span class="ds-auto-op-label">{{op.label}}</span>
+            {{#if op.detail}}<span class="ds-auto-op-detail">{{op.detail}}</span>{{/if}}
+            {{#if op.warning}}<span class="ds-auto-op-warning"><i class="fa-solid fa-triangle-exclamation" inert></i> {{op.warning}}</span>{{/if}}
+            {{#if op.undoTriggers.length}}<span class="ds-auto-op-triggers">{{#each op.undoTriggers as |u|}}<button type="button" class="ds-auto-btn ds-auto-undo-trigger" data-action="dsAutoUndoTrigger" data-trigger-message="{{u.messageId}}"><i class="fa-solid fa-rotate-left" inert></i> {{u.label}}</button>{{/each}}</span>{{/if}}
+          </div>
+          <span class="ds-auto-status" data-tooltip="{{op.statusLabel}}"><i class="{{op.statusIcon}}" inert></i>{{#if op.statusShort}}<span class="ds-auto-status-text">{{op.statusShort}}</span>{{/if}}</span>
+          <span class="ds-auto-op-actions">
+          {{#if op.canEdit}}
+          <button type="button" class="ds-auto-icon-btn" data-action="dsAutoEdit" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.Edit"}}" aria-label="{{localize "DSAUTO.Card.Edit"}}"><i class="fa-solid fa-pen" inert></i></button>
+          {{/if}}
+          {{#if op.canApply}}
+          {{#if op.summonButton}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-summon-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Summon.ChooseTitle"}}" aria-label="{{localize "DSAUTO.Summon.ChooseTitle"}}"><i class="fa-solid fa-person-circle-plus" inert></i></button>
+          {{else if op.zoneButton}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-zone-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Zone.PlaceTitle"}}" aria-label="{{localize "DSAUTO.Zone.PlaceTitle"}}"><i class="fa-solid fa-draw-polygon" inert></i></button>
+          {{else if op.pickButton}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-pick-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Pick.Button"}}" aria-label="{{localize "DSAUTO.Pick.Button"}}"><i class="fa-solid fa-crosshairs" inert></i></button>
+          {{else}}
+          <button type="button" class="ds-auto-icon-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.Apply"}}" aria-label="{{localize "DSAUTO.Card.Apply"}}"><i class="fa-solid fa-play" inert></i></button>
+          {{/if}}
+          {{/if}}
+          {{#if op.canHalf}}
+          <button type="button" class="ds-auto-icon-btn" data-action="dsAutoApplyHalf" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.ApplyHalf"}}" aria-label="{{localize "DSAUTO.Card.ApplyHalf"}}"><i class="fa-solid fa-circle-half-stroke" inert></i></button>
+          {{/if}}
+          {{#if op.canSurge}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-surge-btn" data-action="dsAutoSurge" data-op-id="{{op.opId}}" data-surge-max="{{op.surgeMax}}" data-tooltip="{{localize "DSAUTO.Card.Surge"}}" aria-label="{{localize "DSAUTO.Card.Surge"}}"><i class="fa-solid fa-bolt" inert></i></button>
+          {{/if}}
+          {{#if op.canPotencySurge}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-surge-btn" data-action="dsAutoPotencySurge" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.PotencySurge"}}" aria-label="{{localize "DSAUTO.Card.PotencySurge"}}"><i class="fa-solid fa-angles-up" inert></i></button>
+          {{/if}}
+          {{#if op.canUndo}}
+          <button type="button" class="ds-auto-icon-btn" data-action="dsAutoUndo" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.Undo"}}" aria-label="{{localize "DSAUTO.Card.Undo"}}"><i class="fa-solid fa-rotate-left" inert></i></button>
+          {{/if}}
+          {{#if op.canDismiss}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-dismiss-btn" data-action="dsAutoDismiss" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.Dismiss"}}" aria-label="{{localize "DSAUTO.Card.Dismiss"}}"><i class="fa-solid fa-person-walking-arrow-loop-left" inert></i></button>
+          {{/if}}
+          {{#if op.canDismissZone}}
+          <button type="button" class="ds-auto-icon-btn ds-auto-dismiss-btn ds-auto-zone-btn" data-action="dsAutoZoneDismiss" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Card.Dismiss"}}" aria-label="{{localize "DSAUTO.Card.Dismiss"}}"><i class="fa-solid fa-eraser" inert></i></button>
+          {{/if}}
+          </span>
+        </li>
+        {{/each}}
+      </ul>
+    </li>
+    {{/each}}
+  </ol>
+
+  {{#if v.notes.length}}
+  <details class="ds-auto-notes">
+    <summary><i class="fa-solid fa-circle-info" inert></i> {{localize "DSAUTO.Card.Notes"}} ({{v.notes.length}})</summary>
+    <ul>{{#each v.notes as |n|}}<li>{{n}}</li>{{/each}}</ul>
+  </details>
+  {{/if}}
+
+  {{#if v.footer}}
+  <footer class="ds-auto-footer">
+    {{#if v.canApplyAll}}<button type="button" class="ds-auto-btn" data-action="dsAutoApplyAll"><i class="fa-solid fa-play" inert></i> {{localize "DSAUTO.Card.ApplyAll"}}</button>{{/if}}
+    {{#if v.canUndoAll}}<button type="button" class="ds-auto-btn" data-action="dsAutoUndoAll"><i class="fa-solid fa-rotate-left" inert></i> {{localize "DSAUTO.Card.UndoAll"}}</button>{{/if}}
+    {{#if v.canHeroReroll}}<button type="button" class="ds-auto-btn" data-action="dsAutoHeroReroll" data-tooltip="{{localize "DSAUTO.HeroToken.RerollHint"}}"><i class="fa-solid fa-dice" inert></i> {{localize "DSAUTO.HeroToken.Reroll"}}</button>{{/if}}
+    {{#if v.canRetarget}}<button type="button" class="ds-auto-btn" data-action="dsAutoRetarget" data-tooltip="{{localize "DSAUTO.Card.RetargetHint"}}"><i class="fa-solid fa-crosshairs" inert></i> {{localize "DSAUTO.Card.Retarget"}}</button>{{/if}}
+    {{#if v.details}}<button type="button" class="ds-auto-btn ds-auto-details-btn" data-action="dsAutoDetails" aria-expanded="false" data-tooltip="{{localize "DSAUTO.Card.DetailsShow"}}"><i class="fa-solid fa-chevron-right ds-auto-details-chevron" inert></i> {{localize "DSAUTO.Card.Details"}}<span class="ds-auto-details-badge"></span></button>{{/if}}
+  </footer>
+  {{/if}}
+</div>
+{{/with}}

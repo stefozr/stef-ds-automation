@@ -1,0 +1,14 @@
+{
+  "key": "ability:advanced-tactics",
+  "version": "1.0.0",
+  "name": "Advanced Tactics",
+  "notes": "Using the surges on the triggering damage, and the spend's +1 potency, are by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 2
+    }
+  ]
+}

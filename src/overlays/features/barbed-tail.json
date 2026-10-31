@@ -1,0 +1,25 @@
+{
+  "key": "ancestryTrait:barbed-tail",
+  "version": "1.0.0",
+  "name": "Barbed Tail",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "strike.damage",
+        "targets": "targets",
+        "effects": [
+          {
+            "id": "damage",
+            "type": "damage",
+            "value": "max(@M,@A,@R,@I,@P)"
+          }
+        ],
+        "once": "round",
+        "optional": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "key": "ability:moonlight-sonata",
+  "version": "1.0.0",
+  "name": "Moonlight Sonata",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "round.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:moonlight",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "filter": "allies",
+        "require": {
+          "dead": true
+        },
+        "optional": true,
+        "end": "encounterEnd"
+      }
+    ],
+    "performance": true
+  }
+}

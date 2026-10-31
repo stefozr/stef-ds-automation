@@ -1,0 +1,57 @@
+{
+  "key": "ability:dramatic-monologue",
+  "version": "1.0.0",
+  "name": "Dramatic Monologue",
+  "notes": "Target the chosen ally or enemy (two with the spend option). Edges and banes are tracked by hand.",
+  "choices": [
+    {
+      "id": "tale",
+      "label": "Tale",
+      "options": [
+        {
+          "id": "victory",
+          "label": "Victory: ally edge"
+        },
+        {
+          "id": "heroics",
+          "label": "Heroics: ally surge"
+        },
+        {
+          "id": "insult",
+          "label": "Insult: enemy bane"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "edge",
+      "type": "note",
+      "text": "Edge on the ally's next power roll, until your next turn starts.",
+      "choice": {
+        "group": "tale",
+        "option": "victory"
+      }
+    },
+    {
+      "id": "surge",
+      "type": "resource",
+      "filter": "allies",
+      "resource": "surge",
+      "value": 1,
+      "choice": {
+        "group": "tale",
+        "option": "heroics"
+      }
+    },
+    {
+      "id": "bane",
+      "type": "note",
+      "text": "Bane on the enemy's next power roll, until the end of its next turn.",
+      "choice": {
+        "group": "tale",
+        "option": "insult"
+      }
+    }
+  ]
+}

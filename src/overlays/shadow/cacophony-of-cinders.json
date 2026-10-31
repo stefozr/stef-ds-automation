@@ -1,0 +1,36 @@
+{
+  "key": "ability:cacophony-of-cinders",
+  "version": "1.0.0",
+  "name": "Cacophony of Cinders",
+  "notes": "The shift is made by hand; target each creature you pass next to before rolling.",
+  "effects": [
+    {
+      "id": "damage",
+      "type": "damage",
+      "filter": "enemies",
+      "value": 6,
+      "byTier": {
+        "2": {
+          "value": 10
+        },
+        "3": {
+          "value": 14
+        }
+      }
+    },
+    {
+      "id": "teleport",
+      "type": "teleport",
+      "filter": "allies",
+      "distance": 3,
+      "byTier": {
+        "2": {
+          "distance": 5
+        },
+        "3": {
+          "distance": 7
+        }
+      }
+    }
+  ]
+}

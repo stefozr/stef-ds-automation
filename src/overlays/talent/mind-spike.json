@@ -1,0 +1,29 @@
+{
+  "key": "ability:mind-spike",
+  "version": "1.0.0",
+  "name": "Mind Spike",
+  "effects": [
+    {
+      "id": "strain-target",
+      "type": "damage",
+      "value": 2,
+      "damageType": "psychic",
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "targets": "self",
+      "id": "strain-self",
+      "type": "damage",
+      "value": 2,
+      "damageType": "psychic",
+      "ignoredImmunities": [
+        "all"
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

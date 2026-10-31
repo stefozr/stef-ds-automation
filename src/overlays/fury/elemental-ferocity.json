@@ -1,0 +1,15 @@
+{
+  "key": "ability:elemental-ferocity",
+  "version": "1.0.0",
+  "name": "Elemental Ferocity",
+  "notes": "Pick the element yourself. Retaliation damage on enemies who hurt you, and the extra temporary Stamina when it kills, stay by hand.",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 10,
+      "temporary": true
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "key": "feature:ward-of-surprising-reactivity",
+  "version": "1.0.0",
+  "name": "Ward of Surprising Reactivity",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "source",
+        "effects": [
+          {
+            "id": "forced",
+            "type": "forced",
+            "movement": "push",
+            "distance": "2 * @R"
+          }
+        ],
+        "optional": true,
+        "require": {
+          "adjacent": true
+        }
+      }
+    ]
+  }
+}

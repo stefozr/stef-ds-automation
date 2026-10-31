@@ -1,0 +1,60 @@
+{{!-- Automation settings window, body part (scripts/ui/settings-menu.mjs menuSections): one tab per section. --}}
+<div class="ds-auto-settings-body">
+  {{#each sections as |section|}}
+  <section class="tab ds-auto-settings-tab {{section.cssClass}}" data-tab="{{section.id}}" data-group="sections">
+    {{#each section.fields as |entry|}}
+    {{#if entry.grid}}
+    <div class="form-group stacked ds-auto-settings-grid">
+      <label>{{localize entry.label}}</label>
+      <div class="form-fields ds-auto-settings-cells">
+        {{#each entry.cells as |cell|}}
+        <label class="ds-auto-settings-cell">
+          <span>{{localize cell.label}}</span>
+          <select name="{{cell.name}}">
+            {{selectOptions cell.choices selected=cell.value localize=true}}
+          </select>
+        </label>
+        {{/each}}
+      </div>
+      <p class="hint">{{localize entry.hint}}</p>
+    </div>
+    {{else}}
+    <div class="ds-auto-settings-field{{#if entry.switch}} ds-auto-settings-switch{{/if}}">
+      {{formGroup entry.field value=entry.value disabled=entry.disabled rootId=@root.rootId localize=true}}
+    </div>
+    {{/if}}
+    {{/each}}
+
+    {{#if section.compat}}
+    <div class="ds-auto-settings-compat">
+      <ul class="ds-auto-settings-rows">
+        {{#each section.compat.info as |row|}}
+        <li><span>{{localize row.label}}</span><span>{{#if row.textKey}}{{localize row.textKey}}{{else}}{{row.text}}{{/if}}</span></li>
+        {{/each}}
+      </ul>
+      <h4>{{localize "DSAUTO.Menu.Compat.modules"}}</h4>
+      <ul class="ds-auto-settings-rows">
+        {{#each section.compat.modules as |row|}}
+        <li><span>{{row.name}}</span><span>{{localize row.textKey}}{{#if row.version}} ({{row.version}}){{/if}}</span></li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+
+    {{#if section.maintenance}}
+    {{> "modules/stef-ds-automation/templates/settings/maintenance.hbs" maintenance=section.maintenance}}
+    {{/if}}
+
+    {{#if section.resettable}}
+    <div class="ds-auto-settings-reset">
+      <button type="button" data-action="resetTab" data-section="{{section.id}}">
+        <i class="fa-solid fa-arrow-rotate-left" inert></i> <span>{{localize "DSAUTO.Menu.ResetTab"}}</span>
+      </button>
+      <button type="button" data-action="resetAll">
+        <i class="fa-solid fa-arrows-rotate" inert></i> <span>{{localize "DSAUTO.Menu.ResetAll"}}</span>
+      </button>
+    </div>
+    {{/if}}
+  </section>
+  {{/each}}
+</div>

@@ -1,0 +1,24 @@
+{
+  "key": "ability:summon-source-of-earth",
+  "version": "1.0.0",
+  "name": "Summon Source of Earth",
+  "notes": "No Stamina regained this encounter. Its turn: move, then one main action or maneuver. Keeping it (Persistent) is asked at your turn start and lowers your gain. Heavy damage to you: dismiss it by hand.",
+  "effects": [
+    {
+      "id": "source",
+      "type": "summon",
+      "targets": "self",
+      "actors": [{ "uuid": "Compendium.draw-steel.monsters.Actor.o7qp5KCUuRgfCko6" }],
+      "quantity": "1",
+      "origin": "self",
+      "side": "summoner",
+      "turn": "after",
+      "actsThisRound": true,
+      "squad": "none",
+      "lasts": ["summonerTurnStart", "encounterEnd", "zeroStamina"],
+      "upkeep": 2,
+      "carryStamina": true,
+      "lockOnZero": true
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "key": "feature:focus",
+  "version": "1.0.0",
+  "name": "Focus",
+  "effects": [],
+  "gains": [
+    {
+      "id": "marked-damaged", "event": "damage", "taker": "creature", "dealer": "selfOrAlly",
+      "takerEffect": { "ability": "mark", "effect": "YW2JEdoDPd0XlaII" }, "once": "round", "amount": 1,
+      "amountBy": [{ "feature": "focus-on-their-weakness", "amount": 2 }],
+      "label": "Your marked foe damaged, first this round"
+    },
+    {
+      "id": "ally-heroic", "event": "abilityUse", "user": "ally", "within": 10, "category": "heroic", "once": "round",
+      "amount": 1, "label": "Ally's heroic ability within 10, first this round"
+    }
+  ]
+}

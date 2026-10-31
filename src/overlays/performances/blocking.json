@@ -1,0 +1,24 @@
+{
+  "key": "ability:blocking",
+  "version": "1.0.0",
+  "name": "Blocking",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [],
+        "filter": "all",
+        "limit": "@P",
+        "special": "blocking",
+        "require": {
+          "subject": "self"
+        }
+      }
+    ],
+    "performance": true
+  }
+}

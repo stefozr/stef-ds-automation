@@ -1,0 +1,56 @@
+{
+  "key": "ability:goblin-mode",
+  "version": "1.0.0",
+  "name": "Goblin Mode",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "encounter",
+        "effects": [
+          {
+            "id": "speed",
+            "type": "modifier",
+            "key": "system.movement.value",
+            "value": "2",
+            "mode": "add"
+          }
+        ],
+        "keywords": [
+          "goblin"
+        ],
+        "require": {
+          "subjectKeyword": "goblin"
+        },
+        "optional": true,
+        "cost": 3,
+        "end": "roundEnd",
+        "once": "round",
+        "activateOnUse": true
+      }
+    ]
+  },
+  "monster": [
+    "Compendium.draw-steel.monsters.Actor.6M62ZA9L6xuu0AHz",
+    "Compendium.draw-steel.monsters.Actor.6SR8siFeC5lWUzoO",
+    "Compendium.draw-steel.monsters.Actor.6bpHvy0N4rObJBZq",
+    "Compendium.draw-steel.monsters.Actor.ABCSkDOKuSHQOWU7",
+    "Compendium.draw-steel.monsters.Actor.B4gltUWwUjv812ka",
+    "Compendium.draw-steel.monsters.Actor.CWcc0FNUfUaiYyH7",
+    "Compendium.draw-steel.monsters.Actor.CtnlwvEcJb9YdZQ3",
+    "Compendium.draw-steel.monsters.Actor.E637uEMv0INA5LPW",
+    "Compendium.draw-steel.monsters.Actor.Mdk2jvvw26BaR1HL",
+    "Compendium.draw-steel.monsters.Actor.RTBXFv1dj9NBfVRU",
+    "Compendium.draw-steel.monsters.Actor.Vxxc0EcLHPPnpSbK",
+    "Compendium.draw-steel.monsters.Actor.Xw0gZCS09gdMjaw8",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.1rgM4rU61L172gz8",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.JgTkE9BFQ725llql",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.YEcTRfWgIy7eOE36",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.tuCthtMZUysJwBe6",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.yE1S7Y6t5PmsqdeS",
+    "Compendium.draw-steel-delian-tomb.monsters.Actor.zbIGbGA0OblJ0zsV"
+  ]
+}

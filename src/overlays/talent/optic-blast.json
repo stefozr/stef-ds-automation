@@ -1,0 +1,30 @@
+{
+  "key": "ability:optic-blast",
+  "version": "1.0.0",
+  "name": "Optic Blast",
+  "notes": "The extra target near a reflective surface is chosen by hand.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-surge",
+      "type": "resource",
+      "resource": "surge",
+      "value": 1,
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "targets": "self",
+      "id": "strain-self",
+      "type": "damage",
+      "value": "@R",
+      "ignoredImmunities": [
+        "all"
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

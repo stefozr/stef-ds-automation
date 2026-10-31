@@ -1,0 +1,23 @@
+{
+  "key": "ability:you-were-watching-the-wrong-one",
+  "version": "1.0.0",
+  "name": "You Were Watching the Wrong One",
+  "notes": "Your surge needs an ally near the target. A flanking partner's surge is given by hand.",
+  "effects": [
+    {
+      "id": "surge",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 1,
+      "manual": true,
+      "label": "An ally near the target"
+    },
+    {
+      "id": "flank",
+      "type": "note",
+      "targets": "self",
+      "text": "Flanking: pick one flanking ally, who also gains a surge."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "key": "ability:rejuvenate",
+  "version": "1.0.0",
+  "name": "Rejuvenate",
+  "notes": "The two picked benefits for the target are applied by hand (use the buttons in the text).",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-weakened",
+      "type": "condition",
+      "status": "weakened",
+      "end": "save",
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "targets": "self",
+      "id": "strain-slowed",
+      "type": "condition",
+      "status": "slowed",
+      "end": "save",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

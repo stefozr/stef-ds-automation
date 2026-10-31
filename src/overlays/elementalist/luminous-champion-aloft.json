@@ -1,0 +1,17 @@
+{
+  "key": "ability:luminous-champion-aloft",
+  "name": "Luminous Champion Aloft",
+  "version": "1.0.1",
+  "notes": "By hand: the extra Heroic Resource whenever the target gains some, and its abilities ignoring concealment.",
+  "effects": [
+    {
+      "id": "aloft",
+      "type": "condition",
+      "effect": "aQe8IS4a1UdQvQ7v",
+      "until": "yourNextTurnStart"
+    }
+  ],
+  "persistent": {
+    "keep": "extend"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "key": "ability:hesitation-is-weakness",
+  "version": "1.0.0",
+  "name": "Hesitation is Weakness",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "next",
+      "event": "turn.end",
+      "subject": "creature",
+      "range": "unlimited",
+      "loe": false,
+      "require": { "subjectType": "hero", "notStartedByThis": true },
+      "steps": [{ "type": "takeTurnNext" }]
+    }
+  ]
+}

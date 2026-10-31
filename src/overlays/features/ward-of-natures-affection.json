@@ -1,0 +1,28 @@
+{
+  "key": "feature:ward-of-natures-affection",
+  "version": "1.0.0",
+  "name": "Ward of Nature\u2019s Affection",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "source",
+        "effects": [
+          {
+            "id": "forced",
+            "type": "forced",
+            "movement": "slide",
+            "distance": "@R"
+          }
+        ],
+        "optional": true,
+        "require": {
+          "sourceWithin": "@R"
+        }
+      }
+    ]
+  }
+}

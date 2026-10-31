@@ -1,0 +1,33 @@
+{
+  "key": "ability:doubt",
+  "version": "1.0.0",
+  "name": "Doubt",
+  "notes": "The double edge for you or an ally, and the dispirited state when strained, stay by hand.",
+  "effects": [
+    {
+      "id": "strain-target",
+      "type": "condition",
+      "effect": "atsPk0jYryV6sL3q",
+      "end": "save",
+      "tiers": [
+        3
+      ],
+      "when": {
+        "strained": true
+      }
+    },
+    {
+      "targets": "self",
+      "id": "strain-self",
+      "type": "condition",
+      "effect": "atsPk0jYryV6sL3q",
+      "end": "save",
+      "tiers": [
+        3
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

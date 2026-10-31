@@ -1,0 +1,18 @@
+{
+  "key": "ability:inertial-shield",
+  "version": "1.0.0",
+  "name": "Inertial Shield",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "shield",
+      "event": "damage.before",
+      "subject": "self",
+      "spend": { "cost": 1 },
+      "steps": [
+        { "type": "halve" },
+        { "type": "potency", "delta": -1, "scope": "one", "when": { "spend": true } }
+      ]
+    }
+  ]
+}

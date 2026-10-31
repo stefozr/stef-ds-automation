@@ -1,0 +1,18 @@
+{
+  "key": "ability:kinetic-pulse",
+  "version": "1.0.0",
+  "name": "Kinetic Pulse",
+  "notes": "Strained: the bigger burst is placed by hand.",
+  "effects": [
+    {
+      "id": "strain",
+      "type": "condition",
+      "targets": "self",
+      "status": "bleeding",
+      "until": "yourNextTurnStart",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "key": "ability:spotlight",
+  "version": "1.0.0",
+  "name": "Spotlight",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "resource",
+            "type": "resource",
+            "resource": "heroic",
+            "value": "1"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd",
+        "special": "spotlight"
+      }
+    ],
+    "performance": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "key": "ability:fake-your-death",
+  "version": "1.0.0",
+  "name": "Fake Your Death",
+  "notes": "The illusion, the speed bonus and ending early (damage, an action, the illusion touched) are handled by hand.",
+  "effects": [
+    {
+      "id": "invisible",
+      "type": "condition",
+      "targets": "self",
+      "status": "invisible",
+      "until": "yourNextTurnEnd"
+    }
+  ]
+}

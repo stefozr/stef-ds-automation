@@ -1,0 +1,29 @@
+{
+  "key": "ability:edict-of-unyielding-resolve",
+  "name": "Edict of Unyielding Resolve",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "temp",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "temp",
+            "type": "heal",
+            "value": 10,
+            "temporary": true
+          }
+        ],
+        "filter": "selfAlly"
+      }
+    ],
+    "suppress": []
+  }
+}

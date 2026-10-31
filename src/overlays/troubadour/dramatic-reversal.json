@@ -1,0 +1,19 @@
+{
+  "key": "ability:dramatic-reversal",
+  "version": "1.0.0",
+  "name": "Dramatic Reversal",
+  "notes": "The shifts and free strikes are made by hand.",
+  "effects": [
+    {
+      "id": "recovery",
+      "type": "heal",
+      "filter": "allies",
+      "recoveries": 1,
+      "tiers": [
+        3
+      ],
+      "manual": true,
+      "label": "Optional Recovery"
+    }
+  ]
+}

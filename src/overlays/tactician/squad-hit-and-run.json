@@ -1,0 +1,14 @@
+{
+  "key": "ability:squad-hit-and-run",
+  "version": "1.0.0",
+  "name": "Squad! Hit and Run!",
+  "notes": "The free signature ability, the 2-square shift and hiding afterwards are by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 2
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "key": "ability:inertia-soak",
+  "version": "1.0.0",
+  "name": "Inertia Soak",
+  "notes": "The benefits for the target, and your +5 when moved while weakened by this, stay by hand.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-weakened",
+      "type": "condition",
+      "status": "weakened",
+      "end": "save",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

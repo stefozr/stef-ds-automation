@@ -1,0 +1,26 @@
+{
+  "key": "feature:bastion-ward",
+  "version": "1.0.0",
+  "name": "Bastion Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "passive",
+        "targets": "self",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "system.combat.save.bonus",
+            "value": "1",
+            "mode": "add"
+          }
+        ],
+        "end": "passive"
+      }
+    ]
+  }
+}

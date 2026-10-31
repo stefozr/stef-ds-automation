@@ -1,0 +1,15 @@
+{
+  "key": "ability:counterstrategy",
+  "version": "1.0.0",
+  "name": "Counterstrategy",
+  "notes": "Whenever the Director spends Malice, grant 2 Heroic Resource to you or an ally within 10 by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 6
+    }
+  ]
+}

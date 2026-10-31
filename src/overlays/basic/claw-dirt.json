@@ -1,0 +1,34 @@
+{
+  "key": "ability:claw-dirt",
+  "version": "1.0.0",
+  "name": "Claw Dirt",
+  "notes": "The burrowing move itself is made by hand.",
+  "native": {
+    "suppress": [
+      "gwwGZVwMTP51E7sH"
+    ]
+  },
+  "effects": [
+    {
+      "id": "slowed",
+      "type": "condition",
+      "targets": "self",
+      "status": "slowed",
+      "end": "turn",
+      "tiers": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "weakened",
+      "type": "condition",
+      "targets": "self",
+      "status": "weakened",
+      "end": "turn",
+      "tiers": [
+        1
+      ]
+    }
+  ]
+}

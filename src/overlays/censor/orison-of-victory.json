@@ -1,0 +1,30 @@
+{
+  "key": "ability:orison-of-victory",
+  "version": "1.0.0",
+  "name": "Orison of Victory",
+  "notes": "Optional for each target, and only one of the two: ending an effect or getting up.",
+  "effects": [
+    {
+      "id": "end-one",
+      "type": "cleanse",
+      "filter": "allies",
+      "ends": [
+        "save",
+        "turn"
+      ],
+      "count": 1,
+      "manual": true,
+      "label": "May end one effect"
+    },
+    {
+      "id": "stand",
+      "type": "cleanse",
+      "filter": "allies",
+      "statuses": [
+        "prone"
+      ],
+      "manual": true,
+      "label": "Or may stand up instead"
+    }
+  ]
+}

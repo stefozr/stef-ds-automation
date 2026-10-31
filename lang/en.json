@@ -1,0 +1,1781 @@
+{
+  "DSAUTO": {
+    "Card": {
+      "Title": "Automation",
+      "Tier": "Tier {tier}",
+      "NoTier": "No tier",
+      "TierShort": "T{tier}",
+      "NoTierShort": "—",
+      "Details": "Details",
+      "DetailsShow": "Show Target Damage's panel (dice, edges and banes, Combat Tools rows, Update Targets)",
+      "DetailsHide": "Hide Target Damage's panel",
+      "TeleportNoteExpand": "Show Combat Tools' teleport message (its Undo Teleport also reverses fall damage and statuses)",
+      "PreviousTarget": "Previous target",
+      "Squad": "Squad {name}",
+      "Damage": "{amount} {type} damage",
+      "Heal": "Regains {amount} Stamina",
+      "Temp": "{amount} temporary Stamina",
+      "Immunity": "immunity {value}",
+      "Weakness": "weakness {value}",
+      "SquadPool": "squad pool âˆ’{value}",
+      "PotencyFails": "{chr} {value} vs {resist}: fails",
+      "PotencyResists": "{chr} {value} vs {resist}: resists",
+      "ViaCombatTools": "via Combat Tools",
+      "UndoDelta": "Stamina had changed since; only this change was reversed",
+      "RevivalPending": "still defeated: revive it with Death Tracker's Raise Dead (automatic revival needs the Director to view its scene)",
+      "Apply": "Apply",
+      "Undo": "Undo",
+      "ApplyAll": "Apply all",
+      "UndoAll": "Undo all",
+      "Retarget": "Use my targets",
+      "RetargetHint": "Rebuild this card for the tokens you have targeted right now. Applied results are kept.",
+      "RetargetNone": "Target the tokens first, then click Use my targets.",
+      "ResolveNow": "Resolve now",
+      "Unresolved": "This card was not resolved (no Director was connected, or the page reloaded).",
+      "Resolving": "Waiting for the Director's client to apply the results…",
+      "WaitingForDirector": "Waiting for the Director: results are applied when a Director is connected.",
+      "NoTargets": "No targets. Target tokens and click Use my targets.",
+      "Persistent": {
+        "reroll": "Persistent {cost}: at your next turn start, keep it to make the power roll again for free.",
+        "extend": "Persistent {cost}: at your next turn start, keep it so its effect lasts another round.",
+        "both": "Persistent {cost}: at your next turn start, keep it to roll again for free while its effect lasts.",
+        "manual": "Persistent {cost}: at your next turn start you are asked whether to keep it."
+      },
+      "PersistentFree": "Kept Persistent: rolled again, no essence spent.",
+      "NothingToApply": "Nothing to apply automatically for these targets.",
+      "PotencyFailsHidden": "{chr} {value}: fails",
+      "PotencyResistsHidden": "{chr} {value}: resists",
+      "UnresolvedAuthor": "This card was not resolved yet. Ask the Director's client to resolve it now.",
+      "Tampered": "This card's automation record was changed outside Automation Suite; its buttons are locked.",
+      "TamperedGM": "This card's automation record was changed outside Automation Suite (by a player's client); it is locked. Check it with api.dump(\"<id>\") and unlock it with api.trustCard(\"<id>\").",
+      "SurgeDamage": "Surge: {amount} {type} damage ({count} surges)",
+      "Half": "half damage",
+      "ApplyHalf": "Apply half damage",
+      "Surge": "Spend surges for extra damage on this target",
+      "PotencySurge": "Spend 2 surges: +1 potency against this target (it then fails)",
+      "PotencySurged": "potency +1 for {count} surges",
+      "Notes": "Notes",
+      "Synthetic": {
+        "damage": "Damage",
+        "heal": "Healing",
+        "temp": "Temporary Stamina",
+        "forced": "Forced movement",
+        "teleport": "Teleport",
+        "summon": "Summon",
+        "nativeSummon": "{name}: summon"
+      },
+      "Forced": "{movement} {distance}",
+      "Teleport": "Teleport {distance}",
+      "Edit": "Edit",
+      "Edited": "edited",
+      "PositionKept": "it had moved since: position kept",
+      "GrabsLost": "{count} grab(s) it ended could not be restored",
+      "IgnoresStability": "ignores stability",
+      "Stability": "stability {value}",
+      "SizeBonus": "+1 (larger creature, melee weapon)",
+      "PicksPath": "the path is picked on the canvas",
+      "CollisionLeft": "stopped {count} short: collision damage by hand",
+      "TeleportNeedsCanvas": "Open the scene with your token to pick where it teleports.",
+      "CleanseCount": "End {count} effect(s): {what}",
+      "Cleanse": "End effects: {what}",
+      "HealRecoveries": "Spend {count} Recovery: +{amount} Stamina",
+      "PicksSquareSelf": "the token's owner picks the square",
+      "PicksSquare": "the Director picks the square",
+      "Ended": "ended {names}",
+      "ResourceNow": "now {value}",
+      "AwaitingChoice": "waits for the choice above",
+      "ChooseOne": "Choose one",
+      "Self": "Self",
+      "Resource": {
+        "surge": "+{amount} surges",
+        "surgeOne": "+1 surge",
+        "heroic": "+{amount} heroic resource",
+        "epic": "+{amount} epic resource",
+        "recovery": "+{amount} Recovery",
+        "malice": "+{amount} Malice",
+        "heroToken": "+{amount} hero tokens",
+        "heroTokenOne": "+1 hero token"
+      },
+      "TeleportRefused": "The Director could not record that teleport: your token was put back.",
+      "ResourceNamed": "+{amount} {name}",
+      "Summon": "Summon {count} {name}",
+      "SummonChoice": "Summon {count}: {names}",
+      "SummonRange": "within {distance} squares",
+      "SummonRangeTarget": "within {distance} of {name}",
+      "SummonPicksSelf": "you place it on your screen",
+      "SummonPicks": "placed on the canvas by whoever clicks Summon",
+      "SummonPicksOwner": "placed by {name} on their screen",
+      "Summoned": "{names}",
+      "SummonPlaced": "{placed} of {requested} placed",
+      "SummonActsAfter": "acts right after its summoner",
+      "SummonOwnTurn": "takes its own turn",
+      "SummonNoCombat": "not in a running combat: add it to the encounter by hand",
+      "SummonDismissed": "gone: {reason}",
+      "AlreadyGone": "it was already gone",
+      "SummonSquare": "square {n}",
+      "Dismiss": "Dismiss",
+      "Gain": "+{amount} {name}",
+      "GainDice": "+{formula} {name}",
+      "GainRolled": "rolled {total}",
+      "GainNow": "now {value}",
+      "GainWaits": "waits for the Director",
+      "GainLate": "from an earlier round",
+      "GainRow": "Resource gain",
+      "HeroTokenHeal": "Hero tokens: regains {amount} Stamina",
+      "HeroTokenLeft": "{cost} hero tokens spent, {left} left",
+      "HeroTokenWaiting": "Waiting for {names}",
+      "Zone": "Area: {label}",
+      "ZoneShape": "{shape} {size} within {range}",
+      "ZoneWall": "{count} wall squares within {range}",
+      "ZoneLasts": "lasts: {lasts}",
+      "ZoneAffects": "hits {who}",
+      "ZonePlacesSelf": "you place it on your screen",
+      "ZonePlacesOwner": "placed by {name} on their screen",
+      "ZonePlaces": "placed on the canvas by whoever clicks Place",
+      "ZoneAround": "appears around {name}",
+      "ZonePlaced": "{squares} squares placed",
+      "ZonePlacedOne": "1 square placed",
+      "ZoneEnded": "gone: {reason}",
+      "ZoneTerrain": "{terrain} for {who}",
+      "ZoneAdopted": "from the area drawn on use",
+      "SummonRangeOne": "within 1 square",
+      "SummonPicksAuto": "the Director's client takes the nearest free squares",
+      "Hide": "Hide",
+      "HideAfterTeleport": "Attempt Hide at your teleport destination? Cover or concealment is required.",
+      "HideWhileObserved": "You may hide while observed for this attempt.",
+      "Modifier": "Attribute modifier",
+      "PickTargets": "Pick {count}: {label}",
+      "PickOf": "within {distance} of {name}",
+      "ModifierRow": "{label} ({value})",
+      "TeleportBoost": "boost: {label}",
+      "TeleportBoosted": "+{squares} squares for {amount} {name}",
+      "CleanseSeen": "Effects on the creature: {list}",
+      "CleanseSeenNone": "none",
+      "CleanseInactive": "inactive",
+      "PickFallback": "Moved with Combat Tools' picker",
+      "GainSlot": "Slot: {slot}",
+      "GainSlotKept": "slot kept"
+    },
+    "Status": {
+      "pending": {
+        "auto": "Waiting",
+        "prompt": "Waiting for confirmation",
+        "manual": "Manual: apply when ready"
+      },
+      "short": {
+        "auto": "Waiting",
+        "prompt": "Confirm",
+        "manual": "Manual",
+        "failed": "Failed"
+      },
+      "applied": "Applied",
+      "undone": "Undone",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "external": "Applied elsewhere",
+      "note": "By hand: nothing to apply"
+    },
+    "Reason": {
+      "minionHeal": "minions cannot regain Stamina",
+      "tempNotHigher": "not higher than the current temporary Stamina",
+      "resisted": "resisted the potency",
+      "targetedManual": "needs a source: apply it from Combat Tools or the token HUD",
+      "rollMissing": "the roll is no longer on the card",
+      "targetMissing": "the target no longer exists",
+      "effectMissing": "the effect is no longer on the ability",
+      "nothingCreated": "the system created no effect",
+      "delegateUnavailable": "Combat Tools is not available",
+      "sourceMissing": "the ability's user no longer exists",
+      "notOnCanvas": "the Director must be viewing the scene with both tokens",
+      "delegateRefused": "Combat Tools did not apply it",
+      "delegateNoEffect": "Combat Tools created no effect",
+      "hookVetoed": "stopped by another module",
+      "error": "error, see the console",
+      "undoError": "undo failed, see the console",
+      "addedRoll": "roll added after the card was resolved",
+      "appliedByTargetDamage": "already applied from Target Damage",
+      "partlyAppliedByTargetDamage": "already applied to some of these minions from Target Damage: finish the rest there",
+      "noSurges": "the hero does not have enough surges",
+      "statusImmune": "immune to this condition",
+      "chooseMovement": "choose push, pull or slide first (Edit)",
+      "notMoved": "did not move",
+      "selfForced": "cannot push or pull itself",
+      "moveByHand": "move it by hand",
+      "sourceNotOnCanvas": "the Director must be viewing the scene with the ability's user",
+      "gridUnsupported": "square grids only without Combat Tools",
+      "stabilityResists": "its stability stops it",
+      "blocked": "blocked at once",
+      "badDestination": "invalid destination",
+      "partnerMissing": "needs a partner token",
+      "nothingToEnd": "nothing to end",
+      "notChosen": "not chosen",
+      "tooFar": "the move was longer than allowed",
+      "chooseEffects": "choose which effects end",
+      "noResource": "has no such resource",
+      "nothingGained": "nothing to gain",
+      "noRecoveries": "no Recoveries left",
+      "formulaInvalid": "the library formula gave no number",
+      "nativeSparesAllies": "an ally: the ability spares allies",
+      "nativeOnlyAllies": "not an ally: the ability affects allies only",
+      "triggerResisted": "resists: a triggered action lowered the potency",
+      "placeOnCanvas": "The summoner's owner places it: click Summon",
+      "summonerGone": "The summoner's token is gone",
+      "summonerDown": "The summoner is dying",
+      "chooseActor": "Choose which creature to summon",
+      "actorNotAllowed": "That creature is not one of this ability's choices",
+      "summonLocked": "Locked: it was reduced to 0 Stamina (earn a Victory first)",
+      "noWorldActor": "The stat block could not be found or imported",
+      "noAnchor": "Needs a target to appear next to",
+      "pickTargets": "waits for a pick",
+      "noSourceToken": "The ability's user has no token to measure from",
+      "boostUnpaid": "The extra squares could not be paid: adjust the resource by hand",
+      "wrongScene": "Not on the summoner's scene",
+      "wrongLevel": "Not on the summoner's level",
+      "badPlace": "Not a square of the grid",
+      "offMap": "Outside the map",
+      "tooMany": "More squares than creatures",
+      "occupied": "That space is occupied",
+      "noSpace": "No free space within distance",
+      "noDistance": "The ability gives no distance (the library needs one)",
+      "noSummonerToken": "The summoner has no token on a scene: use the ability again from its token",
+      "alreadyGained": "Already gained this round (or this encounter)",
+      "noHeroTokens": "Not enough hero tokens",
+      "heroTokenDeclined": "not spent this time (the hit was taken)",
+      "notEnoughMalice": "Not enough Malice",
+      "damageNotApplied": "The hit did not land, so the tokens were given back",
+      "noCreatorToken": "Its creator has no token on a scene",
+      "noArea": "The ability has no area to place",
+      "outsideArea": "Part of the area is off the scene",
+      "badZonePlace": "The placed area does not match the ability",
+      "noScene": "The creator's scene is gone",
+      "noZoneType": "The Automation Zone region behavior is not registered",
+      "nativeNoSource": "The effect was created but the system does not see its source",
+      "sourceDefeated": "Ended: its source was defeated",
+      "ended": "Ended by hand",
+      "awaitingTeleport": "waiting for the teleport",
+      "hideDestinationChanged": "the token left the teleport destination",
+      "hideUnavailable": "Combat Tools stealth is unavailable or inactive",
+      "hideDeclined": "Hide declined",
+      "hideFailed": "Hide did not succeed",
+      "hideChanged": "hidden state changed since; it was left intact",
+      "hideIneligible": "no eligible observers at this destination",
+      "effectChanged": "The effect was changed after automation applied it",
+      "featureAlreadyUsed": "This feature has already been used for this turn or round",
+      "featureCostInUse": "Undo the feature effects before refunding its cost",
+      "auraNegated": "Negated by an aura",
+      "healingRefused": "Healing was refused",
+      "recoveryDeclined": "Recovery declined",
+      "recoveryTimedOut": "Recovery offer expired without an answer",
+      "pickEmpty": "no path was chosen"
+    },
+    "Warning": {
+      "targetsChanged": "Targets changed while the ability dialog was open; rolled creatures were added.",
+      "noTier": "This target has no tier of success on the card.",
+      "targetMissing": "This target no longer exists.",
+      "ambiguousTier": "Two tokens of the same creature rolled different tiers: check before applying.",
+      "minionNoSquad": "Minion without a squad: damage goes to its own Stamina.",
+      "minionMultiSquad": "Minion in more than one squad: damage goes to its own Stamina.",
+      "conditionAlwaysWithPotency": "An effect set to 'always' has a potency; it was treated as 'on failure'.",
+      "dsctChoose": "This ability lets its user choose an effect: conditions wait for confirmation.",
+      "unsupportedShape": "This card format is not supported yet: everything is manual.",
+      "privateCard": "Private roll: results are applied manually.",
+      "hookManual": "Another module switched this card to manual.",
+      "itemMissing": "The ability no longer exists; nothing can be applied.",
+      "forcedDistanceInvalid": "This forced movement's distance could not be worked out: move it by hand.",
+      "libraryDefersToCombatTools": "Combat Tools automates part of this ability itself (its buttons on the card); the library left those parts to it.",
+      "adoptedCard": "This card was not prepared by its author; the Director took its targets from the rolls.",
+      "selfMissing": "The ability's user has no token or actor here: effects on them were left out.",
+      "triggerPotencyLate": "The potency change came after the effect was applied: adjust it by hand.",
+      "villainActionReused": "This villain action was already used this encounter.",
+      "villainActionRound": "A villain action was already used this round (one per round, all villains together).",
+      "areaNotFound": "The area this use placed was not found: the creatures inside it get nothing here (apply by hand).",
+      "devBuildPairing": "This Draw Steel development build may pair targets with the wrong rolls: every row is manual.",
+      "potencyAdjusted": "Potency was already adjusted on the card"
+    },
+    "Lock": {
+      "AlreadyApplied": "Already applied by Automation Suite. Undo it on the Automation section first.",
+      "Tooltip": "Already applied by Automation Suite",
+      "AlreadyMoved": "Automation Suite already moved targets of this result. Undo it on the Automation section first.",
+      "MovedTooltip": "Already moved by Automation Suite",
+      "GainApplied": "Applied by Automation Suite",
+      "PartApplied": "Already applied by the automation",
+      "TipTitle": "Automation Suite"
+    },
+    "Errors": {
+      "PartNotRegistered": "Stef's Automation Suite could not register its chat card section. Check the console and run game.modules.get(\"stef-ds-automation\").api.selfCheck()."
+    },
+    "Settings": {
+      "Mode": {
+        "auto": "Automatic",
+        "prompt": "Ask the Director",
+        "manual": "Manual buttons",
+        "off": "Off"
+      },
+      "enabled": {
+        "name": "Enable automation",
+        "hint": "When an ability is used, record its targets and apply its results on the Director's client."
+      },
+      "damageMode": {
+        "name": "Damage",
+        "hint": "Automatic applies damage as soon as the card appears. Ask the Director and Manual list it with an Apply button. Off ignores damage."
+      },
+      "healingMode": {
+        "name": "Healing and temporary Stamina",
+        "hint": "How healing and temporary Stamina from abilities are applied."
+      },
+      "conditionsMode": {
+        "name": "Conditions and effects",
+        "hint": "How conditions and effects from abilities are applied, after the potency check."
+      },
+      "potencyGate": {
+        "name": "Check potency",
+        "hint": "Apply a condition only when the target fails (or, if the effect says so, succeeds on) the potency check against its characteristic."
+      },
+      "potencyAlwaysMeansFailure": {
+        "name": "Treat 'always' with potency as 'on failure'",
+        "hint": "Many abilities store 'always' for effects that do have a potency. With this on, such effects apply only when the target fails the potency."
+      },
+      "targetedConditions": {
+        "name": "Frightened, taunted and grabbed",
+        "hint": "Automatic hands these conditions to Draw Steel: Combat Tools when its conditions are on, and otherwise applies the system's own conditions with their source (grabbed follows the setting below). Our own effects always uses the system's conditions, even with Combat Tools. Off leaves them for you.",
+        "auto": "Combat Tools when it handles them, otherwise our own effects",
+        "off": "Leave for me",
+        "native": "Always our own effects"
+      },
+      "autoGrab": {
+        "name": "Apply grabbed automatically",
+        "hint": "Grabbing ignores size rules when applied this way and needs the Director to view the scene. Off: grabbed waits for confirmation."
+      },
+      "lockDstdRows": {
+        "name": "Lock Target Damage rows",
+        "hint": "Disable Target Damage's apply buttons for results Automation Suite already applied, so nothing is applied twice."
+      },
+      "sweepOnReady": {
+        "name": "Unresolved cards after reload",
+        "hint": "Cards posted while no Director was connected: show a Resolve now button, resolve them automatically when the Director connects, or do nothing.",
+        "banner": "Show Resolve now",
+        "auto": "Resolve automatically",
+        "off": "Do nothing"
+      },
+      "sweepWindowMinutes": {
+        "name": "Look-back for automatic resolve (minutes)",
+        "hint": "Only cards younger than this are resolved automatically when the Director connects."
+      },
+      "mixedTierSafety": {
+        "name": "Ask when tiers are ambiguous",
+        "hint": "If two tokens of the same creature rolled different tiers, their results wait for you instead of being applied."
+      },
+      "hideNpcNumbersFromPlayers": {
+        "name": "Hide immunities from players",
+        "hint": "Players see the rolled damage but not immunities, weaknesses or final damage of creatures they do not own."
+      },
+      "heroOverride": {
+        "inherit": "Same as above"
+      },
+      "playerAuthoredMode": {
+        "name": "Cards posted by players",
+        "hint": "Caps automation for cards posted by players: Ask the Director or Manual keeps their results waiting even where the modes above say Automatic.",
+        "inherit": "Same as above"
+      },
+      "cardActionRole": {
+        "name": "Who may use card buttons",
+        "hint": "Lowest role (besides the Director) allowed to apply or undo results on Automation sections. The Director always may. The active Director's client checks every request."
+      },
+      "playerCardActions": {
+        "name": "Which cards players may act on",
+        "hint": "Above the role, users act on cards they posted or whose creature they own; with the second option also on results whose targets they all own. They can always undo what they applied.",
+        "ownSource": "Own cards",
+        "ownSourceOrTarget": "Own cards and own targets"
+      },
+      "respectDstdApplications": {
+        "name": "Respect Target Damage applications",
+        "hint": "Results already applied from Draw Steel: Target Damage are marked 'applied elsewhere' and not applied again."
+      },
+      "reviveOnHeal": {
+        "name": "Revive when healed",
+        "hint": "When a defeated creature (not a hero, retainer or minion) is healed above 0 Stamina, revive it: the Dead status, the defeated mark in combat and Death Tracker's skull go. A creature killed at positive Stamina (Power Word Kill) stays dead."
+      },
+      "reviveOnUndo": {
+        "name": "Revive on undo",
+        "hint": "When undoing damage that defeated a creature, revive it through Draw Steel: Death Tracker (back in its squad, captain restored). Needs the Director to view the creature's scene; otherwise the row says to use Raise Dead."
+      },
+      "autoApplyDelayMs": {
+        "name": "Delay before applying (ms)",
+        "hint": "Wait this long after a card appears before its results are applied automatically."
+      },
+      "waitForDiceSoNice": {
+        "name": "Wait for Dice So Nice",
+        "hint": "With Dice So Nice active, apply results after the dice stop rolling on the Director's screen, or on the roller's screen while the Director's window is in the background (at most 15 seconds)."
+      },
+      "promptDialog": {
+        "name": "Confirmation dialog",
+        "hint": "On this Director client: when a card has results that wait for confirmation (Ask the Director), open a dialog to apply them right away."
+      },
+      "compactCard": {
+        "name": "Compact automation card",
+        "hint": "On this client: the Automation section of a card shows one line per target (name, tier, result, status, buttons); details are in the tooltips."
+      },
+      "foldDetails": {
+        "name": "Fold details on automated cards",
+        "hint": "On this client: on cards the automation resolved, Target Damage's panel (dice, edges and banes, Combat Tools rows, Update Targets) is folded under a Details button, and Combat Tools' own message for a teleport the card ran shrinks to one line."
+      },
+      "heroSaves": {
+        "name": "Saving throws: player-owned creatures",
+        "hint": "At the end of a hero's turn, each \"save ends\" effect needs a saving throw. Ask the player: their client opens the save dialog (if nobody answers in time, see \"No answer\"). Roll automatically: no dialog. Draw Steel's own: the system's handling, but at most once per effect per turn.",
+        "prompt": "Ask the player",
+        "auto": "Roll automatically"
+      },
+      "npcSaves": {
+        "name": "Saving throws: the Director's creatures",
+        "hint": "Roll automatically: no dialog, the card shows the result. Draw Steel's own: a dialog on the Director's screen for each effect.",
+        "auto": "Roll automatically"
+      },
+      "Saves": {
+        "system": "Draw Steel's own"
+      },
+      "savePromptSeconds": {
+        "name": "Saving throws: seconds to answer",
+        "hint": "How long the player's save dialog stays open before the Director's client takes over."
+      },
+      "saveFallback": {
+        "name": "Saving throws: no answer",
+        "hint": "When a player does not answer in time or no owner is connected. A player who closes the dialog skips the save.",
+        "auto": "Roll automatically",
+        "dialog": "Open the dialog for the Director"
+      },
+      "npcSaveMessageMode": {
+        "name": "Saving throws: visibility of the Director's rolls",
+        "hint": "Who sees automatic saves of the Director's creatures.",
+        "default": "Director's roll mode",
+        "public": "Everyone",
+        "gm": "Director only",
+        "blind": "Blind"
+      },
+      "ongoingDamage": {
+        "name": "Ongoing damage",
+        "hint": "Effects that deal damage at the start or end of each of a creature's turns (such as Burning) post a damage card once per turn. Automatic applies it at once; the other modes leave it on the card."
+      },
+      "ongoingFromDescription": {
+        "name": "Ongoing damage: read effect text",
+        "hint": "Also recognise ongoing damage from an effect's description (\"takes [[/damage 1d6 fire]] damage at the start of each of their turns\"), not only from effects set up for this module."
+      },
+      "systemFixes": {
+        "name": "Fix Draw Steel 1.1 turn bugs",
+        "hint": "Save cards keep their hero-token button, and save-ends and other encounter effects are removed when a creature leaves combat or the encounter ends. Only active on system versions that have the bugs."
+      },
+      "debug": {
+        "name": "Debug logging",
+        "hint": "Write detailed Automation Suite logs to the browser console (this client only)."
+      },
+      "forcedMovementMode": {
+        "name": "Forced movement",
+        "hint": "Push, pull and slide results move the target. Automatic moves straight pushes and pulls at once; moves that need a choice (slides, vertical moves, \"push or pull\") always wait for the Director. With Draw Steel: Combat Tools its engine moves the token (walls, collisions, falls); without it only straight pushes and pulls on square grids are moved."
+      },
+      "forcedPath": {
+        "name": "Forced movement path",
+        "hint": "Straight line: pushes and pulls go straight away from or towards the ability's user without asking. Director picks: Combat Tools' path picker opens on the Director's screen for every forced movement.",
+        "straight": "Straight line",
+        "choose": "Director picks"
+      },
+      "forcedFallback": {
+        "name": "Forced movement without Combat Tools",
+        "hint": "Without Draw Steel: Combat Tools, move straight pushes and pulls ourselves (walls and creatures stop the target; collision damage is left to the Director). Off: forced movement rows are reminders only."
+      },
+      "libraryEnabled": {
+        "name": "Ability library",
+        "hint": "Use automation from library modules (such as the suite's built-in library) and detached automation on items, on top of what the system describes. Off: only the system's own power roll effects are automated."
+      },
+      "libraryDefersToCombatTools": {
+        "name": "Library: leave Combat Tools' own automation alone",
+        "hint": "When an ability carries Combat Tools' automation of a kind (its heal, cleanse, teleport, damage, condition or resource buttons on the card), the library does not add rows of that kind."
+      },
+      "resourceMode": {
+        "name": "Resources",
+        "hint": "Surges, heroic resource and Recoveries that library abilities grant."
+      },
+      "triggersEnabled": {
+        "name": "Triggered actions",
+        "hint": "When a triggered action from the automation library could react (Parry, Inertial Shield, Word of Guidance ...), ask the creature's owner first and hold the damage, roll or turn until they answer."
+      },
+      "triggerPromptSeconds": {
+        "name": "Triggered action prompt (seconds)",
+        "hint": "How long the owner has to answer. Without an answer the event goes ahead unchanged. Damage from other buttons waits at most 10 seconds."
+      },
+      "triggerFallback": {
+        "name": "Owner not connected",
+        "hint": "Who answers for a hero whose players are all offline.",
+        "director": "Ask the Director",
+        "skip": "Nobody: the triggered action is not used"
+      },
+      "triggersOutsideCombat": {
+        "name": "Triggered actions outside combat",
+        "hint": "Also offer triggered actions when no combat has started (there is no per-round limit then)."
+      },
+      "triggerNpcs": {
+        "name": "Director's creatures react",
+        "hint": "Ask the Director when a creature without a player owner could use a triggered action from the library (for example the Arixx's Skitter)."
+      },
+      "triggerExternalDamage": {
+        "name": "Hold damage from other buttons",
+        "hint": "Also hold damage applied by the system's Apply Damage button, Target Damage rows and Combat Tools (a prompt of at most 10 seconds, so Target Damage does not time out). Minion squads, collision and fall damage and Stamina loss are never held."
+      },
+      "triggerTrackers": {
+        "name": "Judgement and Mark trackers",
+        "hint": "When a creature judged or marked through the library drops to 0 Stamina, ask its censor or tactician to use the ability on a new target; using it again ends the older effect."
+      },
+      "triggerRollLock": {
+        "name": "Hold rolls for triggered actions",
+        "hint": "Lock the roll dialog of a damage-dealing ability while an ally may add an edge to it (Word of Guidance)."
+      },
+      "deferToTriggersModule": {
+        "name": "Leave triggers to Draw Steel: Triggers",
+        "hint": "When the Draw Steel: Triggers module is active, these triggered actions, holds and trackers stay off."
+      },
+      "summonMode": {
+        "name": "Summons",
+        "hint": "How summon rows are applied. They are always placed on the canvas, so Automatic acts as Ask."
+      },
+      "summonPlacement": {
+        "name": "Director's summon placement",
+        "hint": "Pick the squares on your canvas, or let the Director's client choose the nearest free squares. Players always pick.",
+        "pick": "Pick on the canvas",
+        "auto": "Nearest free squares"
+      },
+      "summonTurnChain": {
+        "name": "Summons act after their summoner",
+        "hint": "In the default initiative mode, a summon that acts after its summoner waits (it cannot be activated earlier) and takes its turn as soon as the summoner's turn ends."
+      },
+      "summonSquadLabels": {
+        "name": "Label summon squads",
+        "hint": "Name new summon squads Group N and apply Combat Tools' squad labels when they are on."
+      },
+      "summonEncounterEnd": {
+        "name": "Summons at the end of the encounter",
+        "hint": "What is removed when a combat is deleted.",
+        "listed": "Those whose ability says so",
+        "all": "Every summon of that combat",
+        "none": "Nothing"
+      },
+      "summonOwnerPotency": {
+        "name": "Summoner potency link",
+        "hint": "Mark hero summons with their summoner (flags.world.ownerUuid) for the Summoner class module's potency."
+      },
+      "summonUpkeepSeconds": {
+        "name": "Persistent upkeep prompt (seconds)",
+        "hint": "Persistent upkeep prompts (summons, areas and Persistent abilities): how long the owner has to keep it."
+      },
+      "persistentUpkeep": {
+        "name": "Persistent abilities",
+        "hint": "At the user's turn start, ask their player to keep a Persistent ability use for its cost: the free roll again, effects that last until the next decision. Off: Persistent stays a reminder."
+      },
+      "resourceGains": {
+        "name": "Resource gains",
+        "hint": "First-time-each-round gains of heroic resources (Ferocity when hit, Focus on a marked foe…) as undoable rows. Ask the Director: the rows wait for a click."
+      },
+      "heroTokenPrompt": {
+        "name": "Hero tokens on a lethal hit",
+        "hint": "Offer a hero's player (the Director for a hero without one) to spend 2 hero tokens and regain the hero's recovery value when our damage would drop the hero to 0 Stamina or less."
+      },
+      "maliceReminders": {
+        "name": "Malice reminders",
+        "hint": "At a monster's turn start, whisper the Director the malice features the pool can pay, with Use buttons."
+      },
+      "villainActionTracking": {
+        "name": "Villain action tracking",
+        "hint": "Mark villain actions used this encounter and warn on a second use or a second villain action in a round."
+      },
+      "zoneMode": {
+        "name": "Areas",
+        "hint": "Lasting areas from the library (Wall of Fire…). Automatic: an area drawn when the ability is used, or one built around its creator, is applied when the card resolves; any other area waits for Place, as with Ask."
+      },
+      "zoneDamage": {
+        "name": "Area damage",
+        "hint": "How damage from lasting areas is applied. Off: areas deal no damage."
+      },
+      "modeByActorType": {
+        "name": "Results by creature type",
+        "hint": "Overrides the modes above for the creature a result lands on: heroes, retainers, NPCs, minions, summons and objects. Same as above keeps the feature's mode; Off stays a feature setting. The author's cap above still applies."
+      },
+      "summonInterceptNative": {
+        "name": "Place the system's summons",
+        "hint": "When an ability uses Draw Steel's own summoning (system 1.2 and later), its creatures are placed by the summoner's player and join combat, squads and dismissal like the library's summons. Off leaves the system's own placement."
+      },
+      "frightenedMoveWarning": {
+        "name": "Warn when frightened creatures move closer",
+        "hint": "A creature frightened by our own effect warns its mover when a move brings it closer to the source. The move is never blocked."
+      },
+      "automaticAreas": {
+        "name": "Prepare area targets automatically",
+        "hint": "Center bursts and auras on their user; place aimed areas once and select valid targets before the roll."
+      },
+      "gainUndoKeepsSlot": {
+        "name": "Undone gains keep their slot",
+        "hint": "When a once-per-round or once-per-encounter resource gain (Focus on a marked foe, Ferocity when hit, ...) is undone, it still counts as taken for that round or encounter, so the next matching event does not grant it again. Off: Undo frees the slot (the default). The resource API can still release a slot by hand."
+      },
+      "heroTokenRerollPowerRolls": {
+        "name": "Hero tokens reroll power rolls",
+        "hint": "House rule. Ability cards of heroes get a button to spend 1 hero token and reroll the power roll, as Draw Steel allows for tests. Applied rows are undone first, then the card resolves again with the new tiers. Off by default."
+      }
+    },
+    "Menu": {
+      "name": "Automation settings",
+      "label": "Open settings",
+      "hint": "Every automation setting of the suite, in tabs.",
+      "title": "Draw Steel automation",
+      "Tab": {
+        "general": "General",
+        "modes": "Modes",
+        "players": "Players",
+        "conditions": "Conditions",
+        "turns": "Saves and ongoing",
+        "movement": "Movement",
+        "library": "Library",
+        "triggers": "Triggered actions",
+        "summons": "Summons",
+        "resources": "Resources",
+        "compat": "Other modules",
+        "maintenance": "Maintenance"
+      },
+      "ResetTab": "Reset this tab to defaults",
+      "ResetAll": "Reset everything to defaults",
+      "ResetConfirm": "Reset {count} settings to their defaults?",
+      "ActorType": {
+        "hero": "Heroes",
+        "retainer": "Retainers",
+        "npc": "NPCs",
+        "minion": "Minions",
+        "summon": "Summons",
+        "object": "Objects"
+      },
+      "Maintenance": {
+        "selfCheck": "Run self-check",
+        "selfCheckGreen": "Everything is in order.",
+        "strip": "Prepare to uninstall",
+        "stripHint": "Removes the automation section and records from chat cards and turns automation-only cards into plain text, so the log stays readable once the modules are disabled. Run it before disabling them.",
+        "stripDry": "Count first",
+        "stripConfirm": "{abilityCards} ability cards lose their automation section and {syntheticCards} automation cards become plain text. Undo for these cards is gone afterwards. Continue?",
+        "stripReport": "{abilityCards} ability cards and {syntheticCards} automation cards carry automation data; {flagsRemoved} cards hold a record.",
+        "cleanup": "Cleanup report",
+        "cleanupHint": "Lists what the modules leave in the world besides chat cards. To act on it, run api.cleanup from the console (see the README's Uninstall section).",
+        "fromModules": "From other modules",
+        "Cleanup": {
+          "zones": "Areas on scenes: {count}",
+          "untilEffects": "Effects ended by the automation: {count}",
+          "summons": "Summoned creatures: {count}",
+          "items": "Items with automation changes: {count}",
+          "folders": "Summons folders: {count}",
+          "nativeTargeted": "Frightened, taunted and grabbed effects (kept): {count}"
+        }
+      },
+      "Compat": {
+        "detected": "Active",
+        "notDetected": "Not active",
+        "systemVersion": "Draw Steel version",
+        "cardShape": "Ability card format",
+        "devBuild": "Draw Steel development build",
+        "modules": "Modules"
+      }
+    },
+    "Api": {
+      "Deprecated": "{old} is deprecated; use {new}."
+    },
+    "Strip": {
+      "Progress": "Preparing chat cards for uninstall",
+      "Done": "Automation data removed from {count} chat cards.",
+      "DoneHint": "Done. You can now disable the modules.",
+      "Running": "Prepare to uninstall is already running."
+    },
+    "Cleanup": {
+      "Progress": "Cleaning up automation data",
+      "Done": "{count} automation leftovers removed."
+    },
+    "SelfCheck": {
+      "partType": "The dsAutoResolution part type is NOT in the ChatMessage schema: cards cannot show the resolution section.",
+      "relay": "The card relay query is not registered: card buttons and API calls fail on every client except the active GM.",
+      "queryUsers": "This user lacks the 'Query users' permission: card buttons cannot reach the Director.",
+      "noActiveGM": "No active GM: nothing is applied until a GM is connected.",
+      "libraryInvalid": "{count} library overlay(s) failed validation and were skipped (api.library.info().invalid).",
+      "entryTypes": "The dsAuto.* special effect types are not registered: detached library automation cannot load.",
+      "libWrapper": "libWrapper is not active: saving throws, ongoing damage, turn deduplication and the system fixes are off.",
+      "takeDamage": "The takeDamage wrapper is not installed: damage from the system's Apply button, Target Damage and Combat Tools is not held for triggered actions.",
+      "promptTrigger": "The prompt router has no trigger type: triggered-action prompts cannot reach players.",
+      "promptUpkeep": "The prompt router has no summonUpkeep type: Persistent upkeep cannot be asked (summons are let go).",
+      "promptPersistent": "The prompt router has no persistentUpkeep type: Persistent ability uses cannot be kept (each is let go).",
+      "zoneType": "The stef-ds-automation.zone region behavior is not registered: zones cannot be created.",
+      "gridDistance": "The viewed scene's grid distance is {distance}{units} per square, not 1: areas and the system's templates come out the wrong size (set Grid Distance to 1).",
+      "gainsStandDown": "Gains stand down: {module} owns resource gains.",
+      "wrappers": "Wrappers not installed: {list}.",
+      "nativeWithDsct": "Targeted conditions use our own effects while Combat Tools handles conditions: its token HUD toggles act on them too ({count} of our targeted effects live).",
+      "devBuild": "Draw Steel {version} is a development build without the target token field: every targeted row of its cards is manual.",
+      "menu": "The automation settings window is not registered: world settings can only be changed through the API.",
+      "unverifiedVersion": "Not verified with this version of Automation Suite: {list}. Combat Tools and its companions may have changed what we rely on; run the newest Combat Tools family live check in TESTING.md before a session.",
+      "advancedEnrichers": "Combat Tools' Advanced Enrichers are on: their Apply chips on automated cards are locked once Automation Suite applied, but Combat Tools' own auto-apply of enrichers is not. Turn the setting off if effects land twice.",
+      "autoApplyOwn": "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): its enricher auto-apply writes without a click, so it can repeat what Automation Suite applies.",
+      "dsctHandlers": "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently."
+    },
+    "Targeted": {
+      "FrightenedCloser": "{name} is frightened of {source} and cannot willingly move closer.",
+      "GrabberHint": "A grabber's speed is halved unless it is larger than the creature it grabs (not tracked)."
+    },
+    "Relay": {
+      "NoActiveGM": "No Director is connected: card actions wait until one is.",
+      "NotActiveGM": "This request reached a Director who is not the active one; try again.",
+      "BadRequest": "Automation Suite received a malformed card request.",
+      "PickRefused": "That pick is not allowed (out of range, too many, or the row changed).",
+      "UnknownCard": "This card has no Automation record.",
+      "Denied": "You are not allowed to do that on this card.",
+      "Refused": "{count} result(s) were skipped: you are not allowed to change them.",
+      "Tampered": "This card's automation record was changed outside Automation Suite and is locked.",
+      "Unresolved": "This card has not been resolved yet.",
+      "SurgeNotPossible": "Surges cannot be spent on this result (or no more than 3 per damage roll).",
+      "NotEnoughSurges": "The hero does not have enough surges.",
+      "Synthetic": "This card was posted by api.applyDamage; it has no ability to resolve.",
+      "Vetoed": "Another module stopped the card from being posted.",
+      "ChoiceLocked": "Part of this choice was already applied. Undo it first.",
+      "ChoiceFirst": "Pick an option of the choice above first.",
+      "Busy": "Triggered actions are being asked on this card; try again in a moment.",
+      "UnknownSummon": "That summon no longer exists",
+      "SummonCannotAct": "This summon has no turn left this round.",
+      "SummonHeld": "This summon acts right after its summoner.",
+      "SummonNotNow": "Another creature's turn is running.",
+      "UnknownZone": "That area no longer exists.",
+      "Failed": "The action failed; see the console for details.",
+      "NativeSummonRefused": "This ability cannot summon that."
+    },
+    "SurgeDialog": {
+      "Title": "Spend surges",
+      "Label": "Surges",
+      "Hint": "Each surge deals {damage} extra damage to {name}. Available: {available}; at most {max} here.",
+      "Spend": "Spend"
+    },
+    "PromptDialog": {
+      "Title": "Results waiting for you",
+      "Intro": "{name}: these results wait for your confirmation. Apply the checked ones now, or later from the card.",
+      "Apply": "Apply checked",
+      "Later": "Later"
+    },
+    "Save": {
+      "Flavor": "{name}: saving throw",
+      "Note": {
+        "noAnswer": "no answer, rolled by the Director",
+        "noOwner": "no player connected, rolled by the Director"
+      }
+    },
+    "Ongoing": {
+      "Flavor": "{name}: ongoing damage ({formula})"
+    },
+    "Until": {
+      "ExpiryLabel": "Special (Automation)"
+    },
+    "EditDialog": {
+      "Title": "Edit row",
+      "Intro": "Change what this row does to {name}. Empty fields keep the ability's value.",
+      "Movement": "Movement",
+      "Distance": "Distance",
+      "DistanceHint": "Squares before stability.",
+      "Amount": "Amount",
+      "AmountHint": "Replaces the rolled amount (immunities and weaknesses still apply to damage).",
+      "Temp": "As temporary Stamina",
+      "Apply": "Apply",
+      "Save": "Save"
+    },
+    "CleanseDialog": {
+      "Title": "End effects",
+      "Intro": "Choose up to {count} effect(s) to end on {name}.",
+      "TooMany": "Choose at most {count}."
+    },
+    "Library": {
+      "NotOwner": "You do not own this item.",
+      "InCompendium": "Items inside a compendium cannot be changed; import the item first.",
+      "Locked": "The automation of this item is locked. Unlock it first.",
+      "NoOverlay": "The library has no automation for this ability.",
+      "BadPresetName": "Preset needs a name of at most 80 characters.",
+      "PresetMissing": "The selected automation preset no longer exists."
+    },
+    "Entry": {
+      "Legend": "Automation (ds-auto)",
+      "Hint": "Detached library automation of this ability. It shows on the card after a use, not in the ability text.",
+      "None": "(none)",
+      "Targets": {
+        "targets": "Each target",
+        "self": "The user",
+        "pick": "Creatures the user picks",
+        "area": "Creatures in the area"
+      },
+      "PickOf": {
+        "self": "The user",
+        "target": "The first target"
+      },
+      "ModifierMode": {
+        "add": "Add",
+        "override": "Replace"
+      },
+      "ModifierEnd": {
+        "turnEnd": "End of the creature's turn",
+        "nextTurnEnd": "End of the creature's next turn",
+        "nextTurnStart": "Start of the creature's next turn",
+        "sourceNextTurnStart": "Start of the user's next turn",
+        "sourceNextTurnEnd": "End of the user's next turn",
+        "roundEnd": "End of the round",
+        "encounterEnd": "End of the encounter"
+      },
+      "Resource": {
+        "surge": "Surges",
+        "heroic": "Heroic resource",
+        "epic": "Epic resource",
+        "recovery": "Recoveries",
+        "malice": "Malice",
+        "heroToken": "hero tokens"
+      },
+      "End": {
+        "turn": "End of turn",
+        "save": "Save ends",
+        "encounter": "End of encounter",
+        "respite": "Respite"
+      },
+      "Field": {
+        "effectId": "Effect id",
+        "label": "Card label",
+        "targets": "Applies to",
+        "tiers": "Tiers",
+        "whenSpend": "Only when spending",
+        "whenStrained": "Only when strained",
+        "whenConfig": "Only with option",
+        "choiceGroup": "Choice group",
+        "choiceOption": "Choice option",
+        "potencyCharacteristic": "Potency characteristic",
+        "potencyValue": "Potency value",
+        "manual": "Never by itself",
+        "value": "Amount (formula)",
+        "damageType": "Damage type",
+        "ignoredImmunities": "Ignored immunities",
+        "recoveries": "Recoveries spent",
+        "temporary": "Temporary Stamina",
+        "status": "Status",
+        "effect": "The ability's effect (id)",
+        "uuid": "Compendium effect (uuid)",
+        "end": "Ends",
+        "stacking": "Stacks",
+        "statuses": "Statuses to end",
+        "ends": "End effects that end by",
+        "count": "How many (empty: all)",
+        "resource": "Resource",
+        "movement": "Movement",
+        "distance": "Distance (formula)",
+        "vertical": "Vertical",
+        "ignoresStability": "Ignores stability",
+        "mode": "Mode",
+        "key": "Property (actor data path)",
+        "pickCount": "Pick how many",
+        "pickWithin": "Pick within (squares, formula)",
+        "pickOf": "Pick measured from",
+        "pickFilter": "Pick only",
+        "pickDamageTypes": "Damage types the picker chooses from",
+        "boostResource": "Extra squares for",
+        "boostPer": "Squares per point",
+        "boostMax": "At most (points)",
+        "text": "Reminder",
+        "filter": "Only",
+        "until": "Also ends",
+        "spender": "Who spends the Recovery",
+        "properties": "Collision",
+        "actors": "Creatures (uuids)",
+        "quantity": "How many",
+        "origin": "Measured from",
+        "side": "Side",
+        "turn": "Turn",
+        "actsThisRound": "Acts this round",
+        "squad": "Squad (minions)",
+        "lasts": "Lasts until",
+        "upkeep": "Persistent upkeep",
+        "carryStamina": "Stamina carries over",
+        "lockOnZero": "Locked at 0 Stamina",
+        "zoneEvents": "Triggers",
+        "once": "Once",
+        "onceShared": "One hit per round for every trigger",
+        "perSquare": "Per square",
+        "affects": "Affects",
+        "exceptKeywords": "Except keywords",
+        "exceptMonsters": "Except monsters",
+        "shape": "Shape",
+        "size": "Size",
+        "width": "Width",
+        "range": "Range",
+        "forcedCounts": "Forced moves count",
+        "terrain": "Terrain",
+        "autoStart": "Open teleport picker automatically",
+        "hideAfter": "Offer Hide after teleport",
+        "hideWhileObserved": "Allow this Hide while observed",
+        "hideSurge": "Surges on successful Hide",
+        "temporaryStamina": "Temporary Stamina effect ID",
+        "afterMove": "Required movement effect ID"
+      },
+      "Filter": {
+        "allies": "Allies only",
+        "enemies": "Enemies only"
+      },
+      "Until": {
+        "yourNextTurnStart": "Until the start of the user's next turn",
+        "yourNextTurnEnd": "Until the end of the user's next turn"
+      },
+      "Spender": {
+        "target": "The healed creature",
+        "self": "The user"
+      },
+      "Either": "Either way",
+      "Yes": "Yes",
+      "No": "No",
+      "Origin": {
+        "self": "The summoner",
+        "target": "The target"
+      },
+      "Side": {
+        "summoner": "The summoner's side",
+        "hostile": "Hostile"
+      },
+      "Turn": {
+        "after": "Right after the summoner",
+        "own": "Its own turn",
+        "with": "With the summoner",
+        "none": "No turn"
+      },
+      "Squad": {
+        "join": "Join or new",
+        "new": "Always new",
+        "none": "None"
+      },
+      "Lasts": {
+        "summonerTurnStart": "Start of the summoner's next turn",
+        "summonerTurnEnd": "End of the summoner's turn",
+        "encounterEnd": "End of the encounter",
+        "summonerDying": "The summoner is dying",
+        "zeroStamina": "0 Stamina",
+        "manual": "Dismissed by hand"
+      },
+      "ZoneEvent": {
+        "enter": "Enters",
+        "move": "Moves inside",
+        "turnStart": "Starts turn inside",
+        "turnEnd": "Ends turn inside"
+      },
+      "Once": {
+        "round": "Once per round",
+        "none": "Every time"
+      },
+      "Affects": {
+        "enemies": "Enemies",
+        "allies": "Allies",
+        "all": "Every creature"
+      },
+      "Shape": {
+        "ability": "The ability's area",
+        "wall": "Wall",
+        "cube": "Cube",
+        "line": "Line",
+        "burst": "Burst",
+        "aura": "Aura"
+      },
+      "Terrain": {
+        "difficult": "Difficult terrain"
+      }
+    },
+    "Trigger": {
+      "Card": {
+        "Title": "{name}: {ability}",
+        "Budget": "Triggered action of the round ({ability})",
+        "BudgetFree": "{ability}: no triggered action charged",
+        "Bleeding": "Bleeding: lose 1d6 + level Stamina (by hand)",
+        "Spend": "Spends {amount} {name}",
+        "Halved": "{target} takes half the damage",
+        "Potency": "Potency {delta} against {target}",
+        "Edge": "{count} edge(s) on {target}'s roll",
+        "Use": "Uses {ability} on {target}",
+        "FreeStrike": "{name} makes a free strike against {target}",
+        "TakeTurn": "Takes the next turn"
+      },
+      "Waiting": "Waiting for triggered actions: {names}",
+      "HalvedBy": "halved by {ability} ({name})",
+      "PotencyBy": "potency {delta} ({by})",
+      "Revoked": "triggered action undone",
+      "StillSpent": "{ability} ({name}) is still spent",
+      "UndoTrigger": "Undo triggered action",
+      "Director": "the Director",
+      "SurprisedEnds": "Round 1 is over: Surprised ends for {names}.",
+      "Outcome": {
+        "declined": "{ability} declined ({name})",
+        "timedOut": "{ability}: no answer in time ({name})",
+        "noAnswer": "{ability}: nobody to ask ({name})",
+        "closed": "{ability}: prompt closed ({name})",
+        "moot": "{ability} not needed ({name})"
+      },
+      "Dialog": {
+        "Title": "Triggered action: {name}",
+        "UnknownSource": "an unknown source",
+        "Event": {
+          "damageBefore": "{subject} is about to take {amount} damage from {source}.",
+          "damageAfter": "{subject} took {amount} damage from {source}.",
+          "rollBefore": "{subject} is about to roll {ability}.",
+          "turnStart": "{subject} starts their turn.",
+          "turnEnd": "{subject} ended their turn.",
+          "forcedBefore": "{subject} is about to be force-moved.",
+          "moveBefore": "{subject} is about to move.",
+          "zero": "{subject} was reduced to 0 Stamina."
+        },
+        "Option": "{ability}: {steps}",
+        "OptionFor": "{ability} ({subject}): {steps}",
+        "Spend": "Spend {cost} {resource}",
+        "SpendRequired": "Spend {cost} {resource} (needed: out of reach otherwise)",
+        "Countdown": "{seconds} s left",
+        "Cost": "costs {cost} {resource}",
+        "UsesBudget": "uses your triggered action this round",
+        "Free": "free triggered",
+        "Have": "you have {value}",
+        "Bleeding": "You are bleeding: using it costs 1d6 + level Stamina.",
+        "Mute": "Not this round",
+        "Cancel": "Cancel",
+        "Use": "Use",
+        "Decline": "Decline",
+        "FreeStrikeTitle": "Free strike",
+        "FreeStrikeIntro": "{reactor} used {ability}: {striker} may make a free strike against {target}.",
+        "Strike": "Strike",
+        "Skip": "Skip",
+        "RetargetTitle": "{ability}: a new target",
+        "PickTarget": "Target the new creature, then press Use.",
+        "PickTargetHint": "Click the creature to use {ability} on."
+      },
+      "Step": {
+        "halve": "half damage",
+        "potency": "potency {delta}",
+        "edge1": "an edge",
+        "edge2": "a double edge",
+        "use": "use {ability}",
+        "freeStrike": "free strike against the attacker",
+        "takeTurnNext": "take the next turn",
+        "retarget": "use it on a new target"
+      },
+      "Indicator": {
+        "Title": "Triggered actions",
+        "Waiting": "{actor} ({abilities}): {seconds} s",
+        "Release": "Release",
+        "Requester": "Waiting for triggered actions: {seconds} s"
+      },
+      "RollLock": {
+        "Checking": "Waiting for triggered actions",
+        "Skip": "Roll without waiting"
+      },
+      "Notify": {
+        "OtherScene": "Your view is on another scene: target the creature by hand.",
+        "NoFreeStrike": "{name} has no melee free strike ability.",
+        "NoTarget": "No creature in range to use {ability} on.",
+        "RetargetCancelled": "{ability}: no new target chosen. Use it again from the sheet."
+      }
+    },
+    "Summon": {
+      "Whisper": "{names}: removed ({reason})",
+      "Removal": {
+        "dismiss": "dismissed",
+        "undo": "undone",
+        "death": "reduced to 0 Stamina",
+        "encounterEnd": "end of the encounter",
+        "expired": "its time ran out"
+      },
+      "EncounterEnd": "End of the encounter: removed {names}",
+      "UpkeepCard": "Keep {name}",
+      "UpkeepCannotPay": "{name} is dismissed: {summoner} cannot pay Persistent {cost}",
+      "UpkeepNoOwner": "{name} is dismissed: nobody is connected to answer for {summoner}",
+      "NeedsCanvas": "View the summoner's scene and level to place the summon",
+      "Refused": "The summon was not placed: {why}",
+      "ChooseTitle": "Summon",
+      "ChooseIntro": "Which creature?",
+      "Picker": {
+        "Hint": "Place {name}: {count} within {distance} squares. Right-click skips one, Escape cancels.",
+        "badPlace": "Not a square of the grid",
+        "offMap": "Outside the map",
+        "wrongLevel": "Place it on your own level",
+        "tooFar": "Too far: beyond the ability's distance",
+        "occupied": "That space is occupied",
+        "gridUnsupported": "Summons need a square grid"
+      },
+      "Upkeep": {
+        "Title": "Keep {name}?",
+        "Intro": "Persistent {cost}: you gain {cost} less {resource} this turn (you have {current}). Kept, it takes another turn.",
+        "Keep": "Keep",
+        "Release": "Let it go",
+        "Countdown": "{seconds} s"
+      },
+      "NativeNoToken": "Place the summoner's token on the scene you are viewing first.",
+      "NativeCostNote": "The system already paid the summon's cost; undo does not refund it."
+    },
+    "Gain": {
+      "CardTitle": "Resource gain"
+    },
+    "Malice": {
+      "CardTitle": "Malice",
+      "Pool": "Malice pool",
+      "ReminderSpeaker": "Malice",
+      "ReminderIntro": "{name} starts its turn. Malice: {malice}. Features you can pay:",
+      "Use": "Use",
+      "Cost": "{cost} Malice",
+      "NoDialog": "{name}: its dialog did not open. Another module may have stopped it (check your targets), then use it again."
+    },
+    "Villain": {
+      "Reused": "{name} used {ability} again: villain actions are once per encounter.",
+      "Again": "A villain action was already used this round ({name}: {ability}); one per round."
+    },
+    "Persistent": {
+      "Upkeep": {
+        "Title": "Keep {name}?",
+        "Intro": {
+          "reroll": "Persistent {cost}: you gain {cost} less {resource} this turn (you have {current}). Kept, you make the power roll again for free.",
+          "extend": "Persistent {cost}: you gain {cost} less {resource} this turn (you have {current}). Kept, its effect lasts until the start of your next turn.",
+          "both": "Persistent {cost}: you gain {cost} less {resource} this turn (you have {current}). Kept, you roll again for free and the effect lasts until your next turn.",
+          "manual": "Persistent {cost}: you gain {cost} less {resource} this turn (you have {current}). Kept, it goes on (see below)."
+        }
+      },
+      "UpkeepCard": "Keep {name}",
+      "CannotPay": "{ability}: {name} cannot pay its Persistent cost ({cost}), so it ends.",
+      "NoOwner": "{ability}: nobody could keep {name}'s use, so it ends.",
+      "Released": "{ability} ends ({reason}).",
+      "End": {
+        "released": "let go",
+        "timedOut": "no answer in time",
+        "cannotPay": "its cost cannot be paid",
+        "noOwner": "nobody could keep it",
+        "outOfDistance": "no target within distance",
+        "turnEnd": "not kept by the end of the turn",
+        "encounterEnd": "the encounter ended",
+        "superseded": "rolled again",
+        "gone": "its user or ability is gone"
+      },
+      "NoTargets": "{ability}: kept, but no target is within distance to roll again.",
+      "RerollCancelled": "{ability}: kept, but the roll again was not made.",
+      "FreeUseNotice": "{ability}: kept, roll again. No essence is spent (leave the cost at 0)."
+    },
+    "Zone": {
+      "HitFlavor": "{label} ({squares} squares)",
+      "HitFlavorOne": "{label} (1 square)",
+      "Ended": "{label}: gone ({reason}).",
+      "EncounterEnd": "End of the encounter: removed {names}.",
+      "UpkeepCard": "Keep {name}",
+      "UpkeepNoOwner": "{name}: nobody could keep it, so it is gone.",
+      "Upkeep": {
+        "Title": "Keep {name}?",
+        "Intro": "Persistent {cost}: you gain {cost} less {resource} this turn (you have {current}). Kept, the area stays until your next turn."
+      },
+      "End": {
+        "expired": "its time ran out",
+        "encounterEnd": "the encounter ended",
+        "dismiss": "dismissed",
+        "undo": "undone",
+        "creatorDown": "its creator is down",
+        "deleted": "its area was deleted"
+      },
+      "Behavior": {
+        "FIELDS": {
+          "zoneId": {
+            "label": "Zone id"
+          },
+          "triggers": {
+            "label": "Triggers"
+          },
+          "once": {
+            "label": "Once"
+          },
+          "onceShared": {
+            "label": "One hit per round for every trigger"
+          },
+          "perSquare": {
+            "label": "Per square"
+          },
+          "amount": {
+            "label": "Damage"
+          },
+          "damageType": {
+            "label": "Damage type"
+          },
+          "ignoredImmunities": {
+            "label": "Ignored immunities"
+          },
+          "affects": {
+            "label": "Affects"
+          },
+          "exceptKeywords": {
+            "label": "Except keywords"
+          },
+          "exceptMonsters": {
+            "label": "Except monsters"
+          },
+          "sourceActorUuid": {
+            "label": "Source actor"
+          },
+          "aoe": {
+            "label": "Area damage (squad cap)"
+          },
+          "forcedCounts": {
+            "label": "Forced moves count"
+          },
+          "label": {
+            "label": "Label"
+          },
+          "terrain": {
+            "label": "Terrain"
+          }
+        }
+      },
+      "PlaceTitle": "Place the area",
+      "TooFar": "Too far: the area must be within {range} squares.",
+      "NotConnected": "Each wall square must touch another one.",
+      "TemplateTitle": "Area of {name}",
+      "UseTemplate": "Use the placed template",
+      "PlaceAgain": "Place again",
+      "NeedsCanvas": "View your token's scene and level to place the area.",
+      "GridUnsupported": "Areas need a square grid.",
+      "Refused": "The area was not placed: {why}",
+      "Lasts": {
+        "summonerTurnStart": "until its creator's next turn",
+        "summonerTurnEnd": "until the end of its creator's turn",
+        "encounterEnd": "until the encounter ends",
+        "summonerDying": "until its creator is dying",
+        "zeroStamina": "until its creator is at 0 Stamina",
+        "manual": "until dismissed"
+      },
+      "Affects": {
+        "enemies": "enemies",
+        "allies": "allies",
+        "all": "every creature"
+      },
+      "Terrain": {
+        "difficult": "difficult terrain"
+      },
+      "Shape": {
+        "wall": "Wall",
+        "cube": "Cube",
+        "line": "Line",
+        "burst": "Burst",
+        "aura": "Aura"
+      }
+    },
+    "HeroToken": {
+      "Dialog": {
+        "Title": "Spend hero tokens?",
+        "Intro": "This hit leaves {name} at {after} Stamina. Spend {cost} of the party's {tokens} hero tokens to regain {amount} Stamina first ({with} after the hit).",
+        "Spend": "Spend {cost}",
+        "Decline": "Take the hit",
+        "Countdown": "{seconds} s",
+        "OnePerTurn": "One hero token benefit per turn: take the hit if you already used one this turn."
+      },
+      "RerollLabel": "Reroll an ability power roll",
+      "RerollMessage": "A hero token was spent to reroll this power roll.",
+      "Reroll": "Reroll (hero token)",
+      "RerollHint": "Spend 1 hero token to reroll this power roll. Applied rows are undone first; the card resolves again with the new tiers.",
+      "RerollNone": "This card has no power roll to reroll."
+    },
+    "Feature": {
+      "Maintain": "Maintain current performances",
+      "Stop": "Stop performing",
+      "ChoosePerformance": "Choose performances for this round, or maintain your current selection.",
+      "SafeDestination": "Confirm this destination is safe, unoccupied, and does not impose harmful effects.",
+      "Restricted": "This feature prevents using the ability against the selected target.",
+      "Reroll": "Use the performance to reroll this tier 2 result?",
+      "Acrobatics": "Is this a test to jump, tumble, or climb as part of your movement? Use Acrobatics to take a tier 3 outcome?",
+      "Thunder": "Choose an eligible creature for the performance attack.",
+      "MoonlightDust": "Moonlight Sonata: turned to dust",
+      "Radical": "Use Radical Fantasia to take this as your free triggered action for this round?",
+      "RecoveryOffer": "{name}: Spend 1 Recovery to regain {amount} Stamina? Stamina: {value}/{max}. Recoveries remaining: {recoveries}.",
+      "RecoveryTargets": "Choose up to {limit} recipients to offer a Recovery."
+    },
+    "Surge": {
+      "Choose": "Spend surges",
+      "Available": "Available: {count} surges. Each adds {damage} damage. Leave everything at zero to spend none.",
+      "AvailablePotency": "Available: {count} surges. Each adds {damage} damage; {cost} raise one effect's potency by 1. Leave everything unset to spend none.",
+      "Potency": "Potency +1 ({cost} surges): {label}",
+      "Left": "Surges left: {count}"
+    },
+    "ForcedStep": {
+      "Title": "Forced movement",
+      "Choose": "{label}: push or pull?",
+      "push": "Push {distance}",
+      "pull": "Pull {distance}",
+      "slide": "Slide {distance}"
+    },
+    "Movement": {
+      "Instructions": "Click adjacent squares to draw a path, or click your teleport destination. Right-click removes the last step. Apply confirms; closing declines.",
+      "Vertical": "Vertical distance (squares; negative is downward)",
+      "Boost": "Extra squares (spend {name}, up to {max})",
+      "Remaining": "Squares left: {n}"
+    },
+    "UseChoice": {
+      "Required": "Choose an option first"
+    },
+    "Pick": {
+      "Button": "Pick",
+      "Title": "Pick: {label}",
+      "Intro": "{ability}: pick up to {count} creature(s) within {distance} squares of {name}.",
+      "Hint": "Click a highlighted creature.",
+      "DamageType": "Damage type",
+      "Confirm": "Pick",
+      "None": "No creature is in range for {label}.",
+      "TooMany": "Pick at most {count}.",
+      "PicksSelf": "you pick on your screen",
+      "PicksOwner": "{name} picks",
+      "PicksDirector": "the Director picks"
+    },
+    "Teleport": {
+      "BoostTitle": "Extra squares",
+      "BoostIntro": "{label}: teleport {distance} squares, plus {per} square(s) for each {name} you spend (up to {max}).",
+      "BoostLabel": "{name} to spend",
+      "BoostSpend": "Teleport",
+      "BoostDefault": "{per} extra square(s) per {name}"
+    },
+    "Cleanse": {
+      "PromptTitle": "{name}: end an effect",
+      "PromptIntro": "{ability}: choose up to {count} effect(s) to end on {name}.",
+      "PromptApply": "End"
+    },
+    "Aura": {
+      "NullOption": "Spend 1 discipline to enhance Null Field this turn?",
+      "NoOption": "Keep the field without an enhancement",
+      "NoShift": "Inertial Anchor prevents shifting this turn.",
+      "Gravitic": "Gravitic Disruption",
+      "Anchor": "Inertial Anchor",
+      "Synaptic": "Synaptic Break",
+      "TemporaryExpired": "Temporary Stamina expired",
+      "Primordial": "Choose the primordial damage type",
+      "Active": "Aura active",
+      "UntilNextTurn": "Until the start of your next turn"
+    },
+    "Banner": {
+      "unverified": "Stef's Automation Suite has not been verified with {list}. Forced movement, areas and range checks rely on Combat Tools; run the live check before a session (selfCheck lists the versions)."
+    }
+  },
+  "TYPES": {
+    "SpecialEffect": {
+      "dsAuto": {
+        "group": "Automation (ds-auto)",
+        "damage": "Automation: Damage",
+        "heal": "Automation: Healing",
+        "condition": "Automation: Condition",
+        "cleanse": "Automation: End effects",
+        "resource": "Automation: Resource",
+        "forced": "Automation: Forced movement",
+        "teleport": "Automation: Teleport",
+        "note": "Automation: Reminder",
+        "summon": "Automation: Summon",
+        "zone": "Automation: Area",
+        "modifier": "Automation: Modifier"
+      }
+    },
+    "RegionBehavior": {
+      "stef-ds-automation": {
+        "zone": "Automation Zone"
+      }
+    }
+  },
+  "DSMEDKIT": {
+    "Control": {
+      "Item": "Automation",
+      "Actor": "Automation"
+    },
+    "Settings": {
+      "medkitRole": {
+        "name": "Medkit: who may open it",
+        "hint": "Users at or above this role see the Automation windows and badges' click. Changing an item's automation also needs ownership of the item."
+      },
+      "showBadge": {
+        "name": "Medkit: status badge on ability sheets",
+        "hint": "Show how stef-ds-automation automates an ability as a small badge in the sheet's title bar."
+      }
+    },
+    "Status": {
+      "locked": {
+        "label": "Locked",
+        "hint": "Its automation is frozen: no detach, re-sync or reset until unlocked."
+      },
+      "disabled": {
+        "label": "Disabled",
+        "hint": "Automation off for this item: its rows wait for a click and library effects are ignored."
+      },
+      "outdated": {
+        "label": "Outdated",
+        "hint": "Detached from an older version of the library overlay: re-sync to take the new one."
+      },
+      "customized": {
+        "label": "Customized",
+        "hint": "Uses automation entries stored on the item (detached or authored by hand)."
+      },
+      "unavailable": {
+        "label": "Unavailable",
+        "hint": "The library overlay needs a module that is not active."
+      },
+      "covered": {
+        "label": "Combat Tools",
+        "hint": "Combat Tools automates everything the library would add to this ability."
+      },
+      "configurable": {
+        "label": "Configurable",
+        "hint": "Automated by the library, with options you can set."
+      },
+      "automated": {
+        "label": "Automated",
+        "hint": "The library adds automation beyond the system's own effects."
+      },
+      "native": {
+        "label": "Native",
+        "hint": "Only the system's own power roll effects are automated."
+      },
+      "manual": {
+        "label": "Manual",
+        "hint": "Nothing about this ability is automated."
+      }
+    },
+    "Layer": {
+      "disabled": "Disabled",
+      "detached": "Entries on the item",
+      "overlay": "Library overlay",
+      "native": "System effects only",
+      "none": "None"
+    },
+    "Type": {
+      "damage": "damage",
+      "heal": "healing",
+      "condition": "conditions",
+      "cleanse": "ending effects",
+      "resource": "resources",
+      "forced": "forced movement",
+      "teleport": "teleports",
+      "note": "reminders"
+    },
+    "Resource": {
+      "surge": "surge(s)",
+      "heroic": "heroic resource",
+      "epic": "epic resource",
+      "recovery": "Recovery"
+    },
+    "Item": {
+      "Title": "Automation: {name}",
+      "Layer": "Uses",
+      "Overlay": "Library",
+      "DetachedFrom": "detached from",
+      "CombatTools": "Combat Tools",
+      "Enhanced": "enhanced version",
+      "EnhancedLocked": "refresh locked",
+      "LeftToCombatTools": "Left to Combat Tools",
+      "Native": "The system's own effects",
+      "NoNative": "None.",
+      "Replaced": "replaced by the library",
+      "Library": "Library automation",
+      "NoLibrary": "None.",
+      "Options": "Options",
+      "InPack": "Items inside a compendium are shown but not changed. Import the item to change it.",
+      "NativeFilter": {
+        "enemies": "Only enemies get these: allies are spared.",
+        "allies": "Only allies get these."
+      }
+    },
+    "Actor": {
+      "Title": "Automation: {name}",
+      "MonsterKey": "Monster key",
+      "MonsterKeyHint": "Monster-specific library overlays match this key. Pin another one when the automatic key (shown greyed) matches the wrong monster.",
+      "Key": "Key",
+      "Pin": "Pin this key",
+      "Unpin": "Back to the automatic key",
+      "SelectAll": "Select all",
+      "Ability": "Ability",
+      "Status": "Status",
+      "Open": "Open its Automation window",
+      "NoneSelected": "Select one or more abilities first.",
+      "BulkDone": "{done} changed, {failed} failed."
+    },
+    "Action": {
+      "save": "Save options",
+      "enable": "Enable",
+      "disable": "Disable",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "detach": "Detach",
+      "resync": "Re-sync",
+      "reset": "Reset"
+    },
+    "Hint": {
+      "disable": "Turn this ability's automation off (rows wait for a click).",
+      "lock": "Freeze the automation as it is.",
+      "detach": "Copy the library automation onto the item as editable entries (special effects). They survive Combat Tools' refresh and Update Source.",
+      "resync": "Replace the entries with the current library version (options and lock are kept).",
+      "reset": "Remove the entries: the item follows the library again."
+    },
+    "Confirm": {
+      "resync": "Replace this item's automation entries with the current library version? Edits made to the entries are lost.",
+      "reset": "Remove this item's automation entries? Edits made to them are lost and the item follows the library again."
+    },
+    "Effect": {
+      "damage": "{value} {type} damage",
+      "heal": "Heal {value}",
+      "temp": "{value} temporary Stamina",
+      "recoveries": "Spend {count} Recovery and heal its value",
+      "condition": "{name}",
+      "conditionEnd": "{name} ({end})",
+      "cleanse": "End {what}",
+      "cleanseCount": "End {count} of: {what}",
+      "resource": "+{value} {resource}",
+      "forced": "{movement} {distance}",
+      "teleport": "Teleport {distance}",
+      "note": "Reminder: {text}",
+      "toSelf": "the user",
+      "toTargets": "each target",
+      "toAllies": "allied targets",
+      "toEnemies": "enemy targets",
+      "tiers": "tier {tiers}",
+      "byTier": "varies by tier",
+      "potency": "potency {chr} {value}",
+      "whenSpend": "when spending",
+      "whenStrained": "when strained",
+      "whenConfig": "with option {key}",
+      "choice": "option {option}",
+      "manual": "waits for a click",
+      "nativeDamage": "Damage per tier",
+      "nativeApplied": "Applied: {names}",
+      "nativeForced": "Forced movement per tier",
+      "summon": "Summons {count} × {what}",
+      "summonTurn_after": "acts right after you",
+      "summonTurn_own": "own turn",
+      "summonTurn_with": "acts with you",
+      "summonTurn_none": "no turn",
+      "zone": "Area: {label} · {triggers} · {affects} · {lasts}"
+    },
+    "Gain": {
+      "Heading": "Resource gains",
+      "Line": "{label}: +{amount} {resource} ({once})",
+      "Once": {
+        "round": "once per round",
+        "encounter": "once per encounter",
+        "each": "every time"
+      },
+      "Used": "used this round",
+      "UsedEncounter": "used this encounter",
+      "Release": "Release"
+    },
+    "Zones": {
+      "Heading": "Areas",
+      "Line": "{label} · {lasts}",
+      "Dismiss": "Dismiss"
+    },
+    "Villain": {
+      "Heading": "Villain actions",
+      "Line": "{name}: round {round}",
+      "Reset": "Reset"
+    },
+    "Coverage": {
+      "Title": "Automation coverage",
+      "Open": "Open the report",
+      "Hint": "How many abilities of each compendium the library or the system automates.",
+      "Intro": "Abilities per compendium: automated by the library, by the system's own effects only, or not at all. Nothing is written to the compendiums.",
+      "Sources": "Library sources",
+      "NoSources": "none registered",
+      "Pack": "Compendium",
+      "Abilities": "Abilities"
+    },
+    "Trigger": {
+      "Heading": "Triggers",
+      "TrackerHeading": "Trackers",
+      "Event": {
+        "damageBefore": "before damage lands",
+        "damageAfter": "after damage",
+        "rollBefore": "before a roll",
+        "turnStart": "at turn start",
+        "turnEnd": "at turn end",
+        "forcedBefore": "before a forced move",
+        "moveBefore": "before a move"
+      },
+      "Subject": {
+        "self": "you",
+        "ally": "an ally",
+        "selfOrAlly": "you or an ally",
+        "enemy": "an enemy",
+        "creature": "a creature",
+        "selfOrCreature": "you or a creature"
+      },
+      "Line": "{event}, {subject}: {steps}",
+      "Free": "free triggered",
+      "Budget": "uses the round's triggered action",
+      "Spend": "optional spend {cost}",
+      "Cost": "costs {cost}",
+      "Tracker": "{effect}: new target at 0 Stamina",
+      "EndsOnDying": "ends when its source is dying",
+      "BudgetAvailable": "Triggered action this round: available",
+      "BudgetUsed": "Triggered action this round: used ({ability})",
+      "BudgetUntracked": "Triggered action: not tracked (no combat, or triggered actions off)"
+    },
+    "Summon": {
+      "Lasts": {
+        "summonerTurnStart": "Start of your next turn",
+        "summonerTurnEnd": "End of your turn",
+        "encounterEnd": "End of the encounter",
+        "summonerDying": "You are dying",
+        "zeroStamina": "0 Stamina",
+        "manual": "Dismissed by hand"
+      }
+    },
+    "Summons": {
+      "Heading": "Summons",
+      "None": "No summons on the map",
+      "Line": "{names} ({scene})",
+      "Dismiss": "Dismiss"
+    },
+    "Maintenance": {
+      "coverage": "Automation coverage",
+      "coverageHint": "Per ability compendium, how many abilities the library, the system, or nothing automates (the medkit's coverage report).",
+      "customized": "Customized items",
+      "customizedHint": "Items whose automation is stored on the item (detached or edited, also outdated ones): a library update does not reach them, and the suite's cleanup can remove them.",
+      "customizedNone": "No item in this world has customized automation."
+    },
+    "Editor": {
+      "Open": "Edit automation",
+      "Title": "Automation editor",
+      "Hint": "Choose when a rule runs, who it affects, and what it does. Changes are saved only with Save automation.",
+      "Area": "Area targeting",
+      "Suppress": "Native effects replaced by these rules",
+      "Presets": "Reusable world presets",
+      "Append": "Add to existing rules",
+      "ApplyPreset": "Load preset",
+      "PresetName": "Preset name",
+      "SavePreset": "Save as preset",
+      "RenamePreset": "Rename preset",
+      "DeletePreset": "Delete preset",
+      "RuleLabel": "Rule name",
+      "Event": "Activation",
+      "Targets": "Recipients",
+      "Filter": "Side",
+      "Keywords": "Creature keywords (all required)",
+      "Range": "Range (squares or formula)",
+      "Limit": "Maximum recipients",
+      "Once": "Frequency limit",
+      "End": "Duration",
+      "Optional": "Ask before using",
+      "Cost": "Malice cost",
+      "RemoveEffect": "Remove effect",
+      "AddEffect": "Add effect",
+      "RemoveRule": "Remove rule",
+      "AddRule": "Add rule",
+      "Replace": "Replace draft rules",
+      "ReplaceHint": "Replace the current draft with this preset? Changes are saved only when you press Save.",
+      "Clear": "Reset custom automation",
+      "ClearHint": "Remove the custom rules and return to the item’s library automation?",
+      "Start": "Start performance",
+      "Stop": "Stop performance",
+      "Use": "Use feature",
+      "Performance": "Maintain as a performance",
+      "Requirements": "Trigger requirements",
+      "Subject": "Whose event triggers this rule?",
+      "SubjectKeyword": "Event creature keyword",
+      "SourceWithin": "Attacker within squares",
+      "Adjacent": "Attacker must be adjacent",
+      "Dying": "Only dying recipients",
+      "Dead": "Only dead recipients",
+      "Special": "Additional choice",
+      "Rule": "Rule",
+      "Rules": "Feature rules",
+      "key": "Property",
+      "mode": "Modifier mode",
+      "ActivateOnUse": "Also apply when this ability is used (its native use pays its cost)",
+      "whenSpend": "Spend requirement",
+      "whenStrained": "Strained requirement",
+      "AbilitySettings": "Ability settings",
+      "When": "When",
+      "Who": "Who",
+      "What": "What",
+      "Advanced": "Advanced settings",
+      "AdvancedEffect": "Advanced effect settings",
+      "Configured": "settings configured",
+      "OptionalSettings": "Optional",
+      "NoEffectsShort": "No effects yet",
+      "NoEffects": "Add an effect to specify damage, movement, conditions, or another result.",
+      "NoRules": "No custom rules yet. Add a rule or load a preset to get started.",
+      "PresetEmpty": "No world presets saved",
+      "PresetSelect": "Choose a preset",
+      "PresetManage": "Manage presets",
+      "RulePlaceholder": "For example: Damage and push",
+      "EffectType": "Effect type",
+      "EffectRecipients": "Effect recipients",
+      "FormulaHint": "Use a number or a formula, such as @M + 2.",
+      "OverrideHint": "Rule recipients uses the Who section. Acting creature applies only to the creature using this feature.",
+      "SuppressHint": "Checked native effects are replaced by your rules. Add a matching effect below to keep that behavior.",
+      "DurationHint": "Default keeps the normal duration for each effect. Instant damage and movement do not persist.",
+      "RecipientFilters": "Recipient filters",
+      "TimingCost": "Duration and cost",
+      "SpecialBehavior": "Special behavior",
+      "FormulaGuide": "Formulas use the acting creature’s roll data. Separate list values with commas.",
+      "Save": "Save automation",
+      "PresetHint": "Loading a preset changes this draft. Save automation applies it to the item. Saved presets are independent copies.",
+      "Choices": {
+        "default": "Default",
+        "use": "When this feature is used",
+        "passive": "Always active",
+        "damageAfter": "After damage is applied",
+        "turnStart": "At the start of a turn",
+        "turnEnd": "At the end of a turn",
+        "roundStart": "At the start of a round",
+        "roundEnd": "At the end of a round",
+        "strikeDamage": "When dealing melee strike damage",
+        "targets": "Rule recipients",
+        "self": "Acting creature",
+        "subject": "Creature whose event triggered the rule",
+        "source": "Creature responsible for the event",
+        "aura": "Creatures in the aura",
+        "encounter": "Creatures in the encounter",
+        "creature": "Any creature",
+        "each": "Every time",
+        "turn": "Once per turn",
+        "round": "Once per round",
+        "all": "All creatures",
+        "allies": "Allies",
+        "enemies": "Enemies",
+        "selfAlly": "Acting creature and allies",
+        "turnEndDuration": "End of the current turn",
+        "nextTurnEnd": "End of the recipient’s next turn",
+        "nextTurnStart": "Start of the recipient’s next turn",
+        "sourceNextTurnStart": "Start of the source’s next turn",
+        "sourceNextTurnEnd": "End of the source’s next turn",
+        "roundEndDuration": "End of the current round",
+        "encounterEnd": "End of the encounter",
+        "auto": "Automatic targeting",
+        "manual": "Manual template placement",
+        "damage": "Damage",
+        "heal": "Healing",
+        "condition": "Apply condition",
+        "cleanse": "Remove conditions",
+        "resource": "Gain or spend resource",
+        "forced": "Forced movement",
+        "teleport": "Teleport",
+        "modifier": "Attribute or benefit",
+        "note": "Note",
+        "selectedTargets": "Selected ability targets",
+        "onceEncounter": "Once per encounter",
+        "whilePresent": "While the feature is present",
+        "shift": "Choose a shift destination",
+        "blocking": "Choose a blocking position",
+        "immunityChoice": "Choose a damage immunity",
+        "recoveryChoices": "Choose recovery recipients",
+        "spotlight": "Choose a Spotlight recipient",
+        "thunderMother": "Choose a Thunder Mother target",
+        "yourNextTurnStart": "Start of the acting creature’s next turn",
+        "yourNextTurnEnd": "End of the acting creature’s next turn",
+        "save": "Until a successful saving throw",
+        "respite": "Until a respite",
+        "true": "Yes",
+        "false": "No",
+        "noRequirement": "No requirement",
+        "withSpend": "Only when Spend is used",
+        "withoutSpend": "Only when Spend is not used",
+        "strained": "Only while strained",
+        "notStrained": "Only while not strained"
+      },
+      "ConfiguredOne": "setting configured",
+      "TiersHint": "Leave blank for any tier, or enter 1, 2, 3 separated by commas."
+    },
+    "Aura": {
+      "Active": "Aura active",
+      "Stop": "End aura",
+      "Enhance": "Enhance Null Field"
+    }
+  }
+}

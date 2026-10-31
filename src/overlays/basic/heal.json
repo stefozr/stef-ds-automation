@@ -1,0 +1,41 @@
+{
+  "key": "ability:heal",
+  "version": "1.0.0",
+  "name": "Heal",
+  "choices": [
+    {
+      "id": "help",
+      "label": "The target",
+      "options": [
+        {
+          "id": "recovery",
+          "label": "Spends a Recovery"
+        },
+        {
+          "id": "save",
+          "label": "Saves against an effect"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "recovery",
+      "type": "heal",
+      "recoveries": 1,
+      "choice": {
+        "group": "help",
+        "option": "recovery"
+      }
+    },
+    {
+      "id": "save",
+      "type": "note",
+      "text": "Roll a saving throw for one save-ends effect on the target.",
+      "choice": {
+        "group": "help",
+        "option": "save"
+      }
+    }
+  ]
+}

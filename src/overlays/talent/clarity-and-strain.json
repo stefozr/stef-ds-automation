@@ -1,0 +1,14 @@
+{
+  "key": "feature:clarity-and-strain",
+  "version": "1.0.0",
+  "name": "Clarity and Strain",
+  "notes": "Strain damage at the end of your turn and Mind Recovery's Recovery swap stay by hand.",
+  "effects": [],
+  "gains": [
+    {
+      "id": "forced-move", "event": "forcedMove", "taker": "selfOrCreature", "once": "round", "amount": 1,
+      "amountBy": [{ "feature": "mind-recovery", "amount": 2 }, { "feature": "clear-mind", "amount": 3 }],
+      "label": "A creature force moved, first this round"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "key": "ability:flip-the-script",
+  "version": "1.1.0",
+  "name": "Flip the Script",
+  "effects": [
+    {
+      "id": "teleport",
+      "type": "teleport",
+      "filter": "allies",
+      "distance": 5
+    },
+    {
+      "id": "unslow",
+      "type": "cleanse",
+      "filter": "allies",
+      "statuses": [
+        "slowed"
+      ],
+      "afterMove": "teleport"
+    }
+  ]
+}

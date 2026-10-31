@@ -1,0 +1,29 @@
+{
+  "key": "ability:reflector-field",
+  "name": "Reflector Field",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "sourceNextTurnStart"
+    },
+    "rules": [
+      {
+        "id": "reflector",
+        "event": "aura.continuous",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "reflector",
+            "type": "modifier",
+            "key": "benefit:reflector",
+            "value": 1
+          }
+        ],
+        "filter": "allies"
+      }
+    ],
+    "suppress": []
+  }
+}

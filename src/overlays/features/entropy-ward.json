@@ -1,0 +1,33 @@
+{
+  "key": "feature:entropy-ward",
+  "version": "1.0.0",
+  "name": "Entropy Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "source",
+        "effects": [
+          {
+            "id": "speed",
+            "type": "modifier",
+            "key": "system.movement.value",
+            "value": "-@R",
+            "mode": "add"
+          },
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:entropy",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "end": "nextTurnEnd"
+      }
+    ]
+  }
+}

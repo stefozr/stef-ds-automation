@@ -1,0 +1,26 @@
+{
+  "key": "feature:steel-ward",
+  "version": "1.0.0",
+  "name": "Steel Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "self",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "system.damage.immunities.all",
+            "value": "@R",
+            "mode": "add"
+          }
+        ],
+        "end": "nextTurnEnd"
+      }
+    ]
+  }
+}

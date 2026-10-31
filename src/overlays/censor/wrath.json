@@ -1,0 +1,19 @@
+{
+  "key": "feature:wrath",
+  "version": "1.0.0",
+  "name": "Wrath",
+  "effects": [],
+  "gains": [
+    {
+      "id": "judged-hits-you", "event": "damage", "taker": "self",
+      "dealerEffect": { "ability": "judgement", "effect": "MHQDlicbxXquwduc" }, "once": "round", "amount": 1,
+      "label": "Your judged foe damaged you, first this round"
+    },
+    {
+      "id": "you-hit-judged", "event": "damage", "taker": "creature", "dealer": "self",
+      "takerEffect": { "ability": "judgement", "effect": "MHQDlicbxXquwduc" }, "once": "round", "amount": 1,
+      "amountBy": [{ "feature": "wrath-beyond-wrath", "amount": 2 }],
+      "label": "You damaged your judged foe, first this round"
+    }
+  ]
+}

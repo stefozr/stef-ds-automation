@@ -1,0 +1,57 @@
+{
+  "key": "ability:gods-grant-thee-strength",
+  "version": "1.0.0",
+  "name": "Gods Grant Thee Strength",
+  "notes": "The shift ignoring difficult terrain and the free signature strike are taken by hand.",
+  "choices": [
+    {
+      "id": "relief",
+      "label": "The target",
+      "options": [
+        {
+          "id": "effects",
+          "label": "Ends its save and end-of-turn effects"
+        },
+        {
+          "id": "stand",
+          "label": "Stands up from prone"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "effects",
+      "type": "cleanse",
+      "filter": "allies",
+      "ends": [
+        "save",
+        "turn"
+      ],
+      "count": null,
+      "choice": {
+        "group": "relief",
+        "option": "effects"
+      }
+    },
+    {
+      "id": "stand",
+      "type": "cleanse",
+      "filter": "allies",
+      "statuses": [
+        "prone"
+      ],
+      "choice": {
+        "group": "relief",
+        "option": "stand"
+      }
+    },
+    {
+      "id": "surges",
+      "type": "resource",
+      "filter": "allies",
+      "resource": "surge",
+      "value": 2
+    }
+  ]
+}

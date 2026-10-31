@@ -1,0 +1,101 @@
+<section class="ds-medkit-body">
+  <header class="ds-medkit-head">
+    <img src="{{item.img}}" alt="" class="ds-medkit-img">
+    <div class="ds-medkit-title">
+      <strong>{{item.name}}</strong>
+      <span class="ds-medkit-key">{{key}}</span>
+    </div>
+    <span class="ds-auto-status-badge {{status.cls}}" data-tooltip="{{status.hint}}"><i class="{{status.icon}}" inert></i> {{status.label}}</span>
+  </header>
+
+  {{#if auraActive}}<p>{{localize "DSMEDKIT.Aura.Active"}} {{auraOption}}</p>{{#if canEdit}}<button type="button" data-action="auraStop">{{localize "DSMEDKIT.Aura.Stop"}}</button>{{#if nullField}}<button type="button" data-action="auraEnhance">{{localize "DSMEDKIT.Aura.Enhance"}}</button>{{/if}}{{/if}}{{/if}}
+
+  <dl class="ds-medkit-facts">
+    <dt>{{localize "DSMEDKIT.Item.Layer"}}</dt><dd>{{layer}}</dd>
+    {{#if overlay}}
+    <dt>{{localize "DSMEDKIT.Item.Overlay"}}</dt><dd>{{overlay.source}} · {{overlay.version}}{{#if detachedVersion}} ({{localize "DSMEDKIT.Item.DetachedFrom"}} {{detachedVersion}}){{/if}}{{#if overlay.monster}} · {{overlay.monster}}{{/if}}</dd>
+    {{/if}}
+    {{#if dsct.enhanced}}
+    <dt>{{localize "DSMEDKIT.Item.CombatTools"}}</dt><dd>{{localize "DSMEDKIT.Item.Enhanced"}}{{#if dsct.locked}} · {{localize "DSMEDKIT.Item.EnhancedLocked"}}{{/if}}</dd>
+    {{/if}}
+    {{#if covered}}
+    <dt>{{localize "DSMEDKIT.Item.LeftToCombatTools"}}</dt><dd>{{covered}}</dd>
+    {{/if}}
+  </dl>
+
+  {{#if overlay.notes}}<p class="ds-medkit-notes"><i class="fa-solid fa-book" inert></i> {{overlay.notes}}</p>{{/if}}
+
+  {{#if feature}}
+  <h4>{{localize "DSMEDKIT.Gain.Heading"}}</h4>
+  {{#if gains.length}}
+  <ul class="ds-medkit-list">
+    {{#each gains as |g|}}<li><i class="fa-solid fa-arrow-trend-up" inert></i> <span>{{g.what}}</span>{{#if g.detail}} <span class="ds-medkit-detail">{{g.detail}}</span>{{/if}}</li>{{/each}}
+  </ul>
+  {{else}}<p class="hint">{{localize "DSMEDKIT.Item.NoLibrary"}}</p>{{/if}}
+  {{else}}
+  <h4>{{localize "DSMEDKIT.Item.Native"}}</h4>
+  {{#if native.length}}
+  <ul class="ds-medkit-list">
+    {{#each native as |n|}}<li class="{{#if n.suppressed}}ds-medkit-suppressed{{/if}}"><i class="fa-solid fa-gears" inert></i> {{n.what}}{{#if n.suppressed}} <em>({{localize "DSMEDKIT.Item.Replaced"}})</em>{{/if}}</li>{{/each}}
+  </ul>
+  {{#if nativeFilter}}<p class="hint"><i class="fa-solid fa-filter" inert></i> {{nativeFilter}}</p>{{/if}}
+  {{else}}<p class="hint">{{localize "DSMEDKIT.Item.NoNative"}}</p>{{/if}}
+
+  <h4>{{localize "DSMEDKIT.Item.Library"}}</h4>
+  {{#if effects.length}}
+  <ul class="ds-medkit-list">
+    {{#each effects as |e|}}<li><i class="fa-solid fa-wand-magic-sparkles" inert></i> <span>{{e.what}}</span> <span class="ds-medkit-detail">{{e.detail}}</span></li>{{/each}}
+  </ul>
+  {{else}}<p class="hint">{{localize "DSMEDKIT.Item.NoLibrary"}}</p>{{/if}}
+
+  {{#if triggers.length}}
+  <h4>{{localize "DSMEDKIT.Trigger.Heading"}}</h4>
+  <ul class="ds-medkit-list">
+    {{#each triggers as |t|}}<li><i class="fa-solid fa-bolt" inert></i> <span>{{t.what}}</span> <span class="ds-medkit-detail">{{t.detail}}</span></li>{{/each}}
+  </ul>
+  {{/if}}
+
+  {{#if trackers.length}}
+  <h4>{{localize "DSMEDKIT.Trigger.TrackerHeading"}}</h4>
+  <ul class="ds-medkit-list">
+    {{#each trackers as |k|}}<li><i class="fa-solid fa-crosshairs" inert></i> <span>{{k.what}}</span>{{#if k.detail}} <span class="ds-medkit-detail">{{k.detail}}</span>{{/if}}</li>{{/each}}
+  </ul>
+  {{/if}}
+
+  {{#if hasConfig}}
+  <fieldset class="ds-medkit-config">
+    <legend>{{localize "DSMEDKIT.Item.Options"}}</legend>
+    {{#each config as |c|}}
+    <div class="form-group">
+      <label>{{c.label}}</label>
+      <div class="form-fields">
+        {{#if c.isCheckbox}}<input type="checkbox" name="config.{{c.key}}" {{checked c.value}} {{#unless @root.canEdit}}disabled{{/unless}}>{{/if}}
+        {{#if c.isNumber}}<input type="number" name="config.{{c.key}}" value="{{c.value}}" {{#unless @root.canEdit}}disabled{{/unless}}>{{/if}}
+        {{#if c.isSelect}}<select name="config.{{c.key}}" {{#unless @root.canEdit}}disabled{{/unless}}>{{#each c.options as |o|}}<option value="{{o.value}}" {{#if o.selected}}selected{{/if}}>{{o.label}}</option>{{/each}}</select>{{/if}}
+      </div>
+      {{#if c.hint}}<p class="hint">{{c.hint}}</p>{{/if}}
+    </div>
+    {{/each}}
+    {{#if canEdit}}<button type="submit"><i class="fa-solid fa-floppy-disk" inert></i> {{localize "DSMEDKIT.Action.save"}}</button>{{/if}}
+  </fieldset>
+  {{/if}}
+  {{/if}}
+
+  {{#if canEdit}}{{#if isPerformance}}<div class="ds-medkit-actions"><button type="button" data-action="performanceStart">{{localize "DSMEDKIT.Editor.Start"}}</button><button type="button" data-action="performanceStop">{{localize "DSMEDKIT.Editor.Stop"}}</button></div>{{/if}}{{#if canUseAutomation}}<button type="button" data-action="useAutomation">{{localize "DSMEDKIT.Editor.Use"}}</button>{{/if}}{{/if}}
+  {{#if canAuthor}}<button type="button" data-action="editAutomation"><i class="fa-solid fa-pen-ruler" inert></i> {{localize "DSMEDKIT.Editor.Open"}}</button>{{/if}}
+  {{#if inPack}}<p class="hint">{{localize "DSMEDKIT.Item.InPack"}}</p>{{/if}}
+  {{#if canEdit}}
+  {{#if rules.length}}<h4>{{localize "DSMEDKIT.Editor.Rules"}}</h4><ul class="ds-medkit-list">{{#each rules}}<li><strong>{{label}}</strong> {{event}} / {{targets}}<ul>{{#each effects}}<li>{{what}} {{detail}}</li>{{/each}}</ul></li>{{/each}}</ul>{{/if}}
+  <footer class="ds-medkit-actions">
+    {{#if disabled}}<button type="button" data-action="enable"><i class="fa-solid fa-circle-play" inert></i> {{localize "DSMEDKIT.Action.enable"}}</button>
+    {{else}}<button type="button" data-action="disable" data-tooltip="{{localize "DSMEDKIT.Hint.disable"}}"><i class="fa-solid fa-ban" inert></i> {{localize "DSMEDKIT.Action.disable"}}</button>{{/if}}
+    {{#unless feature}}
+    {{#if locked}}<button type="button" data-action="unlock"><i class="fa-solid fa-lock-open" inert></i> {{localize "DSMEDKIT.Action.unlock"}}</button>
+    {{else}}<button type="button" data-action="lock" data-tooltip="{{localize "DSMEDKIT.Hint.lock"}}"><i class="fa-solid fa-lock" inert></i> {{localize "DSMEDKIT.Action.lock"}}</button>{{/if}}
+    {{/unless}}
+    {{#if canDetach}}<button type="button" data-action="detach" data-tooltip="{{localize "DSMEDKIT.Hint.detach"}}"><i class="fa-solid fa-scissors" inert></i> {{localize "DSMEDKIT.Action.detach"}}</button>{{/if}}
+    {{#if canResync}}<button type="button" data-action="resync" data-tooltip="{{localize "DSMEDKIT.Hint.resync"}}"><i class="fa-solid fa-rotate" inert></i> {{localize "DSMEDKIT.Action.resync"}}</button>{{/if}}
+    {{#if canReset}}<button type="button" data-action="reset" data-tooltip="{{localize "DSMEDKIT.Hint.reset"}}"><i class="fa-solid fa-eraser" inert></i> {{localize "DSMEDKIT.Action.reset"}}</button>{{/if}}
+  </footer>
+  {{/if}}
+</section>

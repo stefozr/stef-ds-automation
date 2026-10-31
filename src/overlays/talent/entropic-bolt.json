@@ -1,0 +1,22 @@
+{
+  "key": "ability:entropic-bolt",
+  "version": "1.0.0",
+  "name": "Entropic Bolt",
+  "notes": "Repeat hits on the same creature this encounter add 1 corruption each: add it by hand.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-clarity",
+      "type": "resource",
+      "resource": "heroic",
+      "value": 1,
+      "tiers": [
+        2,
+        3
+      ],
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

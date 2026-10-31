@@ -1,0 +1,22 @@
+{
+  "key": "ability:parry",
+  "version": "1.1.0",
+  "name": "Parry",
+  "notes": "Shift by hand now; when protecting an ally, end adjacent to them.",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "parry",
+      "event": "damage.before",
+      "subject": "selfOrAlly",
+      "attacker": "creature",
+      "spend": { "cost": 1, "range": "1 + @R", "label": "Reach and shift grow with Reason" },
+      "steps": [
+        { "type": "halve" },
+        { "type": "potency", "delta": -1, "scope": "all" },
+        { "type": "note", "text": "Shift 1, ending adjacent unless you protect yourself", "effect": true, "when": { "spend": false } },
+        { "type": "note", "text": "Shift up to Reason squares, ending adjacent unless you protect yourself", "effect": true, "when": { "spend": true } }
+      ]
+    }
+  ]
+}

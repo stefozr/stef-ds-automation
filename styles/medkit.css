@@ -1,0 +1,122 @@
+/* Stef's Automation Suite medkit */
+.ds-auto-medkit .ds-medkit-body { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.25rem; }
+.ds-auto-medkit .ds-medkit-head { display: flex; align-items: center; gap: 0.5rem; }
+.ds-auto-medkit .ds-medkit-img { width: 40px; height: 40px; border: none; flex: 0 0 40px; }
+.ds-auto-medkit .ds-medkit-title { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.ds-auto-medkit .ds-medkit-key { font-size: 0.8em; opacity: 0.7; font-family: var(--font-mono, monospace); word-break: break-all; }
+.ds-auto-medkit .ds-medkit-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 0.75rem; margin: 0; }
+.ds-auto-medkit .ds-medkit-facts dt { font-weight: bold; }
+.ds-auto-medkit .ds-medkit-facts dd { margin: 0; }
+.ds-auto-medkit .ds-medkit-notes { margin: 0; font-style: italic; }
+.ds-auto-medkit h4 { margin: 0.4rem 0 0.1rem; border-bottom: 1px solid var(--color-border-light-2, #8884); }
+.ds-auto-medkit .ds-medkit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.ds-auto-medkit .ds-medkit-list li { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: baseline; }
+.ds-auto-medkit .ds-medkit-detail { font-size: 0.85em; opacity: 0.75; }
+.ds-auto-medkit .ds-medkit-suppressed { text-decoration: line-through; opacity: 0.7; }
+.ds-auto-medkit .ds-medkit-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ds-auto-medkit .ds-medkit-actions button { flex: 1 1 auto; }
+.ds-auto-medkit .ds-medkit-table-wrap { overflow-y: auto; flex: 1; }
+.ds-auto-medkit .ds-medkit-table { width: 100%; border-collapse: collapse; }
+.ds-auto-medkit .ds-medkit-table td, .ds-auto-medkit .ds-medkit-table th { padding: 0.2rem 0.3rem; vertical-align: middle; text-align: left; }
+.ds-auto-medkit .ds-medkit-ability { display: flex; align-items: center; gap: 0.4rem; }
+.ds-auto-medkit .ds-medkit-row-img { display: inline-block; width: 24px; height: 24px; flex: 0 0 24px; border: none; margin: 0; }
+.ds-auto-medkit .ds-medkit-ability-name { min-width: 0; }
+.ds-auto-medkit .ds-medkit-status-cell { white-space: nowrap; }
+.ds-auto-medkit .ds-medkit-icon { width: auto; line-height: 1; padding: 0.2rem 0.4rem; }
+.ds-auto-medkit .ds-medkit-summary { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+
+.ds-auto-status-badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.05rem 0.45rem; border-radius: 999px; font-size: 0.85em; white-space: nowrap; border: 1px solid currentColor; }
+.ds-auto-medkit-badge { margin-right: 0.35rem; font-size: 0.95em; }
+.ds-auto-status--locked { color: #7a7a7a; }
+.ds-auto-status--disabled { color: #b04444; }
+.ds-auto-status--outdated { color: #c27a12; }
+.ds-auto-status--customized { color: #8a4fc7; }
+.ds-auto-status--unavailable { color: #7a7a7a; }
+.ds-auto-status--covered { color: #b5862a; }
+.ds-auto-status--configurable { color: #138f8a; }
+.ds-auto-status--automated { color: #2f9a3f; }
+.ds-auto-status--native { color: #3a73c4; }
+.ds-auto-status--manual { color: #8a8a8a; }
+.ds-auto-medkit .ds-medkit-summons li .ds-medkit-icon { margin-left: auto; }
+
+/* The complete body must shrink inside ApplicationV2's window, not just its table. */
+.ds-auto-medkit { max-height: calc(100vh - 40px); }
+.ds-auto-medkit .window-content { min-height: 0; overflow: hidden; }
+.ds-auto-medkit .ds-medkit-body { min-height: 0; overflow-y: auto; flex: 1; }
+.ds-auto-medkit .ds-medkit-table-wrap { overflow: visible; flex: 0 0 auto; }
+.ds-auto-medkit .ds-medkit-actions { position: sticky; bottom: 0; padding: .5rem; background: var(--background, var(--color-bg, #eee)); z-index: 1; }
+.ds-auto-medkit .ds-editor-errors { color: var(--color-level-error, #a22); white-space: pre-wrap; }
+
+/* Automation authoring: isolate layout from the other Medkit windows and system sheet rules. */
+.ds-auto-medkit.automation-editor {
+  --editor-space: 1rem;
+  --editor-border: var(--color-border-light-2, #8886);
+  --editor-surface: var(--color-cool-5-25, #8881);
+  container-type: inline-size;
+}
+.ds-auto-medkit.automation-editor .window-content { display: flex; flex-direction: column; padding: 0; }
+.ds-auto-medkit.automation-editor .ds-editor-layout { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.ds-auto-medkit.automation-editor .ds-editor-scroll.ds-medkit-body {
+  display: flex; flex-direction: column; gap: var(--editor-space); padding: 1.25rem;
+  min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable;
+}
+.ds-auto-medkit.automation-editor :is(h2, h3, h4, p) { margin: 0; border: none; }
+.ds-auto-medkit.automation-editor h2 { font-size: 1.15rem; }
+.ds-auto-medkit.automation-editor h3 { font-size: 1rem; }
+.ds-auto-medkit.automation-editor h4 { font-size: .95rem; }
+.ds-auto-medkit.automation-editor .ds-editor-intro { display: grid; gap: .4rem; }
+.ds-auto-medkit.automation-editor .ds-editor-intro p { line-height: 1.5; }
+.ds-auto-medkit.automation-editor .ds-editor-help, .automation-editor .ds-editor-summary { font-size: .85rem; line-height: 1.45; opacity: .8; overflow-wrap: anywhere; }
+.ds-auto-medkit.automation-editor .ds-editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem 1rem; align-items: start; }
+.ds-auto-medkit.automation-editor .ds-editor-grid > :is(.ds-editor-check, .ds-editor-field-wide) { grid-column: 1 / -1; }
+.ds-auto-medkit.automation-editor .ds-editor-field { display: flex; flex-direction: column; gap: .35rem; min-width: 0; margin: 0; }
+.ds-auto-medkit.automation-editor .ds-editor-field > span { font-weight: 600; line-height: 1.35; }
+.ds-auto-medkit.automation-editor .ds-editor-field :is(input, select, textarea) { width: 100%; min-width: 0; margin: 0; height: 2.2rem; }
+.ds-auto-medkit.automation-editor .ds-editor-field textarea { min-height: 4rem; height: auto; }
+.ds-auto-medkit.automation-editor .ds-editor-check { display: flex; align-items: flex-start; gap: .5rem; line-height: 1.45; margin: 0; min-width: 0; }
+.ds-auto-medkit.automation-editor .ds-editor-check input[type="checkbox"] { flex: 0 0 auto; width: 1rem; height: 1rem; margin: .15rem 0 0; }
+.ds-auto-medkit.automation-editor .ds-editor-checks { display: flex; flex-wrap: wrap; gap: .65rem 1.25rem; }
+.ds-auto-medkit.automation-editor .ds-editor-rule { display: flex; flex-direction: column; gap: 1.1rem; border: 1px solid var(--editor-border); border-radius: .5rem; padding: 1rem; margin: 0; }
+.ds-auto-medkit.automation-editor .ds-editor-card-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.ds-auto-medkit.automation-editor .ds-editor-card-header > :first-child { flex: 1; min-width: 0; }
+.ds-auto-medkit.automation-editor .ds-editor-card-header h3 { margin-bottom: .3rem; }
+.ds-auto-medkit.automation-editor .ds-editor-card-header button { flex: 0 0 auto; }
+.ds-auto-medkit.automation-editor .ds-editor-step { display: flex; flex-direction: column; gap: .75rem; }
+.ds-auto-medkit.automation-editor .ds-editor-step > h4 { display: flex; align-items: center; gap: .5rem; }
+.ds-auto-medkit.automation-editor .ds-editor-step-number { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border: 1px solid var(--editor-border); border-radius: 50%; font-size: .8rem; }
+.ds-auto-medkit.automation-editor .ds-editor-effects { display: flex; flex-direction: column; gap: .75rem; }
+.ds-auto-medkit.automation-editor .ds-editor-effect { display: flex; flex-direction: column; gap: .85rem; padding: .85rem; margin: 0; border: 1px solid var(--editor-border); border-radius: .4rem; background: var(--editor-surface); }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure { border: 1px solid var(--editor-border); border-radius: .35rem; }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure summary { cursor: pointer; padding: .7rem .8rem; line-height: 1.4; font-weight: 600; }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure summary small { margin-left: .5rem; font-size: .8rem; font-weight: normal; opacity: .75; }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure[open] > summary { border-bottom: 1px solid var(--editor-border); }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure-body { display: flex; flex-direction: column; gap: .85rem; padding: .85rem; }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure-body.ds-editor-grid { display: grid; }
+.ds-auto-medkit.automation-editor .ds-editor-disclosure-body > h4:not(:first-child) { margin-top: .45rem; }
+.ds-auto-medkit.automation-editor .ds-editor-native { margin: 0; padding: .75rem; border: 1px solid var(--editor-border); }
+.ds-auto-medkit.automation-editor .ds-editor-native legend { padding: 0 .3rem; font-weight: 600; }
+.ds-auto-medkit.automation-editor .ds-editor-native .ds-editor-help { margin-bottom: .6rem; }
+.ds-auto-medkit.automation-editor .ds-editor-preset-load { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: .75rem; }
+.ds-auto-medkit.automation-editor .ds-editor-preset-manage { display: flex; flex-direction: column; gap: .75rem; padding-top: .85rem; border-top: 1px solid var(--editor-border); }
+.ds-auto-medkit.automation-editor .ds-editor-toolbar { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ds-auto-medkit.automation-editor button { width: auto; min-height: 2.2rem; padding: .35rem .75rem; margin: 0; line-height: 1.3; white-space: normal; }
+.ds-auto-medkit.automation-editor button:disabled { opacity: .5; }
+.ds-auto-medkit.automation-editor .ds-editor-danger { color: var(--color-text-secondary, inherit); }
+.ds-auto-medkit.automation-editor .ds-editor-danger:hover { color: var(--color-level-error, #a22); }
+.ds-auto-medkit.automation-editor .ds-editor-add-effect { align-self: flex-start; }
+.ds-auto-medkit.automation-editor .ds-editor-rules-heading { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
+.ds-auto-medkit.automation-editor .ds-editor-empty { padding: .85rem; border: 1px dashed var(--editor-border); border-radius: .35rem; line-height: 1.5; }
+.ds-auto-medkit.automation-editor .ds-editor-errors { border: 1px solid currentColor; padding: .85rem; border-radius: .35rem; }
+.ds-auto-medkit.automation-editor .ds-editor-footer { display: flex; justify-content: flex-end; flex: 0 0 auto; padding: .85rem 1.25rem; border-top: 1px solid var(--editor-border); }
+.ds-auto-medkit.automation-editor .ds-editor-save { font-weight: 600; min-width: 11rem; background: var(--button-primary-background-color, var(--color-warm-2, #9f783d)); color: var(--button-primary-text-color, #fff); }
+.ds-auto-medkit.automation-editor :is(input, select, button, summary):focus-visible { outline: 2px solid var(--color-warm-1, #cf9a48); outline-offset: 2px; }
+@container (max-width: 540px) {
+  .ds-auto-medkit.automation-editor .ds-editor-grid { grid-template-columns: minmax(0, 1fr); }
+  .ds-auto-medkit.automation-editor .ds-editor-scroll.ds-medkit-body { padding: .85rem; }
+  .ds-auto-medkit.automation-editor .ds-editor-rule { padding: .75rem; }
+  .ds-auto-medkit.automation-editor .ds-editor-card-header { align-items: flex-start; flex-wrap: wrap; }
+  .ds-auto-medkit.automation-editor .ds-editor-card-header > :first-child { flex-basis: 100%; }
+  .ds-auto-medkit.automation-editor .ds-editor-disclosure summary small { display: block; margin: .2rem 0 0; }
+  .ds-auto-medkit.automation-editor .ds-editor-preset-load { grid-template-columns: minmax(0, 1fr); }
+  .ds-auto-medkit.automation-editor .ds-editor-footer { padding: .75rem .85rem; }
+}

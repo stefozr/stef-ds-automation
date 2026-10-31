@@ -1,0 +1,13 @@
+{
+  "key": "ability:glowing-eyes",
+  "version": "1.0.0",
+  "name": "Glowing Eyes",
+  "notes": "Roll the damage from the ability's card.",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "glare", "event": "damage.after", "subject": "self", "attacker": "creature", "range": "unlimited", "loe": false,
+      "steps": [{ "type": "use", "targets": "source" }]
+    }
+  ]
+}

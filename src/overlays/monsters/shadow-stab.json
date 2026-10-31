@@ -1,0 +1,9 @@
+{
+  "key": "ability:shadow-stab",
+  "monster": ["Compendium.draw-steel-delian-tomb.monsters.Actor.yE1S7Y6t5PmsqdeS", "goblin-shadowknife"],
+  "version": "1.0.0",
+  "name": "Shadow Stab",
+  "effects": [
+    { "id": "edge-bonus", "type": "damage", "value": 2, "damageType": "corruption", "manual": true, "label": "Edge or double edge: +2" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "key": "ability:psychic-pulse",
+  "version": "1.0.0",
+  "name": "Psychic Pulse",
+  "notes": "Null Field grows by 1 until your next turn; the damage to enemies in it at the end of this turn is dealt by hand.",
+  "effects": [
+    {
+      "id": "pulse",
+      "type": "damage",
+      "filter": "enemies",
+      "value": "2 * @I",
+      "damageType": "psychic"
+    }
+  ]
+}

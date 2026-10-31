@@ -1,0 +1,12 @@
+{
+  "key": "ability:impart-force",
+  "version": "1.0.0",
+  "name": "Impart Force",
+  "notes": "Less if the push was cut short: edit the row.",
+  "effects": [
+    {
+      "id": "per-square", "type": "damage", "damageType": "psychic", "manual": true, "label": "1 psychic per square pushed (full push)",
+      "byTier": { "1": { "value": 3 }, "2": { "value": 5 }, "3": { "value": 7 } }
+    }
+  ]
+}

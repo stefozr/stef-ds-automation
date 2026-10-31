@@ -1,0 +1,19 @@
+{
+  "key": "ability:unearthly-reflexes",
+  "version": "1.1.0",
+  "name": "Unearthly Reflexes",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "reflexes",
+      "event": "damage.before",
+      "subject": "self",
+      "spend": { "cost": 1 },
+      "steps": [
+        { "type": "halve" },
+        { "type": "potency", "delta": -1, "scope": "all", "when": { "spend": true } },
+        { "type": "note", "text": "Shift up to Agility squares by hand", "effect": true }
+      ]
+    }
+  ]
+}

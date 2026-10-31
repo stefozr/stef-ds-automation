@@ -1,0 +1,52 @@
+{
+  "key": "ability:you-are-already-dead",
+  "version": "1.0.0",
+  "name": "You Are Already Dead",
+  "choices": [
+    {
+      "id": "foe",
+      "label": "The target is",
+      "options": [
+        {
+          "id": "boss",
+          "label": "A leader or solo"
+        },
+        {
+          "id": "other",
+          "label": "Anything else"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 3,
+      "choice": {
+        "group": "foe",
+        "option": "boss"
+      }
+    },
+    {
+      "id": "strike",
+      "type": "note",
+      "text": "You may also make a melee free strike at the target: roll it by hand.",
+      "choice": {
+        "group": "foe",
+        "option": "boss"
+      }
+    },
+    {
+      "id": "doom",
+      "type": "note",
+      "text": "When its next turn ends, set its Stamina to 0 by hand.",
+      "choice": {
+        "group": "foe",
+        "option": "other"
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "key": "ability:method-acting",
+  "version": "1.0.0",
+  "name": "Method Acting",
+  "native": {
+    "suppress": [
+      "TYZwMQ4QP3Pwevmp"
+    ]
+  },
+  "choices": [
+    {
+      "id": "bleed",
+      "label": "Bleed for extra damage?",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Yes, you bleed"
+        },
+        {
+          "id": "no",
+          "label": "No"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "id": "bleed",
+      "type": "condition",
+      "targets": "self",
+      "status": "bleeding",
+      "end": "save",
+      "choice": {
+        "group": "bleed",
+        "option": "yes"
+      }
+    },
+    {
+      "id": "extra",
+      "type": "damage",
+      "value": 5,
+      "damageType": "corruption",
+      "choice": {
+        "group": "bleed",
+        "option": "yes"
+      }
+    },
+    {
+      "id": "none",
+      "type": "note",
+      "targets": "self",
+      "text": "No bleeding, no bonus damage.",
+      "choice": {
+        "group": "bleed",
+        "option": "no"
+      }
+    }
+  ]
+}

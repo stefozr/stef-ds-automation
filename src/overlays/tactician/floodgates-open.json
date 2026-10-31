@@ -1,0 +1,14 @@
+{
+  "key": "ability:floodgates-open",
+  "version": "1.0.0",
+  "name": "Floodgates Open",
+  "notes": "Each target's free signature ability, with its edge and +1 potency, is used by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 1
+    }
+  ]
+}

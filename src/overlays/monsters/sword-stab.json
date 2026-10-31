@@ -1,0 +1,9 @@
+{
+  "key": "ability:sword-stab",
+  "monster": ["Compendium.draw-steel.monsters.Actor.6bpHvy0N4rObJBZq", "goblin-assassin"],
+  "version": "1.0.0",
+  "name": "Sword Stab",
+  "effects": [
+    { "id": "edge-bonus", "type": "damage", "value": 2, "manual": true, "label": "Edge or double edge: +2" }
+  ]
+}

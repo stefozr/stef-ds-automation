@@ -1,0 +1,30 @@
+{
+  "key": "ability:edict-of-stillness",
+  "name": "Edict of Stillness",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "exit",
+        "event": "aura.exit",
+        "targets": "subject",
+        "effects": [
+          {
+            "id": "damage",
+            "type": "damage",
+            "value": "2*@P",
+            "damageType": "holy"
+          }
+        ],
+        "filter": "enemies",
+        "special": "auraJudgedDamage"
+      }
+    ],
+    "suppress": []
+  }
+}

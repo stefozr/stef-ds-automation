@@ -1,0 +1,33 @@
+{
+  "key": "ability:edict-of-perfect-order",
+  "name": "Edict of Perfect Order",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "punish",
+        "event": "ability.use",
+        "targets": "subject",
+        "effects": [
+          {
+            "id": "damage",
+            "type": "damage",
+            "value": "3*@P",
+            "damageType": "holy"
+          }
+        ],
+        "filter": "enemies",
+        "require": {
+          "costsMalice": true
+        },
+        "special": "auraJudgedDamage"
+      }
+    ],
+    "suppress": []
+  }
+}

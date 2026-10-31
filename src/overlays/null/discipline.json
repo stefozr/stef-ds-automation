@@ -1,0 +1,19 @@
+{
+  "key": "feature:discipline",
+  "version": "1.0.0",
+  "name": "Discipline",
+  "notes": "Only main actions that post an ability card are seen; confirm the field row.",
+  "effects": [],
+  "gains": [
+    {
+      "id": "field-main-action", "event": "abilityUse", "user": "enemy", "actionType": "main",
+      "withinAbility": "null-field", "once": "round", "amount": 1, "confirm": true,
+      "amountBy": [{ "feature": "regenerative-field", "amount": 2 }],
+      "label": "Enemy main action in your field, first this round"
+    },
+    {
+      "id": "director-malice", "event": "abilityUse", "user": "director", "costsMalice": true, "once": "round", "amount": 1,
+      "label": "Director's Malice ability, first this round"
+    }
+  ]
+}

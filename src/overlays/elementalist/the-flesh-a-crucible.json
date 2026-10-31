@@ -1,0 +1,10 @@
+{
+  "key": "ability:the-flesh-a-crucible",
+  "name": "The Flesh, a Crucible",
+  "version": "1.0.0",
+  "notes": "Kept at your turn start: the roll again at the same target if still within 10, no action, no essence.",
+  "effects": [],
+  "persistent": {
+    "keep": "reroll"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "key": "ability:iron-body",
+  "version": "1.0.0",
+  "name": "Iron Body",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 20,
+      "temporary": true
+    },
+    {
+      "id": "stability",
+      "type": "condition",
+      "targets": "self",
+      "effect": "kPSFL3Wc44FHj0dJ"
+    }
+  ]
+}

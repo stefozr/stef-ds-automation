@@ -1,0 +1,12 @@
+{
+  "key": "ability:mark",
+  "version": "1.1.0",
+  "name": "Mark",
+  "notes": "Mark benefits (focus spends) and the taunt after melee damage stay by hand.",
+  "effects": [
+    { "id": "marked", "type": "condition", "effect": "YW2JEdoDPd0XlaII" }
+  ],
+  "trackers": [
+    { "id": "marked", "effect": "YW2JEdoDPd0XlaII", "onZero": "retarget", "endPrevious": true, "endOnSourceDying": true }
+  ]
+}

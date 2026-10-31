@@ -1,0 +1,19 @@
+{
+  "key": "ability:incinerate",
+  "version": "1.0.1",
+  "name": "Incinerate",
+  "notes": "The cube drawn on use becomes the column when the card resolves; strained, the larger cube is centred on it.",
+  "effects": [
+    {
+      "id": "column", "type": "zone", "targets": "self", "label": "Column of fire", "when": { "strained": false },
+      "zoneEvents": ["enter", "turnStart"], "once": "round", "value": 2, "damageType": "fire", "affects": "enemies",
+      "lasts": ["summonerTurnStart"]
+    },
+    {
+      "id": "column-strained", "type": "zone", "targets": "self", "label": "Column of fire (strained)",
+      "when": { "strained": true }, "size": 5,
+      "zoneEvents": ["enter", "turnStart"], "once": "round", "value": 2, "damageType": "fire", "affects": "enemies",
+      "lasts": ["summonerTurnEnd"]
+    }
+  ]
+}

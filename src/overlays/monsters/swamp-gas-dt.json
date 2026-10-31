@@ -1,0 +1,21 @@
+{
+  "key": "ability:swamp-gas-dt",
+  "monster": ["Compendium.draw-steel-delian-tomb.monsters.Actor.zbIGbGA0OblJ0zsV", "goblin-toxinaut"],
+  "version": "1.0.0",
+  "name": "Swamp Gas",
+  "notes": "Spares the adventure's goblins by name list; difficult terrain by hand.",
+  "effects": [
+    {
+      "id": "haze", "type": "zone", "targets": "self", "label": "Green haze",
+      "zoneEvents": ["move"], "once": "none", "perSquare": true, "value": 2, "damageType": "poison",
+      "ignoredImmunities": ["poison"], "affects": "all", "exceptKeywords": ["goblin"],
+      "exceptMonsters": [
+        "Compendium.draw-steel-delian-tomb.monsters.Actor.1rgM4rU61L172gz8", "Compendium.draw-steel-delian-tomb.monsters.Actor.JgTkE9BFQ725llql",
+        "Compendium.draw-steel-delian-tomb.monsters.Actor.YEcTRfWgIy7eOE36", "Compendium.draw-steel-delian-tomb.monsters.Actor.tuCthtMZUysJwBe6",
+        "Compendium.draw-steel-delian-tomb.monsters.Actor.yE1S7Y6t5PmsqdeS", "Compendium.draw-steel-delian-tomb.monsters.Actor.zbIGbGA0OblJ0zsV",
+        "goblin-mastermind", "goblin-battleborn", "goblin-deathtongue", "mystic-queen-bargnot", "goblin-shadowknife", "goblin-toxinaut"
+      ],
+      "lasts": ["summonerTurnStart", "zeroStamina"]
+    }
+  ]
+}

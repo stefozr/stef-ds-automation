@@ -1,0 +1,18 @@
+{
+  "key": "feature:ferocity",
+  "version": "1.0.0",
+  "name": "Ferocity",
+  "notes": "The turn-start gain is the system's. Higher turn gains from later features stay by hand.",
+  "effects": [],
+  "gains": [
+    {
+      "id": "took-damage", "event": "damage", "taker": "self", "once": "round", "amount": 1,
+      "amountBy": [{ "feature": "damaging-ferocity", "amount": 2 }, { "feature": "primordial-ferocity", "amount": 3 }],
+      "label": "First damage taken this round"
+    },
+    {
+      "id": "winded-or-dying", "event": "winded", "taker": "self", "states": ["winded", "dying"], "once": "encounter",
+      "amount": "1d3", "label": "First time winded or dying this encounter"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "key": "ability:make-peace-with-your-god",
+  "version": "1.0.0",
+  "name": "Make Peace With Your God!",
+  "notes": "The automatic tier 3 on your next ability roll this turn is set by hand.",
+  "effects": [
+    {
+      "id": "surge",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 1
+    }
+  ]
+}

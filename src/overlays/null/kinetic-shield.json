@@ -1,0 +1,29 @@
+{
+  "key": "ability:kinetic-shield",
+  "version": "1.0.0",
+  "name": "Kinetic Shield",
+  "notes": "The bleeding immunity has no end: remove Kinetic Shield by hand once this temporary Stamina is gone.",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 10,
+      "temporary": true,
+      "byTier": {
+        "2": {
+          "value": 15
+        },
+        "3": {
+          "value": 20
+        }
+      }
+    },
+    {
+      "id": "shield",
+      "type": "condition",
+      "targets": "self",
+      "effect": "xEuVdei0qGpsyKcF"
+    }
+  ]
+}

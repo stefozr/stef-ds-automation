@@ -1,0 +1,13 @@
+{
+  "key": "feature:essence",
+  "version": "1.0.0",
+  "name": "Essence",
+  "effects": [],
+  "gains": [
+    {
+      "id": "typed-damage-near", "event": "damage", "taker": "selfOrCreature", "within": 10, "notTypes": ["", "holy"],
+      "once": "round", "amount": 1, "amountBy": [{ "feature": "font-of-essence", "amount": 2 }],
+      "label": "Typed damage within 10, first this round"
+    }
+  ]
+}

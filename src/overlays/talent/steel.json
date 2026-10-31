@@ -1,0 +1,28 @@
+{
+  "key": "ability:steel",
+  "version": "1.0.0",
+  "name": "Steel",
+  "notes": "Protection from slowed and weakened stays by hand. On an ally, make sure both effects last until your next turn begins.",
+  "effects": [
+    {
+      "id": "immunity",
+      "type": "condition",
+      "effect": "TvlAECWifZ6xhz16"
+    },
+    {
+      "id": "forced-bonus",
+      "type": "condition",
+      "effect": "7OS6HgpJDLCHrPbB"
+    },
+    {
+      "targets": "self",
+      "id": "strain",
+      "type": "condition",
+      "effect": "yPuEFfXwOBSsr8MT",
+      "end": "save",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

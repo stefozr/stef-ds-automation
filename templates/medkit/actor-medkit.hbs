@@ -1,0 +1,110 @@
+<section class="ds-medkit-body">
+  <header class="ds-medkit-head">
+    <img src="{{actor.img}}" alt="" class="ds-medkit-img">
+    <div class="ds-medkit-title"><strong>{{actor.name}}</strong></div>
+    <span class="ds-medkit-summary">
+      {{#each summary as |s|}}<span class="ds-auto-status-badge {{s.cls}}" data-tooltip="{{s.label}}"><i class="{{s.icon}}" inert></i> {{s.n}}</span>{{/each}}
+    </span>
+  </header>
+
+  {{#if budget}}<p class="hint ds-medkit-budget"><i class="fa-solid fa-bolt" inert></i> {{budget}}</p>{{/if}}
+
+  {{#if summonsApi}}
+  <fieldset class="ds-medkit-summons">
+    <legend>{{localize "DSMEDKIT.Summons.Heading"}}</legend>
+    {{#if summons.length}}
+    <ul class="ds-medkit-list">
+      {{#each summons as |m|}}
+      <li data-summon-id="{{m.summonId}}"><i class="fa-solid fa-person-circle-plus" inert></i> <span>{{m.line}}</span>{{#if m.lasts}} <span class="ds-medkit-detail">{{m.lasts}}</span>{{/if}}
+        {{#if @root.canDismiss}}<button type="button" class="ds-medkit-icon" data-action="dismissSummon" data-tooltip="{{localize "DSMEDKIT.Summons.Dismiss"}}" aria-label="{{localize "DSMEDKIT.Summons.Dismiss"}}"><i class="fa-solid fa-person-walking-arrow-loop-left" inert></i></button>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+    {{else}}
+    <p class="hint">{{localize "DSMEDKIT.Summons.None"}}</p>
+    {{/if}}
+  </fieldset>
+  {{/if}}
+
+  {{#if zones}}
+  <fieldset class="ds-medkit-zones">
+    <legend>{{localize "DSMEDKIT.Zones.Heading"}}</legend>
+    <ul class="ds-medkit-list">
+      {{#each zones as |z|}}
+      <li data-zone-id="{{z.zoneId}}"><i class="fa-solid fa-draw-polygon" inert></i> <span>{{z.line}}</span>
+        {{#if @root.canDismiss}}<button type="button" class="ds-medkit-icon" data-action="dismissZone" data-tooltip="{{localize "DSMEDKIT.Zones.Dismiss"}}" aria-label="{{localize "DSMEDKIT.Zones.Dismiss"}}"><i class="fa-solid fa-xmark" inert></i></button>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+  </fieldset>
+  {{/if}}
+
+  {{#if gains}}
+  <fieldset class="ds-medkit-gains">
+    <legend>{{localize "DSMEDKIT.Gain.Heading"}}</legend>
+    <ul class="ds-medkit-list">
+      {{#each gains as |g|}}
+      <li data-rule-key="{{g.ruleKey}}" data-encounter="{{g.encounter}}"><i class="fa-solid fa-arrow-trend-up" inert></i> <span>{{g.what}}</span>{{#if g.detail}} <span class="ds-medkit-detail">{{g.detail}}</span>{{/if}}
+        {{#if g.used}}<span class="ds-medkit-detail">{{g.used}}</span>
+        {{#if @root.isGM}}<button type="button" class="ds-medkit-icon" data-action="releaseGain" data-tooltip="{{localize "DSMEDKIT.Gain.Release"}}" aria-label="{{localize "DSMEDKIT.Gain.Release"}}"><i class="fa-solid fa-rotate-left" inert></i></button>{{/if}}{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+  </fieldset>
+  {{/if}}
+
+  {{#if villain}}
+  <fieldset class="ds-medkit-villain">
+    <legend>{{localize "DSMEDKIT.Villain.Heading"}}</legend>
+    <ul class="ds-medkit-list">
+      {{#each villain as |v|}}<li><i class="fa-solid fa-crown" inert></i> <span>{{v.line}}</span></li>{{/each}}
+    </ul>
+    {{#if isGM}}<button type="button" data-action="resetVillain"><i class="fa-solid fa-rotate-left" inert></i> {{localize "DSMEDKIT.Villain.Reset"}}</button>{{/if}}
+  </fieldset>
+  {{/if}}
+
+  {{#if npc}}
+  <fieldset class="ds-medkit-monster">
+    <legend>{{localize "DSMEDKIT.Actor.MonsterKey"}}</legend>
+    <p class="hint">{{localize "DSMEDKIT.Actor.MonsterKeyHint"}}</p>
+    <div class="form-group">
+      <label>{{localize "DSMEDKIT.Actor.Key"}}</label>
+      <div class="form-fields">
+        <input type="text" name="monsterKey" value="{{#if pinned}}{{pinned}}{{/if}}" placeholder="{{monsterKey}}" {{#unless canEdit}}disabled{{/unless}}>
+        {{#if canEdit}}<button type="submit" data-tooltip="{{localize "DSMEDKIT.Actor.Pin"}}"><i class="fa-solid fa-thumbtack" inert></i></button>{{/if}}
+        {{#if pinned}}{{#if canEdit}}<button type="button" data-action="unpin" data-tooltip="{{localize "DSMEDKIT.Actor.Unpin"}}"><i class="fa-solid fa-xmark" inert></i></button>{{/if}}{{/if}}
+      </div>
+    </div>
+  </fieldset>
+  {{/if}}
+
+  <div class="ds-medkit-table-wrap">
+    <table class="ds-medkit-table">
+      <thead><tr>
+        <th>{{#if canEdit}}<input type="checkbox" data-action="selectAll" aria-label="{{localize "DSMEDKIT.Actor.SelectAll"}}">{{/if}}</th>
+        <th>{{localize "DSMEDKIT.Actor.Ability"}}</th><th>{{localize "DSMEDKIT.Actor.Status"}}</th><th></th>
+      </tr></thead>
+      <tbody>
+        {{#each rows as |r|}}
+        <tr data-uuid="{{r.uuid}}">
+          <td>{{#if @root.canEdit}}<input type="checkbox" class="ds-medkit-select" value="{{r.uuid}}" aria-label="{{r.name}}">{{/if}}</td>
+          <td><div class="ds-medkit-ability"><img src="{{r.img}}" alt="" class="ds-medkit-row-img"><span class="ds-medkit-ability-name">{{r.name}} <span class="ds-medkit-key">{{r.key}}</span></span></div></td>
+          <td class="ds-medkit-status-cell"><span class="ds-auto-status-badge {{r.status.cls}}" data-tooltip="{{r.status.hint}}"><i class="{{r.status.icon}}" inert></i> {{r.status.label}}</span>{{#if r.version}} <span class="ds-medkit-detail">{{r.version}}</span>{{/if}}</td>
+          <td><button type="button" class="ds-medkit-icon" data-action="open" data-tooltip="{{localize "DSMEDKIT.Actor.Open"}}"><i class="fa-solid fa-kit-medical" inert></i></button></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  {{#if canEdit}}
+  <footer class="ds-medkit-actions">
+    <button type="button" data-action="bulk" data-bulk="disable"><i class="fa-solid fa-ban" inert></i> {{localize "DSMEDKIT.Action.disable"}}</button>
+    <button type="button" data-action="bulk" data-bulk="enable"><i class="fa-solid fa-circle-play" inert></i> {{localize "DSMEDKIT.Action.enable"}}</button>
+    <button type="button" data-action="bulk" data-bulk="lock"><i class="fa-solid fa-lock" inert></i> {{localize "DSMEDKIT.Action.lock"}}</button>
+    <button type="button" data-action="bulk" data-bulk="unlock"><i class="fa-solid fa-lock-open" inert></i> {{localize "DSMEDKIT.Action.unlock"}}</button>
+    <button type="button" data-action="bulk" data-bulk="detach"><i class="fa-solid fa-scissors" inert></i> {{localize "DSMEDKIT.Action.detach"}}</button>
+    <button type="button" data-action="bulk" data-bulk="resync"><i class="fa-solid fa-rotate" inert></i> {{localize "DSMEDKIT.Action.resync"}}</button>
+  </footer>
+  {{/if}}
+</section>

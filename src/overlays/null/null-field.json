@@ -1,0 +1,74 @@
+{
+  "key": "ability:null-field",
+  "name": "Null Field",
+  "version": "1.1.1",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": ""
+    },
+    "rules": [
+      {
+        "id": "dampen",
+        "event": "aura.continuous",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "field",
+            "type": "condition",
+            "effect": "0OMzJvPqF11x4lcj",
+            "stacking": true
+          }
+        ],
+        "filter": "enemies"
+      },
+      {
+        "id": "gravitic",
+        "event": "damage.after",
+        "targets": "subject",
+        "effects": [
+          {
+            "id": "slide",
+            "type": "forced",
+            "movement": "slide",
+            "distance": 2
+          }
+        ],
+        "filter": "enemies",
+        "require": {
+          "subject": "creature",
+          "auraOption": "gravitic"
+        },
+        "once": "turn",
+        "perTarget": true,
+        "opportunity": true,
+        "optional": true,
+        "label": "Gravitic Disruption"
+      },
+      {
+        "id": "anchor",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "anchor",
+            "type": "modifier",
+            "key": "benefit:noShift",
+            "value": 1
+          }
+        ],
+        "filter": "enemies",
+        "require": {
+          "auraOption": "anchor"
+        },
+        "end": "turnEnd",
+        "label": "Inertial Anchor"
+      }
+    ],
+    "suppress": [
+      "0OMzJvPqF11x4lcj",
+      "LXf97nqAA7s3xtPm"
+    ]
+  }
+}

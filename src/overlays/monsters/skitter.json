@@ -1,0 +1,18 @@
+{
+  "key": "ability:skitter",
+  "monster": ["Compendium.draw-steel.monsters.Actor.3B9NyJN29f9wjIpa", "arixx"],
+  "version": "1.1.0",
+  "name": "Skitter",
+  "effects": [],
+  "triggers": [
+    {
+      "id": "skitter",
+      "event": "damage.before",
+      "subject": "self",
+      "steps": [
+        { "type": "halve" },
+        { "type": "note", "text": "Shift up to 3 squares once the damage is resolved", "effect": true }
+      ]
+    }
+  ]
+}

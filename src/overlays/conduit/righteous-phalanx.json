@@ -1,0 +1,12 @@
+{
+  "key": "ability:righteous-phalanx",
+  "version": "1.0.0",
+  "name": "Righteous Phalanx",
+  "effects": [
+    {
+      "id": "blades", "type": "zone", "targets": "self", "label": "Wall of blades",
+      "zoneEvents": ["enter", "turnStart"], "once": "round", "value": 15, "affects": "enemies",
+      "lasts": ["encounterEnd", "summonerDying"]
+    }
+  ]
+}

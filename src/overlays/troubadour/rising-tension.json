@@ -1,0 +1,24 @@
+{
+  "key": "ability:rising-tension",
+  "version": "1.0.0",
+  "name": "Rising Tension",
+  "notes": "The double edge and the extra turn right after yours are handled by hand.",
+  "effects": [
+    {
+      "id": "heroic",
+      "type": "resource",
+      "filter": "allies",
+      "resource": "heroic",
+      "value": 3
+    },
+    {
+      "id": "cleanse",
+      "type": "cleanse",
+      "filter": "allies",
+      "statuses": [
+        "slowed",
+        "weakened"
+      ]
+    }
+  ]
+}

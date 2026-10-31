@@ -1,0 +1,46 @@
+{
+  "key": "ability:blessing-of-the-midday-sun",
+  "name": "Blessing of the Midday Sun",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "surges",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "surges",
+            "type": "resource",
+            "resource": "surge",
+            "value": 1
+          }
+        ],
+        "filter": "selfAlly",
+        "require": {
+          "subject": "self"
+        }
+      },
+      {
+        "id": "bane",
+        "event": "aura.continuous",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "bane",
+            "type": "modifier",
+            "key": "system.roll.banes",
+            "value": 1
+          }
+        ],
+        "filter": "enemies"
+      }
+    ],
+    "suppress": []
+  }
+}

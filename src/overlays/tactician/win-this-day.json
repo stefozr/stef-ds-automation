@@ -1,0 +1,37 @@
+{
+  "key": "ability:win-this-day",
+  "version": "1.0.0",
+  "name": "Win This Day!",
+  "notes": "Target yourself too. The Recovery and the clearing of conditions are optional; other effects are removed by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 2
+    },
+    {
+      "id": "recovery",
+      "type": "heal",
+      "recoveries": 1,
+      "manual": true
+    },
+    {
+      "id": "clear",
+      "type": "cleanse",
+      "statuses": [
+        "bleeding",
+        "dazed",
+        "frightened",
+        "grabbed",
+        "prone",
+        "restrained",
+        "slowed",
+        "surprised",
+        "taunted",
+        "weakened"
+      ],
+      "manual": true
+    }
+  ]
+}

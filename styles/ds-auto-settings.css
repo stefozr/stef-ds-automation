@@ -1,0 +1,106 @@
+/* Stef's Automation Suite: the Automation settings window (scripts/ui/settings-menu.mjs). All rules are .ds-auto-settings scoped. */
+
+.ds-auto-settings {
+  --ds-auto-ok: #3f9b4a;
+  --ds-auto-bad: #b43c3c;
+  --ds-auto-border: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* Vertical tabs on the left, the tab's fields on the right, the Save button below both. */
+.ds-auto-settings .window-content {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 0 0.75rem;
+  overflow: hidden;
+}
+
+.ds-auto-settings .window-content > nav.tabs {
+  grid-column: 1;
+  grid-row: 1;
+  /* Foundry's vertical tabs use height: 0 for flex layouts; this window uses a grid. */
+  height: auto;
+  min-height: 0;
+  align-self: stretch;
+  overflow-y: auto;
+}
+
+/* Foundry 14 reads tab/group from the pointer event target, so tab labels and icons must pass clicks to the anchor. */
+.ds-auto-settings nav.tabs [data-action="tab"] > * {
+  pointer-events: none;
+}
+
+.ds-auto-settings .window-content > .ds-auto-settings-body {
+  grid-column: 2;
+  grid-row: 1;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.ds-auto-settings .window-content > .form-footer {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.ds-auto-settings .ds-auto-settings-switch {
+  border-bottom: 1px solid var(--ds-auto-border);
+  margin-bottom: 0.5rem;
+}
+
+.ds-auto-settings .ds-auto-settings-cells {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem 0.5rem;
+}
+
+.ds-auto-settings .ds-auto-settings-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ds-auto-settings .ds-auto-settings-reset,
+.ds-auto-settings .ds-auto-settings-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ds-auto-settings .ds-auto-settings-rows {
+  list-style: none;
+  margin: 0.25rem 0;
+  padding: 0;
+}
+
+.ds-auto-settings .ds-auto-settings-rows > li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+  border-bottom: 1px solid var(--ds-auto-border);
+}
+
+.ds-auto-settings .ds-auto-settings-list {
+  flex-basis: 100%;
+  font-size: var(--font-size-12, 12px);
+  opacity: 0.8;
+}
+
+.ds-auto-settings .ds-auto-settings-maintenance fieldset {
+  margin-bottom: 0.75rem;
+}
+
+.ds-auto-settings .ds-auto-settings-ok {
+  color: var(--ds-auto-ok);
+}
+
+.ds-auto-settings .ds-auto-settings-problems {
+  margin: 0.25rem 0;
+  padding-left: 1rem;
+  color: var(--ds-auto-bad);
+}
+
+.ds-auto-settings .ds-auto-settings-entry {
+  margin: 0.25rem 0;
+}

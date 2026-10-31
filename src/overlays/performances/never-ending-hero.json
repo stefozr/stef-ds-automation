@@ -1,0 +1,31 @@
+{
+  "key": "ability:never-ending-hero",
+  "version": "1.0.0",
+  "name": "\u201cNever-Ending Hero\u201d",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:dying",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd",
+        "require": {
+          "dying": true
+        }
+      }
+    ],
+    "performance": true
+  }
+}

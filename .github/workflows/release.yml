@@ -1,0 +1,53 @@
+name: Release
+
+# Push a tag v<version> (matching module.json) to publish module.json and module.zip as a GitHub release.
+# The zip holds the paths listed in .github/release-files.txt; the release notes are that version's CHANGELOG section.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag against module.json
+        run: |
+          version=$(jq -r .version module.json)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match module.json version $version"; exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Build module.json and module.zip
+        run: |
+          base="https://github.com/$GITHUB_REPOSITORY/releases"
+          mkdir -p stage dist
+          while IFS= read -r path || [ -n "$path" ]; do
+            case "$path" in ''|'#'*) continue ;; esac
+            mkdir -p "stage/$(dirname "$path")"
+            cp -r "$path" "stage/$path"
+          done < .github/release-files.txt
+          jq --arg m "$base/latest/download/module.json" --arg d "$base/download/$GITHUB_REF_NAME/module.zip" \
+            '.manifest = $m | .download = $d | del(.flags.hotReload) | if .flags == {} then del(.flags) else . end' \
+            module.json > stage/module.json
+          cp stage/module.json dist/module.json
+          (cd stage && zip -r ../dist/module.zip . -x '*.DS_Store')
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v v="$VERSION" 'index($0, "## [" v "]") == 1 { f = 1; next } /^## / && f { exit } f' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then echo "::error::CHANGELOG.md has no ## [$VERSION] section"; exit 1; fi
+          printf '\n### Install\n\nManifest URL: `https://github.com/%s/releases/latest/download/module.json`\n' "$GITHUB_REPOSITORY" >> notes.md
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/module.json dist/module.zip \
+            --title "$(jq -r .title module.json) $VERSION" --notes-file notes.md

@@ -1,0 +1,28 @@
+{
+  "key": "ability:take-two",
+  "version": "1.0.0",
+  "name": "Take Two!",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:takeTwo",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd"
+      }
+    ],
+    "performance": true
+  }
+}

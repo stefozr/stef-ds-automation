@@ -1,0 +1,14 @@
+{
+  "key": "ability:swamp-gas",
+  "monster": ["Compendium.draw-steel.monsters.Actor.CWcc0FNUfUaiYyH7", "goblin-stinker"],
+  "version": "1.0.0",
+  "name": "Swamp Gas",
+  "notes": "Difficult terrain for non-goblins: by hand.",
+  "effects": [
+    {
+      "id": "haze", "type": "zone", "targets": "self", "label": "Green haze",
+      "zoneEvents": ["move"], "once": "none", "perSquare": true, "value": 2, "damageType": "poison",
+      "affects": "all", "exceptKeywords": ["goblin"], "lasts": ["summonerTurnStart", "zeroStamina"]
+    }
+  ]
+}

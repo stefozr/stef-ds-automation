@@ -1,0 +1,9 @@
+module.json
+LICENSE
+README.md
+CHANGELOG.md
+lang
+scripts
+styles
+templates
+dist/overlays.mjs

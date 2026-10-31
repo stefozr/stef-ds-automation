@@ -1,0 +1,33 @@
+{
+  "key": "ability:edict-of-purifying-pacifism",
+  "name": "Edict of Purifying Pacifism",
+  "version": "1.1.0",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "aura": {
+      "end": "encounter"
+    },
+    "rules": [
+      {
+        "id": "punish",
+        "event": "ability.use",
+        "targets": "subject",
+        "effects": [
+          {
+            "id": "damage",
+            "type": "damage",
+            "value": "2*@P",
+            "damageType": "holy"
+          }
+        ],
+        "filter": "enemies",
+        "require": {
+          "strike": true
+        },
+        "special": "auraJudgedDamage"
+      }
+    ],
+    "suppress": []
+  }
+}

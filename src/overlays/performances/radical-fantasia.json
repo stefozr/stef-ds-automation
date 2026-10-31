@@ -1,0 +1,33 @@
+{
+  "key": "ability:radical-fantasia",
+  "version": "1.0.0",
+  "name": "Radical Fantasia",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "condition",
+            "type": "condition",
+            "effect": "tRSo7cwWhLl7oA2F"
+          },
+          {
+            "id": "benefit",
+            "type": "modifier",
+            "key": "benefit:radical",
+            "value": "0",
+            "mode": "add"
+          }
+        ],
+        "filter": "selfAlly",
+        "end": "turnEnd"
+      }
+    ],
+    "performance": true
+  }
+}

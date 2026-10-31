@@ -1,0 +1,17 @@
+{
+  "key": "ability:the-green-within-the-green-without",
+  "version": "1.0.0",
+  "name": "The Green Within, the Green Without",
+  "notes": "Pick the creature to slide when asked, or with the row's Pick button.",
+  "effects": [
+    {
+      "id": "slide",
+      "type": "forced",
+      "movement": "slide",
+      "distance": 2,
+      "targets": "pick",
+      "pick": { "count": 1, "within": 10, "of": "target" },
+      "label": "Slide a creature near the target"
+    }
+  ]
+}

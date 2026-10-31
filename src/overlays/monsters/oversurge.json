@@ -1,0 +1,9 @@
+{
+  "key": "ability:oversurge",
+  "monster": ["Compendium.draw-steel-delian-tomb.monsters.Actor.tuCthtMZUysJwBe6", "mystic-queen-bargnot"],
+  "version": "1.0.0",
+  "name": "Oversurge",
+  "effects": [
+    { "id": "self-daze", "type": "condition", "targets": "self", "status": "dazed", "end": "turn", "label": "Dazed until her turn ends" }
+  ]
+}

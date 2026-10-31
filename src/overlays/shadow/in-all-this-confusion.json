@@ -1,0 +1,20 @@
+{
+  "key": "ability:in-all-this-confusion",
+  "version": "1.1.1",
+  "name": "In All This Confusion",
+  "notes": "The triggered-action prompt halves the damage (halve it by hand when triggered actions are off). The square is picked on the card the trigger posts.",
+  "effects": [
+    { "id": "teleport", "type": "teleport", "targets": "self", "distance": "4 + @spend" }
+  ],
+  "triggers": [
+    {
+      "id": "confusion",
+      "event": "damage.before",
+      "subject": "self",
+      "steps": [
+        { "type": "halve" },
+        { "type": "use", "targets": "none" }
+      ]
+    }
+  ]
+}

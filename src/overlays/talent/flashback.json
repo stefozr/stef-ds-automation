@@ -1,0 +1,18 @@
+{
+  "key": "ability:flashback",
+  "version": "1.0.0",
+  "name": "Flashback",
+  "notes": "Strained: roll the 1d6 self damage by hand. The target uses the repeated ability itself.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "strain-slowed",
+      "type": "condition",
+      "status": "slowed",
+      "end": "save",
+      "when": {
+        "strained": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "key": "feature:quickness-ward",
+  "version": "1.0.0",
+  "name": "Quickness Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "self",
+        "effects": [],
+        "optional": true,
+        "require": {
+          "adjacent": true
+        },
+        "special": "shift",
+        "range": "@I"
+      }
+    ]
+  }
+}

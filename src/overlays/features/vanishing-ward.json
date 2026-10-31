@@ -1,0 +1,24 @@
+{
+  "key": "feature:vanishing-ward",
+  "version": "1.0.0",
+  "name": "Vanishing Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "self",
+        "effects": [
+          {
+            "id": "condition",
+            "type": "condition",
+            "status": "invisible"
+          }
+        ],
+        "end": "nextTurnEnd"
+      }
+    ]
+  }
+}

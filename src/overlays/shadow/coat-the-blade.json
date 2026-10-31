@@ -1,0 +1,15 @@
+{
+  "key": "ability:coat-the-blade",
+  "version": "1.0.0",
+  "name": "Coat the Blade",
+  "notes": "Turning surge damage into poison damage is done by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": "2 + @spend"
+    }
+  ]
+}

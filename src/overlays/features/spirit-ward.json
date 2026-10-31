@@ -1,0 +1,27 @@
+{
+  "key": "feature:spirit-ward",
+  "version": "1.0.0",
+  "name": "Spirit Ward",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "damage.after",
+        "targets": "source",
+        "effects": [
+          {
+            "id": "damage",
+            "type": "damage",
+            "value": "@I",
+            "damageType": "corruption"
+          }
+        ],
+        "require": {
+          "adjacent": true
+        }
+      }
+    ]
+  }
+}

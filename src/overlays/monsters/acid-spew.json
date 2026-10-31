@@ -1,0 +1,13 @@
+{
+  "key": "ability:acid-spew",
+  "monster": ["Compendium.draw-steel.monsters.Actor.3B9NyJN29f9wjIpa", "arixx"],
+  "version": "1.0.0",
+  "name": "Acid Spew",
+  "effects": [
+    {
+      "id": "puddle", "type": "zone", "targets": "self", "label": "Acid puddle",
+      "zoneEvents": ["enter", "turnStart"], "once": "round", "value": 2, "damageType": "acid", "affects": "enemies",
+      "lasts": ["encounterEnd"]
+    }
+  ]
+}

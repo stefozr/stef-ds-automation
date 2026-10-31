@@ -1,0 +1,129 @@
+/*
+ * stef-ds-automation: resources and zones (Milestone 7, docs/M7-DESIGN.md §2.1 WP-C): the hero-token dialog with its
+ * countdown bar, the Director's malice reminder whisper, gain and zone rows on the card, the zone template choice
+ * dialog. Variables are declared on the dialogs and the reminder (the card's variables are scoped to
+ * `.ds-auto-resolution`, styles/stef-ds-automation.css). All rules are .ds-auto-* scoped.
+ */
+
+.ds-auto-herotoken-dialog,
+.ds-auto-zone-dialog,
+.ds-auto-malice-reminder {
+  --ds-auto-ok: #3f9b4a;
+  --ds-auto-wait: #b7892a;
+  --ds-auto-bad: #b43c3c;
+  --ds-auto-gain: #3a7fb8;
+  --ds-auto-muted: color-mix(in srgb, currentColor 55%, transparent);
+  --ds-auto-border: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* ---------- Hero tokens on a lethal hit (owner's prompt) ---------- */
+
+.ds-auto-herotoken .ds-auto-herotoken-intro { margin: 0 0 6px; }
+
+.ds-auto-herotoken .ds-auto-herotoken-note {
+  margin: 0 0 8px;
+  color: var(--ds-auto-muted);
+  font-size: var(--font-size-12, 12px);
+  font-style: italic;
+}
+
+.ds-auto-herotoken-bar {
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--ds-auto-border);
+}
+.ds-auto-herotoken-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--ds-auto-wait);
+  transition: width 250ms linear;
+}
+
+.ds-auto-herotoken .ds-auto-countdown {
+  margin: 6px 0 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-auto-wait);
+}
+
+/* ---------- Zone: use the placed template? ---------- */
+
+.ds-auto-zone-choice p { margin: 0 0 6px; font-weight: bold; }
+
+/* ---------- Malice reminder (Director whisper) ---------- */
+
+.ds-auto-malice-reminder .ds-auto-malice-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.ds-auto-malice-reminder .ds-auto-malice-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  border-top: 1px solid var(--ds-auto-border);
+}
+.ds-auto-malice-reminder .ds-auto-malice-item:first-child { border-top: none; }
+
+.ds-auto-malice-reminder .ds-auto-malice-name {
+  flex: 1;
+  font-weight: bold;
+}
+
+.ds-auto-malice-reminder .ds-auto-malice-cost {
+  flex: 0 0 auto;
+  color: var(--ds-auto-muted);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ds-auto-malice-reminder button[data-uuid],
+.ds-auto-malice-reminder .ds-auto-malice-use {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 0;
+  padding: 1px 8px;
+  line-height: 18px;
+  font-size: 0.9em;
+}
+
+/* ---------- Card rows (resolution part) ---------- */
+
+/* Gain rows: a thin accent so a resource gain reads apart from the damage it came from. */
+.ds-auto-resolution .ds-auto-row-gain,
+.ds-auto-resolution .ds-auto-op--gain {
+  border-left: 2px solid var(--ds-auto-gain, #3a7fb8);
+  padding-left: 4px;
+}
+
+/* A gainer who is not a target of the card (target record `gainOnly`). */
+.ds-auto-resolution .ds-auto-gainonly {
+  color: var(--ds-auto-muted);
+  font-style: italic;
+}
+
+.ds-auto-resolution .ds-auto-row-zone,
+.ds-auto-resolution .ds-auto-op--zone {
+  border-left: 2px solid var(--ds-auto-wait);
+  padding-left: 4px;
+}
+
+/* Same metrics as .ds-auto-icon-btn (styles/stef-ds-automation.css) and the summon row buttons. */
+.ds-auto-resolution .ds-auto-zone-btn {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  padding: 0;
+  line-height: 20px;
+  font-size: 11px;
+}
+
+/* The system's gain button once our row applied it (S/ui/gain-lock.mjs). */
+button.ds-auto-locked[data-action="gainResource"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

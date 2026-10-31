@@ -1,0 +1,26 @@
+{
+  "key": "ability:star-power",
+  "version": "1.0.0",
+  "name": "Star Power",
+  "notes": "The tier 2 floor on your next power roll this turn is applied by hand.",
+  "effects": [
+    {
+      "id": "speed2",
+      "type": "condition",
+      "targets": "self",
+      "effect": "TmUYurW7wqDypQ1u",
+      "when": {
+        "spend": false
+      }
+    },
+    {
+      "id": "speed4",
+      "type": "condition",
+      "targets": "self",
+      "effect": "X0X5TeeR2r2gmYJJ",
+      "when": {
+        "spend": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+<div class="ds-editor-layout">
+  {{#*inline "editorField"}}
+    {{#if checkbox}}
+      <label class="ds-editor-check"><input type="checkbox" name="{{name}}" {{checked value}}><span>{{label}}</span></label>
+    {{else}}
+      <label class="ds-editor-field {{#if wide}}ds-editor-field-wide{{/if}}"><span>{{label}}</span>
+        {{#if choices}}<select name="{{name}}">{{#each choices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+        {{else}}{{#if multiline}}<textarea name="{{name}}">{{value}}</textarea>{{else}}<input type="text" name="{{name}}" value="{{value}}">{{/if}}{{/if}}
+        {{#if hint}}<small class="ds-editor-help">{{hint}}</small>{{/if}}
+      </label>
+    {{/if}}
+  {{/inline}}
+  <section class="ds-medkit-body ds-editor-scroll">
+    <header class="ds-editor-intro"><h2>{{itemName}}</h2><p>{{localize "DSMEDKIT.Editor.Hint"}}</p></header>
+    {{#if errors}}<div class="ds-editor-errors" role="alert" aria-live="polite" tabindex="-1">{{errors}}</div>{{/if}}
+    <label class="ds-editor-field ds-editor-area"><span>{{localize "DSMEDKIT.Editor.Area"}}</span><select name="area">{{#each areas}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+    <details class="ds-editor-disclosure" data-disclosure="ability">
+      <summary>{{localize "DSMEDKIT.Editor.AbilitySettings"}}</summary>
+      <div class="ds-editor-disclosure-body">
+        <label class="ds-editor-check"><input type="checkbox" name="performance" {{checked performance}}><span>{{localize "DSMEDKIT.Editor.Performance"}}</span></label>
+        {{#if native.length}}<fieldset class="ds-editor-native"><legend>{{localize "DSMEDKIT.Editor.Suppress"}}</legend>
+          <p class="ds-editor-help">{{localize "DSMEDKIT.Editor.SuppressHint"}}</p>
+          <div class="ds-editor-checks">{{#each native}}<label class="ds-editor-check"><input type="checkbox" name="suppress" value="{{id}}" {{checked selected}}><span>{{name}}</span></label>{{/each}}</div>
+        </fieldset>{{/if}}
+        <div class="ds-editor-reset"><button type="button" class="ds-editor-danger" data-action="clearAutomation">{{localize "DSMEDKIT.Editor.Clear"}}</button></div>
+      </div>
+    </details>
+    <details class="ds-editor-disclosure" data-disclosure="presets">
+      <summary>{{localize "DSMEDKIT.Editor.Presets"}}</summary>
+      <div class="ds-editor-disclosure-body">
+        <p class="ds-editor-help">{{localize "DSMEDKIT.Editor.PresetHint"}}</p>
+        <div class="ds-editor-preset-load">
+          <label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.PresetSelect"}}</span>
+            <select name="presetId" {{#unless hasPresets}}disabled{{/unless}}>
+              <option value="">{{#if hasPresets}}{{localize "DSMEDKIT.Editor.PresetSelect"}}{{else}}{{localize "DSMEDKIT.Editor.PresetEmpty"}}{{/if}}</option>
+              {{#each presets}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+            </select>
+          </label>
+          <button type="button" data-action="applyPreset" data-preset-action disabled>{{localize "DSMEDKIT.Editor.ApplyPreset"}}</button>
+        </div>
+        <label class="ds-editor-check"><input type="checkbox" name="presetAppend" {{checked presetAppend}}><span>{{localize "DSMEDKIT.Editor.Append"}}</span></label>
+        {{#if isGM}}<div class="ds-editor-preset-manage">
+          <h3>{{localize "DSMEDKIT.Editor.PresetManage"}}</h3>
+          <label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.PresetName"}}</span><input type="text" name="presetName" maxlength="80" value="{{presetName}}"></label>
+          <div class="ds-editor-toolbar">
+            <button type="button" data-action="savePreset" data-preset-action disabled>{{localize "DSMEDKIT.Editor.SavePreset"}}</button>
+            <button type="button" data-action="renamePreset" data-preset-action disabled>{{localize "DSMEDKIT.Editor.RenamePreset"}}</button>
+            <button type="button" class="ds-editor-danger" data-action="deletePreset" data-preset-action disabled>{{localize "DSMEDKIT.Editor.DeletePreset"}}</button>
+          </div>
+        </div>{{/if}}
+      </div>
+    </details>
+    <div class="ds-editor-rules-heading"><h2>{{localize "DSMEDKIT.Editor.Rules"}}</h2><button type="button" data-action="addRule"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "DSMEDKIT.Editor.AddRule"}}</button></div>
+    {{#unless rules.length}}<p class="ds-editor-empty">{{localize "DSMEDKIT.Editor.NoRules"}}</p>{{/unless}}
+    {{#each rules as |r|}}
+    <article class="ds-editor-rule" data-rule-id="{{r.id}}">
+      <header class="ds-editor-card-header"><div><h3 data-rule-title>{{r.displayName}}</h3><p class="ds-editor-summary" data-rule-summary>{{r.summary}}</p></div><button type="button" class="ds-editor-danger" data-action="removeRule" data-rule="{{r.ri}}">{{localize "DSMEDKIT.Editor.RemoveRule"}}</button></header>
+      <label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.RuleLabel"}}</span><input type="text" name="rules.{{r.ri}}.label" maxlength="200" value="{{r.label}}" placeholder="{{localize 'DSMEDKIT.Editor.RulePlaceholder'}}"></label>
+      <section class="ds-editor-step"><h4><span class="ds-editor-step-number">1</span> {{localize "DSMEDKIT.Editor.When"}}</h4><div class="ds-editor-grid">
+<label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Event"}}</span><select name="rules.{{r.ri}}.event">{{#each r.events}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Once"}}</span><select name="rules.{{r.ri}}.once">{{#each r.frequencies}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label></div></section>
+      <section class="ds-editor-step"><h4><span class="ds-editor-step-number">2</span> {{localize "DSMEDKIT.Editor.Who"}}</h4><div class="ds-editor-grid"><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Targets"}}</span><select name="rules.{{r.ri}}.targets">{{#each r.targetOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Filter"}}</span><select name="rules.{{r.ri}}.filter">{{#each r.filters}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label></div></section>
+      <section class="ds-editor-step"><h4><span class="ds-editor-step-number">3</span> {{localize "DSMEDKIT.Editor.What"}}</h4>
+        {{#unless r.effects.length}}<p class="ds-editor-empty">{{localize "DSMEDKIT.Editor.NoEffects"}}</p>{{/unless}}
+        <div class="ds-editor-effects">{{#each r.effects as |e|}}
+          <section class="ds-editor-effect" data-effect-id="{{e.id}}">
+            <header class="ds-editor-card-header">
+              <label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.EffectType"}}</span><select data-effect-type data-rule="{{e.ri}}" data-effect="{{e.ei}}">{{#each e.types}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+              <button type="button" class="ds-editor-danger" data-action="removeEffect" data-rule="{{e.ri}}" data-effect="{{e.ei}}">{{localize "DSMEDKIT.Editor.RemoveEffect"}}</button>
+            </header>
+            <div class="ds-editor-grid">{{#each e.fields}}{{#if primary}}{{> editorField}}{{/if}}{{/each}}</div>
+            <details class="ds-editor-disclosure" data-disclosure="effect:{{r.id}}:{{e.id}}">
+              <summary><span>{{localize "DSMEDKIT.Editor.AdvancedEffect"}}</span><small data-effect-advanced-summary>{{e.advancedSummary}}</small></summary>
+              <div class="ds-editor-disclosure-body ds-editor-grid">{{#each e.fields}}{{#unless primary}}{{> editorField}}{{/unless}}{{/each}}</div>
+            </details>
+          </section>
+        {{/each}}</div>
+        <button type="button" class="ds-editor-add-effect" data-action="addEffect" data-rule="{{r.ri}}"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "DSMEDKIT.Editor.AddEffect"}}</button>
+      </section>
+      <details class="ds-editor-disclosure" data-disclosure="rule:{{r.id}}">
+        <summary><span>{{localize "DSMEDKIT.Editor.Advanced"}}</span><small data-rule-advanced-summary>{{r.advancedSummary}}</small></summary>
+        <div class="ds-editor-disclosure-body">
+          <h4>{{localize "DSMEDKIT.Editor.RecipientFilters"}}</h4><div class="ds-editor-grid"><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Keywords"}}</span><input type="text" name="rules.{{r.ri}}.keywords" value="{{r.keywords}}" ></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Range"}}</span><input type="text" name="rules.{{r.ri}}.range" value="{{r.range}}" ></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Limit"}}</span><input type="text" name="rules.{{r.ri}}.limit" value="{{r.limit}}" ></label></div>
+          <h4>{{localize "DSMEDKIT.Editor.TimingCost"}}</h4><div class="ds-editor-grid"><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.End"}}</span><select name="rules.{{r.ri}}.end">{{#each r.ends}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select><small class="ds-editor-help">{{localize "DSMEDKIT.Editor.DurationHint"}}</small></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Cost"}}</span><input type="number" name="rules.{{r.ri}}.cost" value="{{r.cost}}" min="0" max="20"></label></div><div class="ds-editor-checks"><label class="ds-editor-check"><input type="checkbox" name="rules.{{r.ri}}.activateOnUse" {{checked r.activateOnUse}}><span>{{localize "DSMEDKIT.Editor.ActivateOnUse"}}</span></label><label class="ds-editor-check"><input type="checkbox" name="rules.{{r.ri}}.optional" {{checked r.optional}}><span>{{localize "DSMEDKIT.Editor.Optional"}}</span></label></div>
+          <h4>{{localize "DSMEDKIT.Editor.Requirements"}}</h4><div class="ds-editor-grid"><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Subject"}}</span><select name="rules.{{r.ri}}.require.subject">{{#each r.subjects}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.SubjectKeyword"}}</span><input type="text" name="rules.{{r.ri}}.require.subjectKeyword" value="{{r.require.subjectKeyword}}" ></label><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.SourceWithin"}}</span><input type="text" name="rules.{{r.ri}}.require.sourceWithin" value="{{r.require.sourceWithin}}" ></label></div><div class="ds-editor-checks"><label class="ds-editor-check"><input type="checkbox" name="rules.{{r.ri}}.require.adjacent" {{checked r.require.adjacent}}><span>{{localize "DSMEDKIT.Editor.Adjacent"}}</span></label><label class="ds-editor-check"><input type="checkbox" name="rules.{{r.ri}}.require.dying" {{checked r.require.dying}}><span>{{localize "DSMEDKIT.Editor.Dying"}}</span></label><label class="ds-editor-check"><input type="checkbox" name="rules.{{r.ri}}.require.dead" {{checked r.require.dead}}><span>{{localize "DSMEDKIT.Editor.Dead"}}</span></label></div>
+          <h4>{{localize "DSMEDKIT.Editor.SpecialBehavior"}}</h4><label class="ds-editor-field"><span>{{localize "DSMEDKIT.Editor.Special"}}</span><select name="rules.{{r.ri}}.special">{{#each r.specials}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+        </div>
+      </details>
+    </article>
+    {{/each}}
+    <p class="ds-editor-help">{{localize "DSMEDKIT.Editor.FormulaGuide"}}</p>
+  </section>
+  <footer class="ds-editor-footer"><button type="submit" class="ds-editor-save"><i class="fa-solid fa-check" aria-hidden="true"></i> {{localize "DSMEDKIT.Editor.Save"}}</button></footer>
+</div>

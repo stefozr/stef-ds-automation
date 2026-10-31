@@ -1,0 +1,19 @@
+{
+  "key": "ability:pain-of-your-own-making",
+  "version": "1.0.0",
+  "name": "Pain of Your Own Making",
+  "notes": "Moving the effect onto the creature that imposed it, and its damage, are done by hand.",
+  "effects": [
+    {
+      "id": "end",
+      "type": "cleanse",
+      "ends": [
+        "save",
+        "turn"
+      ],
+      "count": 1,
+      "manual": true,
+      "label": "End the triggering effect"
+    }
+  ]
+}

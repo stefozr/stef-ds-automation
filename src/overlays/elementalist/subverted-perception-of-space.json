@@ -1,0 +1,33 @@
+{
+  "key": "ability:subverted-perception-of-space",
+  "name": "Subverted Perception of Space",
+  "version": "1.0.0",
+  "native": {
+    "suppress": [
+      "2GuEXZKGwY6v5mXA"
+    ]
+  },
+  "effects": [
+    {
+      "id": "near",
+      "type": "condition",
+      "tiers": [
+        2
+      ],
+      "effect": "g3nZRYkT75YEz0BN",
+      "until": "yourNextTurnStart"
+    },
+    {
+      "id": "adjacent",
+      "type": "condition",
+      "tiers": [
+        3
+      ],
+      "effect": "RCjJamvgB3KFLEfe",
+      "until": "yourNextTurnStart"
+    }
+  ],
+  "persistent": {
+    "keep": "extend"
+  }
+}

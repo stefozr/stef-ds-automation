@@ -1,0 +1,30 @@
+{
+  "key": "ability:gravitic-charge",
+  "version": "1.0.0",
+  "name": "Gravitic Charge",
+  "notes": "Replaces the system slide to ignore your stability. Collisions while passing through creatures are resolved by hand.",
+  "native": {
+    "suppress": [
+      "mbXLD1zpXToaZnMK"
+    ]
+  },
+  "effects": [
+    {
+      "id": "slide",
+      "type": "forced",
+      "targets": "self",
+      "movement": "slide",
+      "vertical": true,
+      "ignoresStability": true,
+      "distance": 5,
+      "byTier": {
+        "2": {
+          "distance": 7
+        },
+        "3": {
+          "distance": 9
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "key": "ability:squad-on-me",
+  "version": "1.1.0",
+  "name": "Squad! On Me!",
+  "notes": "Target yourself too. The bonus is a flat +2 stability: adjust it by hand if your Might differs.",
+  "effects": [
+    {
+      "id": "stability",
+      "type": "condition",
+      "effect": "2A1jYk66M5GxGRpO",
+      "until": "yourNextTurnStart"
+    },
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 2
+    }
+  ]
+}

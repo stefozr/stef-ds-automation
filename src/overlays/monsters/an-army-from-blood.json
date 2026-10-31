@@ -1,0 +1,23 @@
+{
+  "key": "ability:an-army-from-blood",
+  "monster": ["Compendium.draw-steel.monsters.Actor.Lcoa5x1olfOONQCJ", "hobgoblin-bloodlord"],
+  "version": "1.0.0",
+  "name": "An Army From Blood",
+  "notes": "Target the creature that triggered it.",
+  "effects": [
+    {
+      "id": "recruits",
+      "type": "summon",
+      "targets": "self",
+      "actors": [{ "uuid": "Compendium.draw-steel.monsters.Actor.ubQBS8oIMsfRK8du" }],
+      "quantity": "3",
+      "distance": "1",
+      "origin": "target",
+      "side": "summoner",
+      "turn": "own",
+      "actsThisRound": true,
+      "squad": "join",
+      "lasts": ["encounterEnd"]
+    }
+  ]
+}

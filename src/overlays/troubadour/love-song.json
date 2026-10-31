@@ -1,0 +1,14 @@
+{
+  "key": "ability:love-song",
+  "version": "1.0.0",
+  "name": "Love Song",
+  "notes": "Taking the target's damage in its place stays by hand.",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "value": 20,
+      "temporary": true
+    }
+  ]
+}

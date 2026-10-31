@@ -1,0 +1,15 @@
+node_modules/
+.cache/
+*.log
+.DS_Store
+Thumbs.db
+
+# Private notes and the live test plan (kept beside the repository, not in it).
+DEV-NOTES.md
+TESTING.md
+docs/DESIGN.md
+docs/*-DESIGN.md
+docs/COMBAT-TOOLS-*.md
+docs/ABILITY-FIXES-*.md
+docs/live-*/
+docs/*.jpg

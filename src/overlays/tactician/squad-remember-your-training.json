@@ -1,0 +1,14 @@
+{
+  "key": "ability:squad-remember-your-training",
+  "version": "1.0.0",
+  "name": "Squad! Remember Your Training!",
+  "notes": "The signature ability with a double edge is used by hand.",
+  "effects": [
+    {
+      "id": "surges",
+      "type": "resource",
+      "resource": "surge",
+      "value": 1
+    }
+  ]
+}

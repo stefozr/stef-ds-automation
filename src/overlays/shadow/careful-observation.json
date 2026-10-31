@@ -1,0 +1,21 @@
+{
+  "key": "ability:careful-observation",
+  "version": "1.0.0",
+  "name": "Careful Observation",
+  "notes": "Edge and surge are meant for your next strike on this target only. Remove the edge after that strike or when the terms break.",
+  "effects": [
+    {
+      "id": "edge",
+      "type": "condition",
+      "targets": "self",
+      "effect": "Sa6eSxZfyUYO4K1r"
+    },
+    {
+      "id": "surge",
+      "type": "resource",
+      "targets": "self",
+      "resource": "surge",
+      "value": 1
+    }
+  ]
+}

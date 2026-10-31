@@ -1,0 +1,21 @@
+{
+  "key": "ability:new-dawn",
+  "monster": ["Compendium.draw-steel.monsters.Actor.PgfqdFL9IvSAPf3B", "angulotl-daybringer"],
+  "version": "1.0.0",
+  "name": "New Dawn",
+  "effects": [
+    {
+      "id": "pollywogs",
+      "type": "summon",
+      "targets": "self",
+      "actors": [{ "uuid": "Compendium.draw-steel.monsters.Actor.UIerVsSyMb36Bm4D" }],
+      "quantity": "4",
+      "origin": "self",
+      "side": "summoner",
+      "turn": "own",
+      "actsThisRound": true,
+      "squad": "join",
+      "lasts": ["encounterEnd"]
+    }
+  ]
+}

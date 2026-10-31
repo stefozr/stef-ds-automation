@@ -1,0 +1,21 @@
+{
+  "key": "ability:overwatch",
+  "version": "1.0.0",
+  "name": "Overwatch",
+  "notes": "The ally's free strike during the move is by hand.",
+  "effects": [
+    {
+      "id": "slowed",
+      "type": "condition",
+      "status": "slowed",
+      "end": "turn",
+      "potency": {
+        "characteristic": "reason",
+        "value": "@potency.average"
+      },
+      "when": {
+        "spend": true
+      }
+    }
+  ]
+}

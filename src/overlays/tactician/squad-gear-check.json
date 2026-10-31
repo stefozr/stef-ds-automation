@@ -1,0 +1,15 @@
+{
+  "key": "ability:squad-gear-check",
+  "version": "1.0.0",
+  "name": "Squad! Gear Check!",
+  "notes": "Allies next to the target also get 10 temporary Stamina: give it by hand.",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 10,
+      "temporary": true
+    }
+  ]
+}

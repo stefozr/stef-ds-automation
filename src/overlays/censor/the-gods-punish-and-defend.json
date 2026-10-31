@@ -1,0 +1,21 @@
+{
+  "key": "ability:the-gods-punish-and-defend",
+  "version": "1.0.0",
+  "name": "The Gods Punish and Defend",
+  "effects": [
+    {
+      "id": "self-heal",
+      "type": "heal",
+      "targets": "self",
+      "recoveries": 1,
+      "manual": true,
+      "label": "Optional: heal yourself"
+    },
+    {
+      "id": "ally-heal",
+      "type": "note",
+      "targets": "self",
+      "text": "Healing an ally instead: you lose the Recovery and they regain your recovery value, by hand."
+    }
+  ]
+}

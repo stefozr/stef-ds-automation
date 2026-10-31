@@ -1,0 +1,14 @@
+{
+  "key": "ability:steelbreaker",
+  "version": "1.0.0",
+  "name": "Steelbreaker",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 20,
+      "temporary": true
+    }
+  ]
+}

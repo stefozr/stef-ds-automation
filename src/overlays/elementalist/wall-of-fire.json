@@ -1,0 +1,13 @@
+{
+  "key": "ability:wall-of-fire",
+  "version": "1.0.1",
+  "name": "Wall of Fire",
+  "notes": "When you keep it (Persistent), add its extra square by hand.",
+  "effects": [
+    {
+      "id": "wall", "type": "zone", "targets": "self", "label": "Wall of fire",
+      "zoneEvents": ["enter", "turnStart"], "once": "round", "onceShared": false, "perSquare": true,
+      "value": "@R", "damageType": "fire", "affects": "enemies", "lasts": ["summonerTurnStart"], "upkeep": 1
+    }
+  ]
+}

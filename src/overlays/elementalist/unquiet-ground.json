@@ -1,0 +1,12 @@
+{
+  "key": "ability:unquiet-ground",
+  "version": "1.0.0",
+  "name": "Unquiet Ground",
+  "notes": "The area slows enemies (difficult terrain) until the encounter ends; Dismiss ends it early.",
+  "effects": [
+    {
+      "id": "ground", "type": "zone", "targets": "self", "label": "Unquiet ground", "terrain": "difficult",
+      "affects": "enemies", "lasts": ["encounterEnd"]
+    }
+  ]
+}

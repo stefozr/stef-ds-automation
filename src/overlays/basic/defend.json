@@ -1,0 +1,14 @@
+{
+  "key": "ability:defend",
+  "version": "1.0.0",
+  "name": "Defend",
+  "notes": "No benefit while a creature is taunted by the defender: remove Defending by hand then.",
+  "effects": [
+    {
+      "id": "defending",
+      "type": "condition",
+      "targets": "self",
+      "effect": "TYggdI2Kwa302NjW"
+    }
+  ]
+}

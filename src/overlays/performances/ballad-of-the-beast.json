@@ -1,0 +1,26 @@
+{
+  "key": "ability:ballad-of-the-beast",
+  "version": "1.0.0",
+  "name": "\u201cBallad of the Beast\u201d",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "turn.start",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "resource",
+            "type": "resource",
+            "resource": "surge",
+            "value": "1"
+          }
+        ],
+        "filter": "selfAlly"
+      }
+    ],
+    "performance": true
+  }
+}

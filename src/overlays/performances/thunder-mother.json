@@ -1,0 +1,22 @@
+{
+  "key": "ability:thunder-mother",
+  "version": "1.0.0",
+  "name": "\u201cThunder Mother\u201d",
+  "effects": [],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "feature",
+        "event": "round.end",
+        "targets": "aura",
+        "effects": [],
+        "filter": "all",
+        "range": "10",
+        "limit": "1",
+        "special": "thunderMother"
+      }
+    ],
+    "performance": true
+  }
+}

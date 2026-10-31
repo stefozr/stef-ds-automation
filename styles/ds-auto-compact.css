@@ -1,0 +1,134 @@
+/* Stef's Automation Suite 0.13.0: compact resolution section (client setting compactCard), the folded Target
+   Damage panel (foldDetails) and the folded Combat Tools teleport message. */
+
+/* ---- Compact section ---- */
+.ds-auto-resolution.ds-auto-compact {
+  margin-top: 6px;
+  padding: 3px 0 2px;
+  border: none;
+  border-top: 1px solid var(--ds-auto-border);
+  border-radius: 0;
+}
+.ds-auto-compact .ds-auto-banner { flex-wrap: wrap; padding: 2px 6px; margin: 2px 0; font-size: 0.95em; }
+.ds-auto-compact .ds-auto-banner > span { flex: 1 1 120px; white-space: normal; line-height: 1.3; }
+/* A banner with a button: the text takes the full width, the button sits below it at the right. */
+.ds-auto-compact .ds-auto-banner:has(> .ds-auto-btn) > span { flex-basis: 100%; }
+.ds-auto-compact .ds-auto-banner .ds-auto-btn { flex: 0 0 auto; margin-left: auto; }
+.ds-auto-compact .ds-auto-empty { font-size: 0.95em; }
+.ds-auto-compact .ds-auto-row { padding: 2px 0; }
+
+/* One target with one result: the target block and the op lend their children to one flex line. */
+.ds-auto-compact .ds-auto-row--one {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+}
+.ds-auto-compact .ds-auto-row--one > .ds-auto-target,
+.ds-auto-compact .ds-auto-row--one .ds-auto-target-text,
+.ds-auto-compact .ds-auto-row--one > .ds-auto-ops,
+.ds-auto-compact .ds-auto-row--one > .ds-auto-ops > .ds-auto-op { display: contents; }
+.ds-auto-compact .ds-auto-row--one .ds-auto-name { flex: 0 1 auto; max-width: 40%; }
+/* 0.14.2: never squeezed to nothing; past this the row wraps the text to the next line instead of clipping it. */
+.ds-auto-compact .ds-auto-row--one .ds-auto-op-text { flex: 1 1 0; min-width: 4.5em; }
+.ds-auto-compact .ds-auto-row--one > .ds-auto-row-warning { order: 99; flex-basis: 100%; margin: 1px 0 0 24px; }
+
+/* Several results: the target line, then one indented line per result. */
+.ds-auto-compact .ds-auto-row--many > .ds-auto-target { margin-bottom: 1px; }
+.ds-auto-compact .ds-auto-row--many .ds-auto-op { margin: 1px 0 0 24px; }
+
+.ds-auto-compact .ds-auto-portrait { width: 18px; height: 18px; flex: 0 0 18px; font-size: 10px; }
+.ds-auto-compact .ds-auto-members { display: none; }
+.ds-auto-compact .ds-auto-tier {
+  flex: 0 0 auto;
+  font-size: 10px;
+  line-height: 14px;
+  padding: 0 5px;
+  border: 1px solid var(--ds-auto-border);
+  border-radius: 8px;
+}
+/* No tier yet (a target added after the roll): a dash, not a chip. */
+.ds-auto-compact .ds-auto-tier--none { border-color: transparent; padding: 0 2px; opacity: 0.55; }
+.ds-auto-compact .ds-auto-op-text {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+/* 0.13.2: a long label wraps inside its column; nothing runs under the status mark or the buttons. */
+.ds-auto-compact .ds-auto-op-label { white-space: normal; }
+/* 0.14.2: a detail with less than 6em beside the label wraps under it (it showed one letter and an ellipsis). */
+.ds-auto-compact .ds-auto-op-detail {
+  flex: 1 1 6em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ds-auto-compact .ds-auto-op-warning,
+.ds-auto-compact .ds-auto-op-triggers { flex-basis: 100%; }
+/* The status column ends at the same x on every row (a lone check and "⚠ Failed" line up). */
+.ds-auto-compact .ds-auto-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  width: auto;
+  min-width: 48px;
+  white-space: nowrap;
+}
+.ds-auto-compact .ds-auto-status-text { font-size: 0.9em; max-width: 64px; overflow: hidden; text-overflow: ellipsis; }
+/* Room for two buttons on every row, so the status column does not move with the button count. */
+.ds-auto-compact .ds-auto-op-actions { display: inline-flex; justify-content: flex-end; gap: 2px; flex: 0 0 auto; min-width: 42px; }
+.ds-auto-compact .ds-auto-icon-btn { width: 20px; height: 20px; line-height: 18px; }
+.ds-auto-compact .ds-auto-notes { margin-top: 2px; }
+.ds-auto-compact .ds-auto-footer { margin-top: 3px; }
+.ds-auto-compact .ds-auto-footer .ds-auto-btn { flex: 0 0 auto; height: 22px; line-height: 20px; }
+
+/* ---- Details toggle ---- */
+.ds-auto-details-btn { margin-left: auto; }
+.ds-auto-details-chevron { transition: transform 0.15s ease; }
+.ds-auto-details-btn[aria-expanded="true"] .ds-auto-details-chevron { transform: rotate(90deg); }
+.ds-auto-details-badge:not(:empty) { margin-left: 2px; opacity: 0.75; }
+.ds-auto-details-badge:not(:empty)::before { content: "("; }
+.ds-auto-details-badge:not(:empty)::after { content: ")"; }
+
+/* ---- Target Damage panel folded under Details (ui/dstd-fold.mjs) ---- */
+li.chat-message.ds-auto-fold-dstd > section.draw-steel-target-damage-panel { display: none; }
+
+/* ---- Combat Tools' teleport message for one of our rows (ui/teleport-message-fold.mjs) ----
+   Same :is() prefix as Draw Steel Plus' chat rules (an id inside :is() weighs as an id), plus our class. */
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport { position: relative; }
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport:not(.ds-auto-folded-teleport--open) {
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport:not(.ds-auto-folded-teleport--open) > .message-header,
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport:not(.ds-auto-folded-teleport--open) .dsct-undo-tp {
+  display: none;
+}
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport:not(.ds-auto-folded-teleport--open) .message-part-buttons {
+  display: inline;
+  margin: 0 0 0 4px;
+  padding: 0;
+  border: none;
+}
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport:not(.ds-auto-folded-teleport--open) .dsct-undo-status { display: inline; }
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport .message-content { padding-right: 20px; }
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport > .ds-auto-tp-toggle {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  line-height: 16px;
+  font-size: 10px;
+}
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport--open > .ds-auto-tp-toggle > i { transform: rotate(180deg); }

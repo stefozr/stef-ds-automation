@@ -1,0 +1,135 @@
+{
+  "id": "stef-ds-automation",
+  "title": "Stef's Automation Suite for Draw Steel",
+  "description": "Automation for the Draw Steel system: when an ability is used, damage, healing, conditions and forced movement are applied to each target at its own tier of success, with immunities, weaknesses, minion squads, potency and surges handled, a per-target summary on the chat card, and undo. Saves, ongoing damage and encounter effects run themselves; a built-in ability library adds conditions from the ability text, triggered actions (Parry, Inertial Shield and more) offered with a countdown, summons placed on the canvas, heroic resource gains, Malice and villain actions, and lasting areas such as Wall of Fire. The medkit adds an Automation window to item and actor sheets, a custom automation editor and a coverage report. Applied by the Director's client; works alongside Draw Steel: Combat Tools and Target Damage. Stef's Automation Suite for Draw Steel is not affiliated with MCDM Productions, LLC. Draw Steel is a trademark of MCDM Productions, LLC.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Stefan",
+      "url": "https://github.com/stefozr"
+    }
+  ],
+  "url": "https://github.com/stefozr/stef-ds-automation",
+  "manifest": "https://github.com/stefozr/stef-ds-automation/releases/latest/download/module.json",
+  "download": "https://github.com/stefozr/stef-ds-automation/releases/download/v1.0.0/module.zip",
+  "bugs": "https://github.com/stefozr/stef-ds-automation/issues",
+  "license": "LICENSE",
+  "readme": "README.md",
+  "changelog": "CHANGELOG.md",
+  "esmodules": [
+    "scripts/main.mjs",
+    "scripts/content/main.mjs",
+    "scripts/medkit/main.mjs"
+  ],
+  "styles": [
+    "styles/ds-auto-suite.css",
+    "styles/ds-auto-compact.css",
+    "styles/ds-auto-triggers.css",
+    "styles/ds-auto-summons.css",
+    "styles/ds-auto-resources.css",
+    "styles/ds-auto-settings.css",
+    "styles/medkit.css"
+  ],
+  "documentTypes": {
+    "RegionBehavior": {
+      "zone": {}
+    }
+  },
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "flags": {
+    "hotReload": {
+      "extensions": [
+        "css",
+        "hbs",
+        "json"
+      ],
+      "paths": [
+        "styles",
+        "templates",
+        "lang"
+      ]
+    }
+  },
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.369"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "draw-steel",
+        "type": "system",
+        "compatibility": {
+          "minimum": "1.1.2",
+          "verified": "1.1.2"
+        },
+        "reason": "Built on the Draw Steel system's abilities, power rolls, conditions and chat cards."
+      }
+    ],
+    "requires": [
+      {
+        "id": "lib-wrapper",
+        "type": "module",
+        "reason": "Wraps the system's damage, turn and save methods without clashing with other modules."
+      }
+    ],
+    "recommends": [
+      {
+        "id": "draw-steel-combat-tools",
+        "type": "module",
+        "compatibility": {
+          "verified": "1.2.8"
+        },
+        "reason": "Forced movement, teleports, areas and range checks go through its engine and undo log; without it the suite moves tokens in a straight line itself."
+      },
+      {
+        "id": "draw-steel-target-damage",
+        "type": "module",
+        "compatibility": {
+          "verified": "1.0.8"
+        },
+        "reason": "Its apply buttons are locked for results the suite already applied, so nothing lands twice."
+      },
+      {
+        "id": "draw-steel-ctlib",
+        "type": "module",
+        "compatibility": {
+          "verified": "1.5.1"
+        },
+        "reason": "Shared services of the Combat Tools family (token visibility, squads)."
+      },
+      {
+        "id": "draw-steel-death-tracker",
+        "type": "module",
+        "compatibility": {
+          "verified": "1.2.2"
+        },
+        "reason": "Undo revives a creature the undone damage had killed."
+      },
+      {
+        "id": "draw-steel-battle-log",
+        "type": "module",
+        "compatibility": {
+          "verified": "1.5.0"
+        },
+        "reason": "Applied results appear in the battle log."
+      },
+      {
+        "id": "stef-ds-fx",
+        "type": "module",
+        "reason": "Plays an animation per target at the tier the suite resolved."
+      },
+      {
+        "id": "stef-ds-qol",
+        "type": "module",
+        "reason": "Compact ability cards and other table fixes that pair with the suite's chat cards."
+      }
+    ]
+  }
+}

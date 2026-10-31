@@ -1,0 +1,18 @@
+{
+  "key": "ability:contact-spirits",
+  "version": "1.0.0",
+  "name": "Contact Spirits",
+  "notes": "Edges or banes from recent deaths, and the questions to the spirit, stay by hand.",
+  "effects": [
+    {
+      "targets": "self",
+      "id": "backlash",
+      "type": "damage",
+      "value": "5 + @level",
+      "damageType": "corruption",
+      "tiers": [
+        1
+      ]
+    }
+  ]
+}

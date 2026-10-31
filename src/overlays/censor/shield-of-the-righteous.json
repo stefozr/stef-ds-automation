@@ -1,0 +1,23 @@
+{
+  "key": "ability:shield-of-the-righteous",
+  "version": "1.0.0",
+  "name": "Shield of the Righteous",
+  "notes": "Allies adjacent to you get the same temporary Stamina: give it to them by hand.",
+  "effects": [
+    {
+      "id": "temp",
+      "type": "heal",
+      "targets": "self",
+      "value": 10,
+      "temporary": true,
+      "byTier": {
+        "2": {
+          "value": 15
+        },
+        "3": {
+          "value": 20
+        }
+      }
+    }
+  ]
+}
