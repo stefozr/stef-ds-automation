@@ -2,7 +2,7 @@
   "id": "stef-ds-automation",
   "title": "Stef's Automation Suite for Draw Steel",
   "description": "Automation for the Draw Steel system: when an ability is used, damage, healing, conditions and forced movement are applied to each target at its own tier of success, with immunities, weaknesses, minion squads, potency and surges handled, a per-target summary on the chat card, and undo. Saves, ongoing damage and encounter effects run themselves; a built-in ability library adds conditions from the ability text, triggered actions (Parry, Inertial Shield and more) offered with a countdown, summons placed on the canvas, heroic resource gains, Malice and villain actions, and lasting areas such as Wall of Fire. Smart Automation adds an Automation window to item and actor sheets, a custom automation editor and a coverage report. Applied by the Director's client; works alongside Draw Steel: Combat Tools and Target Damage. Stef's Automation Suite for Draw Steel is not affiliated with MCDM Productions, LLC. Draw Steel is a trademark of MCDM Productions, LLC.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "authors": [
     {
       "name": "Stefan",

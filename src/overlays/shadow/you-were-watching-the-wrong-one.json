@@ -1,8 +1,8 @@
 {
   "key": "ability:you-were-watching-the-wrong-one",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "You Were Watching the Wrong One",
-  "notes": "Your surge needs an ally near the target. A flanking partner's surge is given by hand.",
+  "notes": "Your surge applies by itself when an ally is 5 or fewer squares from the target. While you flank, pick your flanking partner when asked: they get a surge as well.",
   "effects": [
     {
       "id": "surge",
@@ -10,14 +10,17 @@
       "targets": "self",
       "resource": "surge",
       "value": 1,
-      "manual": true,
-      "label": "An ally near the target"
+      "when": { "alliesNearTarget": 5 },
+      "label": "An ally within 5 of the target"
     },
     {
       "id": "flank",
-      "type": "note",
-      "targets": "self",
-      "text": "Flanking: pick one flanking ally, who also gains a surge."
+      "type": "resource",
+      "targets": "pick",
+      "resource": "surge",
+      "value": 1,
+      "pick": { "count": 1, "within": 1, "of": "target", "filter": "allies", "flanking": true },
+      "label": "A flanking ally"
     }
   ]
 }

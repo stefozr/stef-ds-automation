@@ -16,7 +16,7 @@
  * `pickCandidates` is pure (both sides compute the same list): scene tokens with an actor that are creatures, not
  * hidden, never the user, within `pick.within` squares of the anchor (the user's token, or the card's first real
  * target: library-plan pickRow), of the side `pick.filter` names, at most MAX_CANDIDATES.
- * No engine imports (resolution-part.mjs imports this file): engine.mjs hands `recordPick` and `notePicksAsked` to
+ * No engine imports apart from the pure engine/proximity.mjs (resolution-part.mjs imports this file): engine.mjs hands `recordPick` and `notePicksAsked` to
  * `offerPicks`.
  *
  * i18n keys: DSAUTO.Pick.{Title, Intro, Hint, DamageType, Confirm, None, TooMany}, DSAUTO.Relay.{Denied, BadRequest}.
@@ -27,6 +27,7 @@ import { distanceSquares, notCreature, relation } from "../triggers/eligibility.
 import { ownersOf } from "../triggers/prompt.mjs";
 import { routePrompt } from "../relay/prompt-router.mjs";
 import { dsctApi } from "../compat/dsct.mjs";
+import { flankingAllies } from "../engine/proximity.mjs";
 import { error, log } from "../log.mjs";
 
 export const MAX_CANDIDATES = 60;
@@ -68,11 +69,14 @@ export function pickCandidates(op, res) {
   const within = Math.max(0, Number(p.within) || 0);
   const userToken = doc(res?.sourceTokenUuid);
   const userActorUuid = res?.sourceActorUuid ?? null;
+  // 1.1.1: a flanking pick offers only the allies flanking the anchor with the user.
+  const flankers = p.flanking ? new Set(flankingAllies(userToken, anchor).map(t => t.uuid)) : null;
   const out = [];
   for (const t of list(scene.tokens)) {
     if (!t?.actor || t.hidden || notCreature(t.actor)) continue;
     if (t.actor.uuid === userActorUuid || (userToken && t.uuid === userToken.uuid)) continue;
     if (distanceSquares(anchor, t) > within) continue;
+    if (flankers && !flankers.has(t.uuid)) continue;
     if (p.filter) {
       const rel = relation(userToken, t);
       if (p.filter === "allies" ? rel !== "ally" : rel !== "enemy") continue;

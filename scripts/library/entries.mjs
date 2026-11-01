@@ -36,7 +36,7 @@ export const ENTRY_FIELDS = Object.freeze({
  * Milestone 9: the effect's `pick` and a teleport's `boost`, flattened into entry fields (the sheet edits flat
  * fields); entryToEffect rebuilds the objects. `entryFieldsOf(type)` is the whole schema of one entry type.
  */
-export const PICK_ENTRY_FIELDS = Object.freeze(["pickCount", "pickWithin", "pickOf", "pickFilter", "pickDamageTypes"]);
+export const PICK_ENTRY_FIELDS = Object.freeze(["pickCount", "pickWithin", "pickOf", "pickFilter", "pickDamageTypes", "pickFlanking"]);
 export const BOOST_ENTRY_FIELDS = Object.freeze(["boostResource", "boostPer", "boostMax"]);
 /** Types whose effects may pick their targets (schema NO_PICK_TYPES: summon, zone, note may not). */
 const PICKING_TYPES = new Set(["damage", "heal", "condition", "cleanse", "resource", "forced", "teleport", "modifier"]);
@@ -49,7 +49,7 @@ const SELF_TYPES = new Set(["summon", "zone"]);
 /** Formula fields stored as strings in an entry (the sheet edits them as text). */
 const FORMULA_FIELDS = new Set(["value", "distance", "quantity", "size", "width", "range"]);
 export const COMMON_ENTRY_FIELDS = Object.freeze([
-  "effectId", "label", "targets", "filter", "tiers", "whenSpend", "whenStrained", "whenConfig",
+  "effectId", "label", "targets", "filter", "tiers", "whenSpend", "whenStrained", "whenConfig", "whenAlliesNear",
   "choiceGroup", "choiceOption", "potencyCharacteristic", "potencyValue", "manual",
 ]);
 
@@ -87,6 +87,7 @@ export function effectToEntries(effect, overlayKey, sortBase = 400_000) {
       whenSpend: triState(e.when?.spend),
       whenStrained: triState(e.when?.strained),
       whenConfig: e.when?.config ?? "",
+      whenAlliesNear: e.when?.alliesNearTarget != null ? String(e.when.alliesNearTarget) : "",
       choiceGroup: e.choice?.group ?? "",
       choiceOption: e.choice?.option ?? "",
       potencyCharacteristic: e.potency?.characteristic ?? "",
@@ -108,6 +109,7 @@ export function effectToEntries(effect, overlayKey, sortBase = 400_000) {
       Object.assign(data, {
         pickCount: Number.isInteger(e.pick.count) ? e.pick.count : 1, pickWithin: e.pick.within != null ? String(e.pick.within) : "",
         pickOf: e.pick.of ?? "self", pickFilter: e.pick.filter ?? "", pickDamageTypes: [...(e.pick.damageTypes ?? [])],
+        pickFlanking: !!e.pick.flanking,
       });
     }
     if (e.boost && effect.type === "teleport") {
@@ -155,6 +157,7 @@ export function entryToEffect(entry) {
   if (spend !== null) when.spend = spend;
   if (strained !== null) when.strained = strained;
   if (d.whenConfig) when.config = d.whenConfig;
+  if (d.whenAlliesNear !== "" && d.whenAlliesNear != null) when.alliesNearTarget = /^\d+$/.test(String(d.whenAlliesNear).trim()) ? Number(d.whenAlliesNear) : String(d.whenAlliesNear).trim();
   if (Object.keys(when).length) effect.when = when;
   if (d.choiceGroup && d.choiceOption) effect.choice = { group: d.choiceGroup, option: d.choiceOption };
   if (d.potencyCharacteristic && d.potencyValue) effect.potency = { characteristic: d.potencyCharacteristic, value: d.potencyValue };
@@ -178,6 +181,7 @@ export function entryToEffect(entry) {
   if (effect.targets === "pick" && PICKING_TYPES.has(type)) {
     const pick = { count: Number.isInteger(Number(d.pickCount)) && Number(d.pickCount) > 0 ? Number(d.pickCount) : 1, within: blankToNull(d.pickWithin) ?? "0", of: d.pickOf || "self" };
     if (d.pickFilter) pick.filter = d.pickFilter;
+    if (d.pickFlanking) pick.flanking = true;
     const types = list(d.pickDamageTypes).filter(t => typeof t === "string" && t);
     if (types.length && type === "damage") pick.damageTypes = types;
     effect.pick = pick;

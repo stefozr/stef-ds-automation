@@ -95,6 +95,7 @@ export function describeEffect(effect, item) {
   if (e.when?.spend) bits.push(L("whenSpend"));
   if (e.when?.strained) bits.push(L("whenStrained"));
   if (e.when?.config) bits.push(L("whenConfig", { key: e.when.config }));
+  if (e.when?.alliesNearTarget != null) bits.push(L("whenAlliesNear", { n: e.when.alliesNearTarget }));
   if (e.choice) bits.push(L("choice", { option: e.choice.option }));
   if (e.manual) bits.push(L("manual"));
   return { type: e.type, what, detail: bits.join(" · ") };

@@ -69,6 +69,8 @@ code). Read its header first; this file is the how-to.
 - `when.spend: true`: only when the user spent their resource on the ability's "Spend" option (the
   card shows that special effect). `@spend` in formulas is the amount spent.
 - `when.strained: true`: only when the Talent is strained (the card shows the Strained effect).
+- `when.alliesNearTarget: N` (1.1.1, squares, formula): only when a creature allied to the user (not the user) stands
+  within N squares of the card's first target, measured when the card resolves.
 - `potency`: `{characteristic, value}` gates a condition, damage, forced move or teleport on targets:
   it applies when the target fails (`"@potency.weak|average|strong"` or a number).
 - `choices` + `choice`: "choose one" options the card offers as buttons; rows of the unpicked options
@@ -94,7 +96,9 @@ code). Read its header first; this file is the how-to.
 
 Needs (core 0.14.0). `targets: "pick"` with `pick: {count (1-5, default 1), within (squares, formula), of
 ("self" default: the user's token | "target": the card's first target), filter? ("allies" | "enemies"),
-damageTypes? (damage effects only: the picker chooses one; then no `damageType`)}` — for "a creature within N
+damageTypes? (damage effects only: the picker chooses one; then no `damageType`), flanking? (1.1.1: `true` offers only
+the allies flanking the target with the user, and nothing while the user is not flanking; needs `of: "target"` and
+`filter: "allies"`)}` — for "a creature within N
 squares" that is not one of the ability's targets. The card shows a Pick row on the user's own row; the user's
 owner is asked once after the card resolves (and after its choice-group option is picked), or presses Pick. The
 Director checks the pick (inside `within`, on `filter`'s side, at most `count`, never the user) and resolves the

@@ -30,6 +30,7 @@ import { summonSourceUuid } from "../summons/actors.mjs";
 import { isSummonLocked } from "../summons/registry.mjs";
 import { opId } from "./keys.mjs";
 import { sideOnly } from "./record.mjs";
+import { alliesNear, isFlanking } from "./proximity.mjs";
 import { targetedRoute } from "./plan.mjs";
 import { effectDisplay, statusConfig } from "./native.mjs";
 
@@ -179,6 +180,8 @@ export function libraryOps({ lib, item, targets, selfKey, self, use, assignment,
     if (effect.when?.spend != null && effect.when.spend !== use.spend) continue;
     if (effect.when?.strained != null && effect.when.strained !== use.strained) continue;
     if (effect.when?.config && !lib.config?.[effect.when.config]) continue;
+    // 1.1.1: an ally of the user within N squares of the card's first real target.
+    if (effect.when?.alliesNearTarget != null && !alliesNearTarget(effect.when.alliesNearTarget, { item, targets, selfKey, userRecord, spend, config: lib.config })) continue;
     // Combat Tools "choose one": effects of an unpicked choice do not apply.
     let chooseGated = false;
     if (assignment && effect.name && assignment.claimed.has(String(effect.name).trim())) {
@@ -458,11 +461,28 @@ function modifierRow(base, eff, effect, item, ctx) {
  * the answer (engine.mjs recordPick) and resolves again, which plans the real rows for the picked creature(s). It is
  * measured from the user's token (`of: "self"`) or the card's first real target (`of: "target"`). Never applied.
  */
+/** The card's first real target record entry `[key, record]` (pickRow's `of: "target"` anchor), or null. */
+function firstTargetEntry(targets, selfKey) {
+  return Object.entries(targets ?? {}).find(([k, r]) => r?.tokenUuid && !sideOnly(r) && (k !== selfKey || r.alsoTarget)) ?? null;
+}
+
+const tokenDoc = uuid => {
+  try { return uuid ? fromUuidSync(uuid) : null; } catch (_err) { return null; }
+};
+
+/** 1.1.1 `when.alliesNearTarget`: does the user have an ally within that many squares of the card's first target? */
+function alliesNearTarget(formula, { item, targets, selfKey, userRecord, spend, config }) {
+  const anchor = tokenDoc(firstTargetEntry(targets, selfKey)?.[1]?.tokenUuid);
+  const user = tokenDoc(userRecord?.tokenUuid);
+  const within = evaluateInt(formula, item, { spend, config }, { min: 0, max: 100 });
+  if (!anchor || !user || within == null) return false;
+  return alliesNear(anchor, user, within, { userActorUuid: userRecord?.actorUuid ?? null }).length > 0;
+}
+
 function pickRow(base, effect, eff, item, t, ctx, { targets, selfKey }) {
   const p = eff.pick ?? effect.pick ?? {};
   const of = p.of === "target" ? "target" : "self";
-  const anchorEntry = of === "target"
-    ? (Object.entries(targets ?? {}).find(([k, r]) => r?.tokenUuid && !sideOnly(r) && (k !== selfKey || r.alsoTarget)) ?? null) : null;
+  const anchorEntry = of === "target" ? firstTargetEntry(targets, selfKey) : null;
   const anchor = of === "target" ? (anchorEntry?.[1]?.tokenUuid ?? null) : (t.tokenUuid ?? null);
   const within = evaluateInt(p.within, item, ctx, { min: 0, max: 100 });
   const op = {
@@ -472,12 +492,15 @@ function pickRow(base, effect, eff, item, t, ctx, { targets, selfKey }) {
     pick: {
       effectId: effect.id, effectType: effect.type, count: Number.isInteger(p.count) ? p.count : 1, within: within ?? 0, of,
       filter: p.filter ?? null, damageTypes: [...(p.damageTypes ?? [])], anchorTokenUuid: anchor,
+      ...(p.flanking ? { flanking: true } : {}),
     },
   };
   delete op.potency;
   if (within == null) return { ...op, status: OP_STATUS.FAILED, reason: "formulaInvalid" };
   if (!anchor && of === "target") return { ...op, status: OP_STATUS.SKIPPED, reason: "noAnchor" };
   if (!anchor) return { ...op, status: OP_STATUS.SKIPPED, reason: "noSourceToken" };
+  // 1.1.1: a flanking pick is offered only while the user flanks the anchor (the candidates: ui/target-pick.mjs).
+  if (p.flanking && !isFlanking(tokenDoc(t.tokenUuid), tokenDoc(anchor))) return { ...op, status: OP_STATUS.SKIPPED, reason: "notFlanking" };
   return op;
 }
 

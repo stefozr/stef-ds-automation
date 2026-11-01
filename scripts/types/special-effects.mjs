@@ -75,6 +75,7 @@ function fieldFor(key, type = null) {
     case "whenSpend":
     case "whenStrained": return str({ choices: { "": "DSAUTO.Entry.Either", yes: "DSAUTO.Entry.Yes", no: "DSAUTO.Entry.No" } });
     case "whenConfig":
+    case "whenAlliesNear":
     case "choiceGroup":
     case "choiceOption": return str();
     case "potencyCharacteristic": return str({ choices: Object.fromEntries([["", "DSAUTO.Entry.None"], ...CHARACTERISTICS.map(c => [c, `DRAW_STEEL.Actor.characteristics.${c}.full`])]) });
@@ -149,6 +150,7 @@ function fieldFor(key, type = null) {
     case "pickOf": return new f.StringField({ required: true, blank: false, initial: "self", choices: keyed(PICK_OF, "PickOf"), label });
     case "pickFilter": return str({ choices: Object.fromEntries([["", "DSAUTO.Entry.None"], ...FILTERS.map(v => [v, `DSAUTO.Entry.Filter.${v}`])]) });
     case "pickDamageTypes": return new f.SetField(new f.StringField({ blank: false }), { label });
+    case "pickFlanking": return new f.BooleanField({ initial: false, label });
     case "boostResource": return str({ choices: Object.fromEntries([["", "DSAUTO.Entry.None"], ...BOOST_RESOURCES.map(v => [v, `DSAUTO.Entry.Resource.${v}`])]) });
     case "boostPer": return new f.NumberField({ integer: true, min: 1, max: 10, initial: 1, label });
     case "boostMax": return new f.NumberField({ integer: true, min: 1, max: 20, nullable: true, initial: null, label });

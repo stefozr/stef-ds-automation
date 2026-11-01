@@ -2,6 +2,19 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.1.1] - 2026-11-01
+
+### Fixed
+- Forced movement and teleports from a hero's feature cards (such as Null Field's Gravitic Disruption slide) now open
+  the picker on the hero's player's screen. Before, the Director always got it. The Director still takes over when the
+  player is offline or does not answer.
+
+### Changed
+- **You Were Watching the Wrong One** is automated: the surge applies by itself when an ally stands within 5 squares
+  of the target, and while you flank the target you are asked which flanking ally also gains a surge.
+- Library authoring: new effect condition `when.alliesNearTarget` and pick option `pick.flanking` (also in the Smart
+  Automation editor).
+
 ## [1.1.0] - 2026-11-01
 
 ### Added

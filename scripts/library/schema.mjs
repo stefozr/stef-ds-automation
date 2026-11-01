@@ -126,7 +126,7 @@ export const MODIFIER_ENDS = Object.freeze(["turnEnd", "nextTurnEnd", "nextTurnS
 export const MODIFIER_MODES = Object.freeze(["add", "override"]);
 /** Resources a self teleport's `boost` may spend (one point per `per` extra squares). */
 export const BOOST_RESOURCES = Object.freeze(["heroic", "surge", "epic"]);
-const PICK_FIELDS = Object.freeze(["count", "within", "of", "filter", "damageTypes"]);
+const PICK_FIELDS = Object.freeze(["count", "within", "of", "filter", "damageTypes", "flanking"]);
 const BOOST_FIELDS = Object.freeze(["resource", "per", "max", "label"]);
 /** Effect types a pick cannot target (they go on the user's own row, or apply nothing). */
 const NO_PICK_TYPES = Object.freeze(["summon", "zone", "note"]);
@@ -421,6 +421,9 @@ function pickProblems(e, where) {
   else if (literalNumber(p.within) !== null && literalNumber(p.within) < 0) bad("`pick.within` must be 0 or more");
   if (p.of != null && !PICK_OF.includes(p.of)) bad(`unknown pick.of "${p.of}" (${PICK_OF.join(" | ")})`);
   if (p.filter != null && !FILTERS.includes(p.filter)) bad("`pick.filter` must be \"allies\" or \"enemies\"");
+  // 1.1.1: allies flanking the card's target together with the user (engine/proximity.mjs flankingAllies).
+  if (p.flanking != null && typeof p.flanking !== "boolean") bad("`pick.flanking` must be true or false");
+  if (p.flanking === true && (p.of !== "target" || p.filter !== "allies")) bad("`pick.flanking` needs `of: \"target\"` and `filter: \"allies\"`");
   if (p.damageTypes != null) {
     if (e.type !== "damage") bad("`pick.damageTypes` only goes with a damage effect");
     const ok = Array.isArray(p.damageTypes) && p.damageTypes.length >= 1 && p.damageTypes.length <= 10
@@ -654,10 +657,12 @@ export function validateOverlay(overlay, ctx = {}) {
     if (e.when != null) {
       if (!isObj(e.when)) bad(`${where}: when must be an object`);
       else {
-        for (const k of Object.keys(e.when)) if (!["spend", "strained", "config"].includes(k)) bad(`${where}: unknown when.${k}`);
+        for (const k of Object.keys(e.when)) if (!["spend", "strained", "config", "alliesNearTarget"].includes(k)) bad(`${where}: unknown when.${k}`);
         if (e.when.spend != null && typeof e.when.spend !== "boolean") bad(`${where}: when.spend must be true or false`);
         if (e.when.strained != null && typeof e.when.strained !== "boolean") bad(`${where}: when.strained must be true or false`);
         if (e.when.config != null && !configKeys.has(e.when.config)) bad(`${where}: when.config names no config entry`);
+        // 1.1.1: squares from the card's first target (engine/proximity.mjs alliesNear).
+        if (e.when.alliesNearTarget != null && (!isFormula(e.when.alliesNearTarget) || (literalNumber(e.when.alliesNearTarget) !== null && literalNumber(e.when.alliesNearTarget) < 0))) bad(`${where}: when.alliesNearTarget must be a formula (squares, 0 or more)`);
       }
     }
     if (e.choice != null) {

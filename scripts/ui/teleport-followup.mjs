@@ -12,9 +12,16 @@ import { boostLimit } from "../engine/forced.mjs";
 
 const running = new Set();
 
+/**
+ * Who makes a card's move: the card's author when they own `actor`, else its first active owner, else the active GM.
+ * A real card by a GM stays with the active GM. 1.1.1: a synthetic card (feature rules such as Null Field's Gravitic
+ * Disruption) is always created by the active GM, so its record's `authorUserId` stands for the author, and a GM there
+ * does not keep the move from the hero's player.
+ */
 export function stepRecipient(message, actor) {
-  const author = message.author ?? game.users.get(getResolution(message)?.authorUserId);
-  if (author?.isGM) return game.users.activeGM;
+  const res = getResolution(message);
+  const author = res?.synthetic ? game.users.get(res.authorUserId) : (message.author ?? game.users.get(res?.authorUserId));
+  if (author?.isGM && !res?.synthetic) return game.users.activeGM;
   const owners = ownersOf(actor);
   return owners.find(u => u.id === author?.id) ?? owners[0] ?? game.users.activeGM;
 }
