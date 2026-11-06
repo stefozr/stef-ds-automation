@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 globalThis.__HARNESS_SKIP_SCENARIOS__ = true;
 const world = await import(new URL("./harness.mjs", import.meta.url).href);
-const { postAbility, settle, makeAbility, hero, tA, tB, gobA, gobB, api, getResolution, buildView, Effect, setCombat, setDstd, Message, gm } = world;
+const { postAbility, settle, makeAbility, hero, tA, tB, gobA, gobB, addToken, api, getResolution, buildView, Effect, setCombat, setDstd, Message, gm } = world;
 const paths = createRequire(import.meta.url)("./paths.cjs"); const ROOT = paths.SCRIPTS;
 const { blockingOp, blockingEnricherOp, onCaptureClick } = await import(pathToFileURL(ROOT + "ui/dstd-lock.mjs").href);
 
@@ -45,7 +45,7 @@ const { blockingOp, blockingEnricherOp, onCaptureClick } = await import(pathToFi
   await api.undoOps(msg.id);
   assert.ok(!gobA.effects.has(ae.id), "undo deletes the DSCT effect");
 
-  // grabbed without autoGrab waits for confirmation
+  // grabbed without ctlib waits (autoGrab is on, the size rule cannot be checked)
   game.settings.register("draw-steel-combat-tools", "grabEnabled", { default: true });
   applied.tier2.effects = { grabbed: { condition: "always", end: "", properties: new Set() } };
   const msg2 = postAbility(item, { 2: [tA] }, {});
@@ -53,6 +53,51 @@ const { blockingOp, blockingEnricherOp, onCaptureClick } = await import(pathToFi
   const g = Object.values(getResolution(msg2).ops)[0];
   assert.equal(g.mode, "prompt");
   assert.equal(g.status, "pending");
+  // grabbed (autoGrab on by default) still waits without ctlib: the size rule cannot be checked.
+  assert.equal(game.settings.get("stef-ds-automation", "autoGrab"), true, "autoGrab defaults to on");
+
+  // With ctlib: auto unless the size rule forbids it (then a reason on the row); ignore-size and the GM bypass skip the check.
+  game.modules.set("draw-steel-ctlib", { active: true });
+  let fits = true;
+  globalThis.ctlib = { canForcedMoveTarget: () => fits, MULTI_GRAB_LIMITS: { "claw-swing": 2 } };
+  const modeOf = async () => {
+    const m = postAbility(item, { 2: [tA] }, {});
+    await settle();
+    return Object.values(getResolution(m).ops)[0];
+  };
+  let go = await modeOf();
+  assert.equal(go.mode, "auto", "autoGrab default + the size rule allows it: auto");
+  fits = false;
+  go = await modeOf();
+  assert.equal(go.mode, "prompt", "too large: waits");
+  assert.equal(go.reason, "grabTooLarge");
+  applied.tier2.effects = { grabbed: { condition: "always", end: "", properties: new Set(["ignore-size"]) } };
+  go = await modeOf();
+  assert.equal(go.mode, "auto", "ignore-size: auto");
+  applied.tier2.effects = { grabbed: { condition: "always", end: "", properties: new Set() } };
+  game.settings.register("draw-steel-combat-tools", "gmBypassesSizeCheck", { default: true });
+  go = await modeOf();
+  assert.equal(go.mode, "auto", "GM bypass: auto");
+  await game.settings.set("draw-steel-combat-tools", "gmBypassesSizeCheck", false);
+  fits = true;
+  await game.settings.set("stef-ds-automation", "autoGrab", false);
+  go = await modeOf();
+  assert.equal(go.mode, "prompt", "autoGrab off: prompt");
+  await game.settings.set("stef-ds-automation", "autoGrab", true);
+
+  // Claw Swing: two targets from one card -> Combat Tools gets maxGrabs 2 for each grab.
+  const grabCalls = [];
+  dsctApi.grab = async (src, tgt, opts) => { grabCalls.push({ tgt: tgt.id, opts }); (window._activeGrabs ??= new Map()).set(tgt.id, {}); };
+  const heroTokDoc = addToken("hero000000000tok", hero, "Hero").document;
+  heroTokDoc.object = { id: "hero000000000tok" };
+  tA.document.object = { id: "tokA000000000001" }; tB.document.object = { id: "tokB000000000001" };
+  const claw = makeAbility({ uuid: "Actor.hero000000000001.Item.claw0000000001", name: "Claw Swing", actor: hero, damage: false, applied });
+  postAbility(claw, { 2: [tA, tB] }, {});
+  await settle();
+  assert.equal(grabCalls.length, 2, "both targets grabbed");
+  assert.deepEqual(grabCalls.map(c => c.opts.maxGrabs), [2, 2], "maxGrabs 2 for two claw-swing targets");
+  delete dsctApi.grab; delete globalThis.ctlib; game.modules.delete("draw-steel-ctlib");
+  tA.document.object = null; tB.document.object = null; heroTokDoc.object = null;
   game.modules.delete("draw-steel-combat-tools");
 
   // targetedConditions "off": the targeted condition is manual with no Apply button

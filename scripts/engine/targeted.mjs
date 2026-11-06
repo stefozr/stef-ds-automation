@@ -30,6 +30,8 @@
 import { HOOKS, MODULE_ID, OP_STATUS } from "../constants.mjs";
 import { dsctFlaggedEffect } from "../compat/dsct.mjs";
 import { meetsRoleFloor } from "../relay/auth.mjs";
+import { ctlib } from "../compat/ctlib.mjs";
+import { setting } from "../settings.mjs";
 import { setUntil } from "../turn/until.mjs";
 import { error, log } from "../log.mjs";
 import * as engine from "./engine.mjs";
@@ -52,6 +54,31 @@ const sourceChange = (statusId, uuid) => ({ key: SOURCES(statusId), type: "add",
 export function targetedStatus(statusId) {
   const list = CONFIG.statusEffects;
   return (Array.isArray(list) ? list.find(s => s.id === statusId) : list?.[statusId]) ?? null;
+}
+
+/**
+ * Mode of a planned grabbed row. With `autoGrab` on the row stays "auto" unless the size rule forbids the grab (then it
+ * waits, `reason: "grabTooLarge"`, unless a reason such as "resisted" is already set). Too large = ctlib's
+ * `canForcedMoveTarget(grabber, target)` is false, the grab has no `ignore-size` property and the Director has not
+ * turned on Combat Tools' `gmBypassesSizeCheck`. Without ctlib the size rule cannot be checked: the row waits.
+ * Only touches rows that are "auto"; mutates and returns `op`.
+ */
+export function gateGrabMode(op, { sourceActor = null, targetActor = null, ignoreSize = false } = {}) {
+  if (op.mode !== "auto") return op;
+  if (!setting("autoGrab")) { op.mode = "prompt"; return op; }
+  const lib = ctlib();
+  if (typeof lib?.canForcedMoveTarget !== "function") { op.mode = "prompt"; return op; }
+  if (ignoreSize) return op;
+  let bypass = false;
+  try { bypass = !!game.settings.get("draw-steel-combat-tools", "gmBypassesSizeCheck"); } catch (_err) { /* setting not registered */ }
+  if (bypass) return op;
+  let fits = true;
+  try { fits = !!lib.canForcedMoveTarget(sourceActor, targetActor); } catch (_err) { fits = false; }
+  if (!fits) {
+    op.mode = "prompt";
+    if (!op.reason && op.status !== OP_STATUS.SKIPPED) op.reason = "grabTooLarge";
+  }
+  return op;
 }
 
 /** "dsct" | "native" | "off" for a targeted status under the current settings. */

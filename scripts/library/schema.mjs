@@ -84,6 +84,11 @@ import { modifierKeyOk, validateAutomation } from "./custom.mjs";
  *                                           never together with `monster`
  *   gains?: [Gain, ...]                     only on a class feature's overlay (`feature:<dsid>`, `effects: []`),
  *                                           at most MAX_GAINS
+ * 1.2.0 overlay-level field:
+ *   class?: "<hero class dsid>"             only on a `feature:<dsid>` overlay: it applies only to heroes of that class
+ *                                           (actor.system.class dsid). For dsids shared by two classes' features
+ *                                           (essence: Elementalist / Summoner; ferocity: Fury / Beastheart).
+ *                                           Without `class` the overlay applies to every hero, as before.
  * Milestone 9 overlay-level field (docs/M9-DESIGN.md §C):
  *   persistent?: {cost?, keep, targets?, note?}  a Persistent ability (heroes only): at the user's turn start the owner
  *                                           keeps the use for `cost` (1-10, default the item's persistent effect
@@ -98,6 +103,14 @@ import { modifierKeyOk, validateAutomation } from "./custom.mjs";
  *   [{feature, amount}] (upgrades replace the amount, the highest present wins), taker?, dealer?, user?,
  *   takerEffect? / dealerEffect? {ability, effect?}, within?, withinAbility?, notTypes?, minSurges?, category?,
  *   actionType?, costsMalice?, heroesInTurn?, natural?, loe?, states?, confirm?, label (required, our own words)
+ *   1.2.0: minResource? (1-30: only while the hero's heroic resource, tracking-aware on Draw Steel 1.2, is at least that),
+ *   amountBy entries may be {minResource, amount} (live thresholds, the highest reached replaces the amount), and
+ *   onceWith? (the id of another gain of the overlay with the same `once`: both share one slot per round/encounter);
+ *   forcedMove gains: includeResisted? (true: a move that stability or a blocked path cut to nothing still counts).
+ * Scaling (feature overlays, 1.2.0; features/mastery.mjs; computed when used, never stored): `scaling` {rollEdges?,
+ *   forcedBonus?, useBenefits?, offers?}, lists of tiers where the highest `minResource` reached replaces lesser ones:
+ *   rollEdges [{minResource, abilities?, edges 1|2}], forcedBonus [{minResource, abilities?, bonus (formula)}],
+ *   useBenefits [{minResource, category?, temporaryStamina}], offers [{after, ability, free? "triggered" | "maneuver"}].
  */
 import {
   ATTACKERS, EVENT_STEPS, FREE_STRIKE_BY, LIMITS, POTENCY_SCOPES, RANGE_WORDS, REQUIRE_KEYS, STEP_TYPES, SUBJECTS,
@@ -184,13 +197,13 @@ export const GAIN_DICE_RE = /^\s*\d{1,2}d\d{1,2}(\s*\+\s*\d{1,2})?\s*$/;
 /** Fields a gain may carry besides the common ones, per event ("does not go with <event>" otherwise). */
 export const GAIN_FIELDS = Object.freeze({
   damage: Object.freeze(["taker", "dealer", "takerEffect", "dealerEffect", "within", "notTypes", "minSurges"]),
-  forcedMove: Object.freeze(["taker", "within"]),
+  forcedMove: Object.freeze(["taker", "within", "includeResisted"]),
   abilityUse: Object.freeze(["user", "within", "withinAbility", "category", "actionType", "costsMalice", "heroesInTurn"]),
   naturalRoll: Object.freeze(["user", "within", "natural", "loe"]),
   winded: Object.freeze(["taker", "within", "states"]),
   heroDeath: Object.freeze(["taker"]),
 });
-const GAIN_COMMON = Object.freeze(["id", "event", "once", "resource", "amount", "amountBy", "confirm", "label"]);
+const GAIN_COMMON = Object.freeze(["id", "event", "once", "resource", "amount", "amountBy", "confirm", "label", "minResource", "onceWith"]);
 /** Default `taker` per event (forced movement: the gainer can be force moved too). */
 const GAIN_TAKER_DEFAULT = Object.freeze({ damage: "self", forcedMove: "selfOrCreature", winded: "self", heroDeath: "self" });
 
@@ -321,7 +334,7 @@ function typeProblems(e, where, ctx) {
       const hasRec = e.recoveries != null;
       if (hasValue === hasRec) bad("heal needs exactly one of `value` and `recoveries`");
       if (hasValue && !isFormula(e.value)) bad("heal `value` must be a formula");
-      if (hasRec && !(Number.isInteger(e.recoveries) && e.recoveries >= 1 && e.recoveries <= 5)) bad("`recoveries` must be 1-5");
+      if (hasRec && !((Number.isInteger(e.recoveries) && e.recoveries >= 1 && e.recoveries <= 5) || (isStr(e.recoveries) && !formulaProblem(e.recoveries)))) bad("`recoveries` must be 1-5 or a formula (\"1 + @spend\")");
       if (hasRec && e.temporary) bad("recoveries heal Stamina, not temporary Stamina");
       if (e.spender != null && (!hasRec || !SPENDERS.includes(e.spender))) bad("`spender` (target | self) only goes with `recoveries`");
       if (e.spender === "self" && e.targets === "self") bad("`spender: self` is for healing a target with the user's Recovery");
@@ -559,7 +572,7 @@ export function validateOverlay(overlay, ctx = {}) {
   const bad = msg => errors.push(msg);
   if (!isObj(overlay)) return { ok: false, errors: ["overlay must be an object"] };
   const o = overlay;
-  const known = ["key", "monster", "version", "name", "notes", "requires", "native", "config", "choices", "effects", "triggers", "trackers", "gains", "npc", "source", "automation", "persistent"];
+  const known = ["key", "monster", "version", "name", "notes", "requires", "native", "config", "choices", "effects", "triggers", "trackers", "gains", "npc", "class", "source", "automation", "persistent", "scaling"];
   for (const k of Object.keys(o)) if (!known.includes(k)) bad(`unknown field "${k}"`);
   if (!isStr(o.key) || !KEY_RE.test(o.key)) bad("`key` must look like \"ability:<dsid>\"");
   if (!isStr(o.version) || !SEMVER_RE.test(o.version)) bad("`version` must be semver (1.0.0)");
@@ -570,6 +583,12 @@ export function validateOverlay(overlay, ctx = {}) {
   if (o.npc != null) {
     if (o.npc !== true) bad("`npc` must be true (or absent)");
     if (o.monster != null) bad("`npc` is for generic overlays: a monster-specific overlay already applies to its monsters");
+  }
+  // 1.2.0 (Summoner / Beastheart): a class feature's overlay may be scoped to one hero class (registry findOverlay).
+  if (o.class != null) {
+    if (!isStr(o.class) || !DSID_RE.test(o.class)) bad("`class` must be a hero class dsid (elementalist)");
+    if (isStr(o.key) && !o.key.startsWith("feature:")) bad("`class` only goes on a class feature overlay (`feature:<dsid>`)");
+    if (o.monster != null) bad("`class` is for hero class features, not monster overlays");
   }
   if (o.requires != null) {
     if (!isObj(o.requires) || (o.requires.modules != null && !(Array.isArray(o.requires.modules) && o.requires.modules.every(isStr)))) bad("`requires.modules` must be module ids");
@@ -620,7 +639,7 @@ export function validateOverlay(overlay, ctx = {}) {
   // A trigger-, tracker- or gain-only overlay has nothing to apply from the card itself: `effects: []`.
   if (o.automation != null) for (const msg of validateAutomation(o.automation).errors) bad(`automation: ${msg}`);
   const reacts = !!o.automation?.rules?.length || (Array.isArray(o.triggers) && o.triggers.length > 0) || (Array.isArray(o.trackers) && o.trackers.length > 0)
-    || (Array.isArray(o.gains) && o.gains.length > 0) || persistentAutomates(o.persistent);
+    || (Array.isArray(o.gains) && o.gains.length > 0) || persistentAutomates(o.persistent) || isObj(o.scaling);
   if (!Array.isArray(o.effects)) bad("`effects` must be a list");
   else if (!o.effects.length && !reacts) bad("`effects` must be a non-empty list (it may be empty only with `triggers`, `trackers` or `gains`)");
   const ids = new Set();
@@ -697,7 +716,7 @@ export function validateOverlay(overlay, ctx = {}) {
   for (const [g, opts] of choiceOptions) {
     for (const op of opts) if (!usedOptions.get(g)?.has(op)) bad(`choice group "${g}": option "${op}" has no effects`);
   }
-  errors.push(...triggerProblems(o, ctx), ...trackerProblems(o, ctx), ...gainProblems(o, ctx), ...persistentProblems(o, ctx));
+  errors.push(...triggerProblems(o, ctx), ...trackerProblems(o, ctx), ...gainProblems(o, ctx), ...persistentProblems(o, ctx), ...scalingProblems(o));
   return { ok: !errors.length, errors };
 }
 
@@ -740,13 +759,29 @@ export function gainProblems(o, _ctx = {}) {
     if (g.once != null && !GAIN_ONCE.includes(g.once)) bad(`unknown once "${g.once}" (${GAIN_ONCE.join(" | ")})`);
     if (g.resource != null && !GAIN_RESOURCES.includes(g.resource)) bad(`unknown resource "${g.resource}" (${GAIN_RESOURCES.join(" | ")})`);
     if (g.amount != null && !gainAmountOk(g.amount)) bad("`amount` must be 1-20 or a dice formula like 1d3");
+    if (g.includeResisted != null && typeof g.includeResisted !== "boolean") bad("`includeResisted` must be true or false");
+    if (g.minResource != null && !intIn(g.minResource, 1, 30)) bad("`minResource` must be 1-30 (the hero's heroic resource, tracking-aware)");
+    if (g.onceWith != null) {
+      const other = o.gains.find(x => x?.id === g.onceWith);
+      if (!ID_RE.test(g.onceWith) || g.onceWith === g.id || !other) bad("`onceWith` must be the id of another gain of this overlay");
+      else if (other.onceWith != null) bad("`onceWith` must name a gain that has no `onceWith` itself");
+      else if ((g.once ?? "round") !== (other.once ?? "round")) bad("`onceWith` needs the same `once` as the gain it shares with");
+    }
     if (g.amountBy != null) {
-      if (!Array.isArray(g.amountBy) || g.amountBy.length > 4) bad("`amountBy` must be a list of up to 4 {feature, amount}");
+      if (!Array.isArray(g.amountBy) || g.amountBy.length > 4) bad("`amountBy` must be a list of up to 4 {feature, amount} or {minResource, amount}");
       else {
         const features = new Set();
+        const levels = new Set();
         for (const [k, a] of g.amountBy.entries()) {
-          if (!isObj(a) || !isStr(a.feature) || !DSID_RE.test(a.feature) || !gainAmountOk(a.amount) || Object.keys(a).some(f => !["feature", "amount"].includes(f))) {
-            bad(`\`amountBy[${k}]\` needs a feature dsid and an amount`);
+          const byLevel = isObj(a) && a.minResource != null;
+          const keys = byLevel ? ["minResource", "amount"] : ["feature", "amount"];
+          if (!isObj(a) || (byLevel ? !intIn(a.minResource, 1, 30) : !(isStr(a.feature) && DSID_RE.test(a.feature))) || !gainAmountOk(a.amount) || Object.keys(a).some(f => !keys.includes(f))) {
+            bad(`\`amountBy[${k}]\` needs a feature dsid (or minResource 1-30) and an amount`);
+            continue;
+          }
+          if (byLevel) {
+            if (levels.has(a.minResource)) bad(`\`amountBy[${k}]\`: duplicate minResource ${a.minResource}`);
+            levels.add(a.minResource);
             continue;
           }
           if (features.has(a.feature)) bad(`\`amountBy[${k}]\`: duplicate feature "${a.feature}"`);
@@ -793,7 +828,8 @@ export function gainProblems(o, _ctx = {}) {
 
 /** A gain with the defaults of §1.1 filled in (already a deep copy); `amountBy` sorted, integers first, ascending. */
 function normalizeGain(g) {
-  const out = { once: "round", resource: "heroic", amount: 1, confirm: false, ...g };
+  // `confirm` is deprecated: accepted by the validator (which warns) and always false in the built rule.
+  const out = { once: "round", resource: "heroic", amount: 1, ...g, confirm: false };
   const fields = GAIN_FIELDS[g?.event] ?? [];
   if (fields.includes("taker")) out.taker ??= GAIN_TAKER_DEFAULT[g.event];
   if (fields.includes("dealer")) out.dealer ??= "any";
@@ -808,6 +844,55 @@ function normalizeGain(g) {
     if (ka !== kb) return ka - kb;
     return ka === 0 ? va - vb : String(va).localeCompare(String(vb));
   });
+  return out;
+}
+
+/* -------------------------------------------- */
+/*  Resource scaling (1.2.0)                    */
+/* -------------------------------------------- */
+
+const SCALING_LISTS = Object.freeze({
+  rollEdges: ["minResource", "abilities", "edges"],
+  forcedBonus: ["minResource", "abilities", "bonus"],
+  useBenefits: ["minResource", "category", "temporaryStamina"],
+  offers: ["after", "ability", "free"],
+});
+export const SCALING_FREE = Object.freeze(["triggered", "maneuver"]);
+
+/**
+ * Problems of an overlay's `scaling` (features/mastery.mjs): benefits that follow the hero's heroic resource
+ * (tracking-aware) at use time. Only on `feature:<dsid>` overlays. Messages are prefixed `scaling.<list>[i]`.
+ * @param {object} o  The overlay.
+ * @returns {string[]}
+ */
+export function scalingProblems(o) {
+  const out = [];
+  if (o?.scaling == null) return out;
+  if (!isObj(o.scaling)) return ["`scaling` must be an object"];
+  if (!(isStr(o.key) && o.key.startsWith("feature:"))) out.push("`scaling` belongs to a class feature's overlay (feature:<dsid>)");
+  for (const k of Object.keys(o.scaling)) if (!(k in SCALING_LISTS)) out.push(`unknown field "scaling.${k}" (${Object.keys(SCALING_LISTS).join(" | ")})`);
+  for (const [name, fields] of Object.entries(SCALING_LISTS)) {
+    const list = o.scaling[name];
+    if (list == null) continue;
+    if (!Array.isArray(list) || !list.length || list.length > 8) { out.push(`\`scaling.${name}\` must be a list of 1-8 entries`); continue; }
+    for (const [i, e] of list.entries()) {
+      const bad = msg => out.push(`scaling.${name}[${i}]: ${msg}`);
+      if (!isObj(e)) { bad("must be an object"); continue; }
+      for (const k of Object.keys(e)) if (!fields.includes(k)) bad(`unknown field "${k}"`);
+      if (name !== "offers" && !intIn(e.minResource, 1, 30)) bad("`minResource` must be 1-30");
+      if (e.abilities != null && !(Array.isArray(e.abilities) && e.abilities.length && e.abilities.length <= 10 && e.abilities.every(a => isStr(a) && DSID_RE.test(a)))) bad("`abilities` must list ability dsids");
+      if (name === "rollEdges" && !intIn(e.edges, 1, 2)) bad("`edges` must be 1 or 2");
+      if (name === "forcedBonus" && !(isStr(e.bonus) && isFormula(e.bonus))) bad("`bonus` must be a formula");
+      if (name === "useBenefits") {
+        if (e.category != null && !isStr(e.category)) bad("`category` must be an ability category");
+        if (!intIn(e.temporaryStamina, 1, 100)) bad("`temporaryStamina` must be 1-100");
+      }
+      if (name === "offers") {
+        if (!(isStr(e.after) && DSID_RE.test(e.after)) || !(isStr(e.ability) && DSID_RE.test(e.ability))) bad("`after` and `ability` must be ability dsids");
+        if (e.free != null && !SCALING_FREE.includes(e.free)) bad(`\`free\` must be ${SCALING_FREE.join(" | ")}`);
+      }
+    }
+  }
   return out;
 }
 

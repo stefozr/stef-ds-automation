@@ -14,6 +14,17 @@ export function itemDsid(item) {
   return item?.name ? slug(item.name) : null;
 }
 
+/**
+ * The dsid of a hero actor's class (Draw Steel: `actor.system.class` is the class Item, whose model carries `_dsid`;
+ * the item's own `dsid` getter is the fallback). null for NPCs and class-less heroes.
+ */
+export function actorClassDsid(actor) {
+  const cls = actor?.system?.class;
+  if (!cls) return null;
+  const dsid = cls.system?._dsid || cls.dsid || null;
+  return dsid ? String(dsid) : null;
+}
+
 export function itemKey(item) {
   const dsid = itemDsid(item);
   return item?.type && dsid ? `${item.type}:${dsid}` : null;

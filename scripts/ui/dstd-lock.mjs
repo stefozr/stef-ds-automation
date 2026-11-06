@@ -23,7 +23,7 @@
  *    from the effect text. Our power-roll rows never come from the text, so its extra damage stays free (live §27).
  */
 import { CTLIB_ID, OP_STATUS, loc } from "../constants.mjs";
-import { dstdActive, dstdTargetKeyFromButton } from "../compat/dstd.mjs";
+import { dstdActive, dstdOnCard, dstdTargetKeyFromButton } from "../compat/dstd.mjs";
 import { ctlib } from "../compat/ctlib.mjs";
 import { debug } from "../log.mjs";
 import { setting } from "../settings.mjs";
@@ -276,7 +276,7 @@ function lockedClick(event) {
   const button = event.target?.closest?.(BUTTONS);
   if (!button || !button.closest(PANEL)) return null;
   const message = messageFor(button);
-  if (!message) return null;
+  if (!message || !dstdOnCard(message)) return null;
   const op = blockingOp(message, button);
   return op ? { op, messageId: message.id, warn: op.held ? "DSAUTO.Relay.Busy" : "DSAUTO.Lock.AlreadyApplied" } : null;
 }
@@ -296,13 +296,14 @@ export function decorateForced(message, root) {
 export function decorate(message, root) {
   if (!setting("lockDstdRows") || !root) return;
   if (!getResolution(message)) return;
-  for (const button of root.querySelectorAll(`${PANEL} ${FM_ROW_APPLY}`)) {
+  for (const button of dstdOnCard(message) ? root.querySelectorAll(`${PANEL} ${FM_ROW_APPLY}`) : []) {
     if (!blockingForcedRow(message, button.closest(FM_ROW)?.dataset?.dsctFmKey)) continue;
     button.disabled = true;
     button.classList.add("ds-auto-locked");
     lockTip(button, loc("DSAUTO.Lock.MovedTooltip"));
   }
-  for (const button of root.querySelectorAll(`${PANEL} :is(${BUTTONS})`)) {
+  // 1.2.0: no Target Damage panel work on a 1.2 card (the enrichers below are independent of it).
+  for (const button of dstdOnCard(message) ? root.querySelectorAll(`${PANEL} :is(${BUTTONS})`) : []) {
     const op = blockingOp(message, button);
     if (!op) continue;
     button.disabled = true;

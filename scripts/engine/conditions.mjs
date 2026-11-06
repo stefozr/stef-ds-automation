@@ -16,6 +16,7 @@
  * on undo (D16).
  */
 import { MODULE_ID, OP_STATUS } from "../constants.mjs";
+import { ctlib } from "../compat/ctlib.mjs";
 import { dsctApi, dsctFlaggedEffect } from "../compat/dsct.mjs";
 import { tokenIdFromUuid } from "./keys.mjs";
 import { statusConfig } from "./native.mjs";
@@ -87,7 +88,14 @@ async function applyTargeted(message, res, op, item, actor, target) {
     const targetTok = targetDoc.object;
     const sourceTok = fromUuidSync(res.sourceTokenUuid)?.object;
     if (!targetTok || !sourceTok) return { status: OP_STATUS.FAILED, reason: "notOnCanvas" };
-    await api.grab(sourceTok, targetTok, { forceApply: true, tier: op.tier });
+    // Combat Tools releases the oldest grab when the grabber is at its cap, so an ability that grabs several creatures
+    // (Claw Swing) passes its own cap, or the number of grabs this card makes if that is higher. The size rule was
+    // checked when the row was planned, hence forceApply.
+    const dsid = item?.system?._dsid ?? null;
+    const cardGrabs = Object.values(res.ops ?? {}).filter(o => o?.kind === "condition" && o.effectId === "grabbed"
+      && o.status !== OP_STATUS.SKIPPED).length;   // one card, one grabber: every grabbed row shares the source
+    const maxGrabs = Math.max((dsid && ctlib()?.MULTI_GRAB_LIMITS?.[dsid]) || 1, cardGrabs);
+    await api.grab(sourceTok, targetTok, { forceApply: true, tier: op.tier, maxGrabs });
     if (!window._activeGrabs?.has?.(targetTok.id)) return { status: OP_STATUS.FAILED, reason: "delegateRefused" };
     return { ...NOT_NATIVE, status: OP_STATUS.APPLIED, delegated: "dsct-grab", grabbedTokenId: targetTok.id, createdIds: [], replaced: null, replacedExtra: [] };
   }

@@ -88,7 +88,7 @@ if (gainOverlays.length) {
   for (const o of gainOverlays) {
     for (const g of o.gains) {
       const upgrades = (g.amountBy ?? []).map(a => `${index.features?.[`feature:${a.feature}`]?.name ?? a.feature} ${a.amount}`).join(", ");
-      lines.push(`| ${o.name} | ${g.label}${g.confirm ? " (Director confirms)" : ""} | ${g.event} | ${g.once ?? "round"} | ${g.amount ?? 1}${upgrades ? `; ${upgrades}` : ""} |`);
+      lines.push(`| ${o.name}${o.class ? ` (${o.class} only)` : ""} | ${g.label}${g.confirm ? " (Director confirms)" : ""} | ${g.event} | ${g.once ?? "round"} | ${g.amount ?? 1}${upgrades ? `; ${upgrades}` : ""} |`);
     }
   }
   lines.push("");

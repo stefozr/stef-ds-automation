@@ -1,8 +1,7 @@
 {
   "key": "feature:insight",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "Insight",
-  "notes": "The cheaper cost with an edge stays by hand.",
   "effects": [],
   "gains": [
     {

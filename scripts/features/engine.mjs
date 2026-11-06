@@ -1,4 +1,4 @@
-import { auraActive, auraRuleMatches, prepareAuraSpecial, expireAuraTurn } from "./auras.mjs";
+import { auraActive, auraRuleMatches, auraRadius, prepareAuraSpecial, expireAuraTurn } from "./auras.mjs";
 import { entryId } from "../library/entries.mjs";
 import { clearSanctuaryOnHarm } from "./capabilities.mjs";
 import { removeTemporaryResources } from "./temporary-resources.mjs";
@@ -23,12 +23,15 @@ import { ownersOf } from "../triggers/prompt.mjs";
 import { tokenOnScene, relation, distanceSquares, incapacitated } from "../triggers/eligibility.mjs";
 import { routePrompt, registerPromptType } from "../relay/prompt-router.mjs";
 import { worldValue } from "../resources/world-resources.mjs";
-import { error } from "../log.mjs";
+import { error, debug } from "../log.mjs";
 
 const list = c => c?.contents ?? (c ? [...c] : []);
 const escape = s => foundry.utils.escapeHTML(String(s ?? ""));
 let chain = Promise.resolve();
-const pending = new Set();
+/** In-flight rule runs by `${item.uuid}:${frequencyId}`; the value settles when the run (prompt and card) is over. */
+const pending = new Map();
+/** Discrete events: a run that meets an in-flight run of the same rule waits its turn instead of being dropped (state refreshes are dropped). */
+const QUEUED_EVENTS = new Set(["damage.after"]);
 const seenEvents = new Set();
 const schedule = fn => { const run = chain.then(fn); chain = run.catch(e => error("features", e)); return run; };
 /** Wait for serialized feature events (integration tests). */
@@ -53,11 +56,15 @@ export function featureActors(combat = game.combat) {
   return [...actors.values()];
 }
 function tokenOf(actor, sceneId) { return tokenOnScene(actor, sceneId); }
+/** The token of an event reference ({tokenUuid, actorUuid}): the token itself, else the actor's token on the event's scene. */
+function eventToken(value, sceneId) {
+  return value?.tokenUuid ? fromUuidSync(value.tokenUuid) : value?.actorUuid ? tokenOf(fromUuidSync(value.actorUuid), sceneId) : null;
+}
 export function ruleTargets(item, rule, event = {}) {
   const actor = item.actor;
   const sceneId = event.sceneId ?? actor?.token?.parent?.id ?? game.combat?.scene?.id ?? game.combat?.scene;
   const source = fromUuidSync(item.flags?.[MODULE_ID]?.aura?.tokenUuid ?? "") ?? tokenOf(actor, sceneId);
-  const doc = value => value?.tokenUuid ? fromUuidSync(value.tokenUuid) : value?.actorUuid ? tokenOf(fromUuidSync(value.actorUuid), sceneId) : null;
+  const doc = value => eventToken(value, sceneId);
   let tokens;
   switch (rule.targets) {
     case "self": tokens = [source ?? (rule.event === "passive" ? { actor, uuid: actor.uuid, name: actor.name } : null)]; break;
@@ -68,10 +75,12 @@ export function ruleTargets(item, rule, event = {}) {
     default: tokens = event.targetDocs ?? []; break;
   }
   if (event.auraSingle) tokens = tokens.filter(t => t.uuid === event.auraSingle);
-  const range = rule.range == null ? (rule.targets === "aura" ? evaluateInt(item.system?.distance?.primary ?? 0, item) : null) : evaluateInt(rule.range, item);
+  const range = rule.range == null ? (rule.targets === "aura" ? auraRadius(item) : null) : evaluateInt(rule.range, item);
   if (event.kind === "turn.start" && rule.targets === "aura") tokens = tokens.filter(t => t?.uuid === event.subject?.tokenUuid);
   return [...new Map(tokens.filter(t => {
     if (!t?.actor || t.actor.system?.isObject) return false;
+    // Corpses inside an aura take no damage rows or effects (unless the rule is about the dead).
+    if (rule.targets === "aura" && !rule.require?.dead && ["dead", "defeated"].includes(incapacitated(t.actor, game.combat))) return false;
     if (automationFor(item, findOverlay(item))?.performance && typeof item.system?.validTarget === "function" && !item.system.validTarget(t)) return false;
     if (rule.special === "thunderMother" && item.actor.flags?.[MODULE_ID]?.performanceTargets?.[item.system._dsid]?.includes(t.uuid)) return false;
     const side = relation(source, t);
@@ -93,10 +102,28 @@ export function frequencyKey(rule, event, combat = game.combat) {
   return null;
 }
 
-export async function askFeature(item, rule, { kind = "confirm", tokens = [], choices = [], limit = null, promptActor = item.actor } = {}) {
+/**
+ * 1.2.0 (player report: optional feature prompts were a bare "<feature>? Yes / No" that players missed or dismissed):
+ * what happened and whom the feature would affect, for the confirm prompt.
+ */
+function promptDetail(event = {}, tokens = []) {
+  const name = uuid => {
+    const doc = uuid ? fromUuidSync(uuid) : null;
+    return doc?.name ?? null;
+  };
+  const lines = [];
+  const source = event.source?.name ?? name(event.source?.tokenUuid) ?? name(event.source?.actorUuid);
+  const subject = name(event.subject?.tokenUuid) ?? name(event.subject?.actorUuid);
+  if (event.kind === "damage.after" && source && subject) lines.push(game.i18n.format("DSAUTO.Feature.DamagedBy", { source, subject }));
+  const names = [...new Set((tokens ?? []).map(t => t?.name).filter(Boolean))];
+  if (names.length) lines.push(game.i18n.format("DSAUTO.Feature.Affects", { names: names.join(", ") }));
+  return lines.join(" ");
+}
+
+export async function askFeature(item, rule, { kind = "confirm", tokens = [], choices = [], limit = null, promptActor = item.actor, detail = "" } = {}) {
   const recipient = rule.cost > 0 || promptActor?.type === "npc" ? game.users.activeGM : ownersOf(promptActor)[0] ?? game.users.activeGM;
   const payload = { type: "featureRule", itemUuid: item.uuid, ruleId: rule.id, kind,
-    tokens: tokens.map(t => t.uuid), choices, limit, label: rule.label ?? item.name, promptActorUuid: promptActor?.uuid };
+    tokens: tokens.map(t => t.uuid), choices, limit, label: rule.label ?? item.name, promptActorUuid: promptActor?.uuid, detail: String(detail ?? "").slice(0, 300) };
   return recipient?.isSelf || recipient?.id === game.userId
     ? routePrompt(payload, { user: game.user })
     : recipient?.query(QUERY_PROMPT, payload, { timeout: 123_000 });
@@ -141,7 +168,7 @@ export async function handleFeaturePrompt(payload, { user } = {}) {
   }
   if (payload.kind === "destination") return pickFeatureDestination(payload);
   if (payload.kind === "confirm") return { accepted: !!await foundry.applications.api.DialogV2.confirm({
-    window: { title: item.name }, content: `<p>${escape(payload.label)}${featureRules(item).find(r => r.id === payload.ruleId)?.cost ? ` (Malice: ${featureRules(item).find(r => r.id === payload.ruleId).cost})` : ""}</p>`, rejectClose: false,
+    window: { title: item.name }, content: `${payload.detail ? `<p>${escape(payload.detail)}</p>` : ""}<p>${escape(payload.label)}${featureRules(item).find(r => r.id === payload.ruleId)?.cost ? ` (Malice: ${featureRules(item).find(r => r.id === payload.ruleId).cost})` : ""}</p>`, rejectClose: false,
   }) };
   const choices = payload.kind === "targets" ? payload.tokens.map(uuid => ({ id: uuid, name: fromUuidSync(uuid)?.name ?? uuid })) : payload.choices;
   const recoveryTargets = payload.kind === "targets" && featureRules(item).find(r => r.id === payload.ruleId)?.special === "recoveryChoices";
@@ -178,24 +205,43 @@ export async function executeRule(item, rule, event = {}) {
   const shared = rule.targets === "encounter" && item.system?.category === "maliceAncestry";
   const key = shared ? `${game.combat?.id}:${item.system._dsid}:${rule.id}` : `${item.uuid}:${frequencyId}`;
   const frequency = frequencyKey(rule, event);
-  if (pending.has(key) || (frequency && (shared ? game.combat?.flags?.[MODULE_ID]?.encounterRuleUses?.[item.system._dsid] : item.flags?.[MODULE_ID]?.ruleUses?.[frequencyId]) === frequency)) return null;
+  const inflight = pending.get(key);
+  if (inflight && QUEUED_EVENTS.has(event.kind)) {
+    debug("feature.queued", { item: item.name, rule: rule.id, event: event.kind, eventId: event.id });
+    await inflight;
+    return executeRule(item, rule, event);
+  }
+  if (inflight || (frequency && (shared ? game.combat?.flags?.[MODULE_ID]?.encounterRuleUses?.[item.system._dsid] : item.flags?.[MODULE_ID]?.ruleUses?.[frequencyId]) === frequency)) return null;
   let tokens = ruleTargets(item, rule, event);
   if (!tokens.length && rule.event === "use" && rule.effects.some(e => e.targets === "self")) tokens = [tokenOf(item.actor, event.sceneId)].filter(Boolean);
-  if (!tokens.length) return null;
+  if (!tokens.length) {
+    // A reference (attacker, event subject) that resolves to no token on the scene would otherwise skip the rule silently.
+    if (["source", "subject"].includes(rule.targets) || rule.require?.sourceWithin != null) debug("feature.skip", { item: item.name, rule: rule.id, why: "noEligibleToken", targets: rule.targets, event: event.kind, ref: event[rule.targets === "subject" ? "subject" : "source"] ?? null, sceneId: event.sceneId ?? null });
+    return null;
+  }
   if (rule.perTarget && !event.auraSingle && tokens.length > 1) {
     const results = [];
     for (const token of tokens) results.push(await executeRule(item, rule, { ...event, id: `${event.id ?? "aura"}:${token.uuid}`, auraSingle: token.uuid, subject: { tokenUuid: token.uuid, actorUuid: token.actor.uuid } }));
     return results;
   }
   if (rule.require?.adjacent) {
-    const source = event.source?.tokenUuid ? fromUuidSync(event.source.tokenUuid) : null;
+    const source = eventToken(event.source, event.sceneId);
     const target = tokenOf(item.actor, event.sceneId);
-    if (!source || !target || distanceSquares(source, target, event.positions) > 1) return null;
+    if (!source || !target || distanceSquares(source, target, event.positions) > 1) {
+      debug("feature.skip", { item: item.name, rule: rule.id, why: !source ? "noSourceToken" : !target ? "noOwnerToken" : "notAdjacent", source: event.source ?? null });
+      return null;
+    }
   }
   if (rule.require?.sourceWithin != null) {
-    const src = event.source?.tokenUuid ? fromUuidSync(event.source.tokenUuid) : null;
+    const src = eventToken(event.source, event.sceneId);
     const self = tokenOf(item.actor, event.sceneId);
-    if (!src || !self || distanceSquares(src, self, event.positions) > (evaluateInt(rule.require.sourceWithin, item) ?? -1)) return null;
+    const within = evaluateInt(rule.require.sourceWithin, item) ?? -1;
+    const sameScene = !!src && !!self && (!src.parent || !self.parent || src.parent.id === self.parent.id);
+    const distance = sameScene ? distanceSquares(src, self, event.positions) : Infinity;
+    if (distance > within) {
+      debug("feature.skip", { item: item.name, rule: rule.id, why: !src ? "noSourceToken" : !self ? "noOwnerToken" : !sameScene ? "otherScene" : "outOfRange", distance, within, source: event.source ?? null, sceneId: event.sceneId ?? null });
+      return null;
+    }
   }
   const subjectKeywords = fromUuidSync(event.subject?.actorUuid ?? "")?.system?.keywords;
   if (rule.require?.subjectKeyword && !(subjectKeywords?.has?.(rule.require.subjectKeyword) || subjectKeywords?.includes?.(rule.require.subjectKeyword))) return null;
@@ -204,10 +250,12 @@ export async function executeRule(item, rule, event = {}) {
   if (rule.require?.dying) tokens = tokens.filter(t => t.actor.statuses?.has("dying"));
   if (!tokens.length) return null;
   if (rule.cost && worldValue("malice") < rule.cost) return null;
-  pending.add(key);
-  if (rule.opportunity && frequency) await item.update({ [`flags.${MODULE_ID}.ruleUses.${frequencyId}`]: frequency,
-    [`flags.${MODULE_ID}.ruleMessages.${frequencyId}`]: new foundry.data.operators.ForcedDeletion() });
+  let release;
+  pending.set(key, new Promise(resolve => { release = resolve; }));
   try {
+    // Inside the try: a failed claim write must still settle `pending`, or queued runs of this rule would wait forever.
+    if (rule.opportunity && frequency) await item.update({ [`flags.${MODULE_ID}.ruleUses.${frequencyId}`]: frequency,
+      [`flags.${MODULE_ID}.ruleMessages.${frequencyId}`]: new foundry.data.operators.ForcedDeletion() });
     const moonlight = rule.effects.some(e => e.key === "benefit:moonlight");
     if (moonlight) {
       const chosen = [];
@@ -216,7 +264,7 @@ export async function executeRule(item, rule, event = {}) {
         if ((await askFeature(item, rule, { promptActor: token.actor }))?.accepted) chosen.push(token);
       }
       tokens = chosen; if (!tokens.length) return null;
-    } else if ((rule.optional || rule.cost > 0) && !(await askFeature(item, rule))?.accepted) return null;
+    } else if ((rule.optional || rule.cost > 0) && !(await askFeature(item, rule, { detail: promptDetail(event, tokens) }))?.accepted) return null;
     if (rule.limit) {
       const recoveryChoices = rule.special === "recoveryChoices";
       if (recoveryChoices && setting("healingMode") === "off") return null;
@@ -294,7 +342,7 @@ export async function executeRule(item, rule, event = {}) {
     const result = await postRecordCard({ title: rule.label ?? item.name, sourceActor: item.actor, sourceTokenUuid: source?.uuid,
       abilityUuid: item.uuid, targets, ops, modes: {}, warnings, user: event.user ?? game.user, meta: { choices: plan.choices, featureEventId: event.id ?? null, featureRuleId: rule.id, featureItemUuid: item.uuid, featureChain: [...(event.source?.featureChain ?? []), item.uuid] } });
     return result;
-  } finally { pending.delete(key); }
+  } finally { pending.delete(key); release(); }
 }
 
 export async function runFeatureEvents(events) {
@@ -302,7 +350,7 @@ export async function runFeatureEvents(events) {
   for (const event of events) {
     if (seenEvents.has(event.id)) continue;
     seenEvents.add(event.id);
-    if (event.kind === "damage.after") await clearSanctuaryOnHarm(event);
+    if (event.kind === "damage.after") await clearSanctuaryOnHarm(event).catch(err => error("features.sanctuary", err));
     if (seenEvents.size > 2000) seenEvents.delete(seenEvents.values().next().value);
     const sharedOffers = new Set();
     for (const actor of featureActors()) for (const item of list(actor.items)) for (const rule of featureRules(item)) {
@@ -312,7 +360,8 @@ export async function runFeatureEvents(events) {
       const offer = rule.targets === "encounter" && item.system?.category === "maliceAncestry" ? `${item.system._dsid}:${rule.id}` : null;
       if (offer && sharedOffers.has(offer)) continue;
       if (offer) sharedOffers.add(offer);
-      await executeRule(item, rule, event);
+      // One failing rule must not drop the rules and events (the other targets of the same card) behind it.
+      try { await executeRule(item, rule, event); } catch (err) { error("features.rule", err, { item: item.name, rule: rule.id, event: event.kind }); }
     }
   }
 }

@@ -2333,7 +2333,7 @@ let regResult;
     const r = validateOverlay(o);
     assert.ok(r.ok, `${f}: ${JSON.stringify(r.errors)}`);
   }
-  assert.equal(ALL_OVERLAYS.length, 175, `175 overlays in the library (got ${ALL_OVERLAYS.length})`);
+  assert.equal(ALL_OVERLAYS.length, 177, `177 overlays in the library (got ${ALL_OVERLAYS.length})`);
   assert.deepEqual([regResult.accepted, regResult.rejected], [LIB_SOURCE.overlays.length, 0], `registered: ${JSON.stringify(regResult.problems ?? regResult)}`);
   const info = api.library.info();
   assert.ok(info.gainFeatures >= 8 || (Array.isArray(info.gainFeatures) && info.gainFeatures.length >= 8), `gain features: ${JSON.stringify(info.gainFeatures)}`);
@@ -2601,7 +2601,6 @@ let h5Combat;
   assert.equal(liveOp(m2, w2.opId).status, "skipped");
   assert.equal(liveOp(m2, w2.opId).reason, "alreadyGained", "the first applied wins");
   assert.equal(ferocity(), f0 + 1);
-  // "Apply all" never takes a waiting gain row? (prompt rows are part of Apply all; confirm rows are not, below.)
   // Deleting a card with a waiting row leaves the rule free.
   await nextRound(c);
   borin.system.stamina.value = borin.system.stamina.max;
@@ -2621,7 +2620,7 @@ let h5Combat;
   const m6 = await hit(spear, tBorin, 1);
   assert.equal(gainOps(m6).length, 0, "off: nothing");
   await set("resourceGains", "auto");
-  // A confirm rule under auto: Troy's natural 19 row waits and is not part of "Apply all".
+  // The former confirm rule (natural 19 or 20 in sight) is checked by the engine now: Troy's own natural 19 applies at once.
   await nextRound(c);
   const n0 = markMsgs();
   const roll = useCard(troyRoll, { targets: [tWarrior], amount: 1, natural: 19 });
@@ -2631,15 +2630,9 @@ let h5Combat;
   assert.equal(gc.length, 1, `one gain card for the natural roll: ${gc.length}`);
   const nat = opsOf(gc[0]).find(o => o.gain?.ruleKey === "drama:natural-high");
   assert.ok(nat, "the natural-high row");
-  assert.equal(nat.status, "pending");
-  assert.equal(nat.mode, "prompt", "confirm -> prompt");
-  assert.equal(engineMod.ownButtonOnly(nat), true, "confirm rows only by their own button");
-  await api.applyOps(gc[0].id, null);   // "Apply all"
-  await settleAll();
-  assert.equal(liveOp(gc[0], nat.opId).status, "pending", "Apply all skips the confirm row");
-  await api.applyOps(gc[0].id, [nat.opId]);
-  await settleAll();
-  assert.equal(liveOp(gc[0], nat.opId).status, "applied", "its own button applies it");
+  assert.equal(nat.mode, "auto", "no confirm wait any more");
+  assert.equal(nat.status, "applied", "applied at once");
+  assert.equal(engineMod.ownButtonOnly(nat), false, "an ordinary row again");
   assert.equal(troy.system.hero.primary.value, 3, "+3 Drama");
   void roll;
   // A hook veto releases the auto claim: the next event this round gains.
@@ -2653,7 +2646,7 @@ let h5Combat;
   assert.deepEqual(gainsMod.gainClaims(), [], "the vetoed row's claim was released");
   const m8 = await hit(stab, tBorin, 1);
   assert.equal(gainOps(m8)[0]?.status, "applied", "the rule is still free this round");
-  console.log("ok H11 modes: prompt rows wait without claims, first applied wins, re-resolve keeps them, delete frees, manual / off, confirm outside Apply all, a veto releases");
+  console.log("ok H11 modes: prompt rows wait without claims, first applied wins, re-resolve keeps them, delete frees, manual / off, a former confirm rule applies at once, a veto releases");
 }
 
 /* ======================================================================== */
@@ -2993,17 +2986,25 @@ const rowsFor = (msg, ruleKey) => gainOps(msg).filter(o => o.gain.ruleKey === ru
   assert.equal(rows[0].status, "applied");
   tAssassin._source.x = 5 * G;
   tAssassin._source.y = 7 * G;   // next to Jorah (4,6): inside the Null Field (aura 2)
+  // The Null Field must be UP (its aura flag active): a field that is not up gives nothing.
+  n = markMsgs();
+  useCard(stab, { targets: [tBorin], amount: 1 });
+  await idle();
+  await settleAll();
+  assert.equal(gainRowsOf(gainCards(n)).filter(o => o.gain.ruleKey === "discipline:field-main-action").length, 0, "field not up: no row");
+  nullField.flags["stef-ds-automation"] = { aura: { active: true, tokenUuid: tJory.uuid, sceneId: canvas.scene.id } };
   n = markMsgs();
   useCard(stab, { targets: [tBorin], amount: 1 });
   await idle();
   await settleAll();
   const field = gainRowsOf(gainCards(n)).filter(o => o.gain.ruleKey === "discipline:field-main-action");
   assert.equal(field.length, 1, "the field main action row");
-  assert.equal(field[0].status, "pending", "it waits for the Director (confirm)");
-  assert.match(viewRow(gainCards(n)[0], field[0].opId).detail, /GainWaits/);
+  assert.equal(field[0].mode, "auto", "no confirm wait: the field is up and the enemy is inside");
+  assert.equal(field[0].status, "applied", "applied at once");
+  delete nullField.flags["stef-ds-automation"];
   tAssassin._source.x = tAssassin.home.x;
   tAssassin._source.y = tAssassin.home.y;
-  console.log("ok H15e Null: Malice ability gain card, field main action waits");
+  console.log("ok H15e Null: Malice ability gain card, field main action only while the field is up, then at once");
 
   // Troubadour: a hero winded (encounter), its own natural 20 without line of effect, hero deaths, three heroes.
   await nextRound(c);
@@ -3047,7 +3048,7 @@ const rowsFor = (msg, ruleKey) => gainOps(msg).filter(o => o.gain.ruleKey === ru
   await Promise.all([dorian.createEmbeddedDocuments("ActiveEffect", [{ name: "Dead", statuses: ["dead"] }]), jory.createEmbeddedDocuments("ActiveEffect", [{ name: "Dead", statuses: ["dead"] }])]);
   await settleAll();
   assert.equal(gainRowsOf(gainCards(n)).filter(o => o.gain.ruleKey === "drama:hero-died" && o.status === "applied").length, 2, "two deaths: +10 twice");
-  // Three heroes using abilities in one turn (encounter, confirm -> prompt).
+  // Three heroes using abilities in one turn (encounter; counted by the engine, applies at once).
   await nextRound(c);
   await activate(c, tBorin);
   n = markMsgs();
@@ -3058,7 +3059,7 @@ const rowsFor = (msg, ruleKey) => gainOps(msg).filter(o => o.gain.ruleKey === ru
   await settleAll();
   rows = gainRowsOf(gainCards(n)).filter(o => o.gain.ruleKey === "drama:heroes-same-turn");
   assert.equal(rows.length, 1, `three heroes this turn: ${JSON.stringify(gainRowsOf(gainCards(n)).map(o => o.gain.ruleKey))}`);
-  assert.equal(rows[0].status, "pending", "waits for the Director");
+  assert.equal(rows[0].status, "applied", "counted heroes: applied at once, no Director wait");
   console.log("ok H15f Troubadour: hero winded, own natural 20, line of effect, deaths once per hero, two deaths, three heroes");
 
   // Fury: the winded 1d3 rolled once, undone with its damage row.

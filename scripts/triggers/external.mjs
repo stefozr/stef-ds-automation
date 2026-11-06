@@ -190,6 +190,18 @@ export async function takeDamageWrapper(wrapped, damage, options = {}) {
 }
 
 /**
+ * The damage source of an external takeDamage call: DSCT's `options.dsbl.source` (DSCT/helpers.mjs:117), else Draw
+ * Steel 1.2's `options.origin` (DamageRoll.getOrigin: the chat message speaker's actorUuid / tokenUuid), so features
+ * with `require.sourceWithin` see chat-button hits too. Each uuid falls back on its own.
+ */
+export function externalSource(options) {
+  const dsbl = options?.dsbl?.source ?? null;
+  const origin = options?.origin ?? null;
+  const pick = key => (validUuid(dsbl?.[key]) ? dsbl[key] : (validUuid(origin?.[key]) ? origin[key] : null));
+  return { actorUuid: pick("actorUuid"), tokenUuid: pick("tokenUuid") };
+}
+
+/**
  * Decide whether (and how) to hold one external takeDamage call. Never throws its own errors.
  * @returns {Promise<{amount: number, holdId: string|null, actor: Actor, token: TokenDocument|null}|null>} null = untouched
  */
@@ -216,10 +228,10 @@ async function planExternal(model, damage, options) {
   // anything returns, so the creature's next hit is not taken for halved (third review).
   const halvedMark = holdsOn && !noHold ? consumeExternalHalf(actor, token) : false;
   if (!Number.isFinite(damage) || damage <= 0) return null;
-  const src = options?.dsbl?.source ?? null;   // DSCT's damage source (DSCT/helpers.mjs:117)
+  const src = externalSource(options);
   const extra = {
     type: normType(options?.type), staminaLoss, groupUuid: group?.uuid ?? null,
-    source: { actorUuid: validUuid(src?.actorUuid) ? src.actorUuid : null, tokenUuid: validUuid(src?.tokenUuid) ? src.tokenUuid : null },
+    source: { ...src },
   };
   // A report-only plan has no gmId: its report goes to the active GM (I28).
   const reportOnly = { amount: damage, holdId: null, gmId: undefined, actor, token, reportOnly: true, ...extra };
@@ -238,7 +250,7 @@ async function planExternal(model, damage, options) {
     // A half application running for this creature on this client (the system's Shift+Click, Combat Tools'
     // Apply) or a Shift+Click half marked per target (Target Damage, Combat Tools' socket); the mark is consumed.
     halved: halvedMark || halfRunning(actor, token),
-    source: { actorUuid: validUuid(src?.actorUuid) ? src.actorUuid : null, tokenUuid: validUuid(src?.tokenUuid) ? src.tokenUuid : null },
+    source: { ...src },
   };
   let res = null;
   let gmId = null;   // the GM that keeps the pending commit (holdDone goes there, §6.4)

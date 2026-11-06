@@ -2,6 +2,48 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.2.0] - 2026-11-05
+
+### Added
+- Works with Draw Steel 1.2.0 and the Combat Tools 2.x family (Combat Tools 2.2.0, ctlib 2.0.0, Death Tracker 2.0.0,
+  Battle Log 2.0.0). Draw Steel 1.1.2 still works.
+- On Draw Steel 1.2 the Automation box is the one place to apply and undo a card: the system's per-target buttons and
+  ctlib's **Apply All Damage** are locked for rows the box applied or still has pending, and while a card is
+  resolving. A player's click relayed by ctlib is refused the same way.
+- Results applied from the system's per-target buttons or ctlib's **Apply All Damage** show as applied elsewhere in
+  the box instead of being applied twice, and follow later undo.
+- Companions (Draw Steel 1.2) are covered: their master's surges are offered in damage dialogs and Moonlight's
+  recovery limit applies to them.
+- Class features shared by two classes (Essence of the Elementalist and Summoner, Ferocity of the Fury and
+  Beastheart) now apply only to heroes of their own class.
+
+### Changed
+- Draw Steel: Target Damage is only needed on Draw Steel 1.1. On Draw Steel 1.2 the suite ignores its panel, and
+  the self-check asks the Director to turn it off.
+- Damage from the system's chat buttons carries its source, so features that look for a nearby source of damage see it.
+- Summons that add abilities to the new actor use the system's own placement.
+- Summoner and Beastheart heroes no longer get the Elementalist and Fury resource gains.
+- Conditions and triggered gains apply automatically whenever the automation can check the rule itself: grabbed (setting on by default; a grab the size rule forbids still waits; abilities that grab several creatures keep every grab) and the Null Field Discipline and Troubadour Drama gains (the Null Field must be up). Rows still wait only for a real choice: choose-one, picks, placement, an unclear tier, a fact only a player reported.
+- Library gain rules: `confirm` is deprecated; it is accepted and ignored, and the validator warns.
+
+### Fixed
+- Draw Steel 1.2: a crash (`getActorModifiers`) stopped every power-roll ability from opening its Use Ability dialog.
+- **Shadow Insight:** heroic power-roll abilities cost 1 less Insight when any target has an edge or double edge. The
+  discounted cost shows in the Use Ability dialog and follows Combat Tools' edge pills; a cost you type yourself wins.
+  Setting **Insight edge discount**.
+- **Breath of Dawn Remembered:** the target spends a Recovery plus one more per essence spent, and its recoveries go
+  down accordingly.
+- **Ward of Nature's Affection:** it no longer drops a hit that lands while an earlier prompt is open; it measures
+  range from the attacker's token for hits applied from chat buttons; one failing rule no longer stops the others; and
+  optional feature prompts now say who damaged whom and whom the feature affects.
+- **Psychic Pulse:** Null Field grows by 1 until the start of your next turn, and enemies in it take Intuition psychic
+  damage at the end of your turn (plus the ability's own 2 x Intuition damage).
+- **Metakinetic Mastery** is automated by discipline (tracking needs Draw Steel 1.2): Knockback gets +Intuition
+  distance (discipline 2); you gain 1 surge the first time each round you take damage or are force moved, even if you
+  resist it (discipline 4; 2 surges at 8); edge (6) or double edge (10) on Grab and Knockback; +Intuition on every
+  forced move and 10 temporary Stamina on heroic abilities (12); and a free Knockback is offered after Inertial Shield.
+- Aura damage no longer hits dead creatures.
+
 ## [1.1.1] - 2026-11-01
 
 ### Fixed

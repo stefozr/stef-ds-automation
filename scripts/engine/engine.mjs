@@ -59,8 +59,8 @@ import { applyModifier, applyRuleDuration } from "./modifiers.mjs";
  * - Persistent (M9, docs/M9-DESIGN.md §C): the resolve write carries `persistent` (persistent/registry.mjs
  *   persistentRecord; a fresh card is matched against a pending free re-roll there), indexed on HOOKS.resolved.
  */
-import { DSTD_ID, HOOKS, MODULE_ID, OP_STATUS } from "../constants.mjs";
-import { damageBatch } from "../compat/ctlib.mjs";
+import { CTLIB_ID, DSTD_ID, HOOKS, MODULE_ID, OP_STATUS } from "../constants.mjs";
+import { ctlibActive, ctlibCoverage, damageBatch } from "../compat/ctlib.mjs";
 import { noteDamageCause } from "../compat/death-tracker.mjs";
 import { dstdActive, dstdCoveredTokens, dstdTargetTokenUuids } from "../compat/dstd.mjs";
 import { debug, error, log, warn } from "../log.mjs";
@@ -410,7 +410,7 @@ export async function trustCard(message) {
 /*  Applying ops                                */
 /* -------------------------------------------- */
 
-const EXTERNAL_REASONS = new Set(["appliedByTargetDamage", "partlyAppliedByTargetDamage"]);
+const EXTERNAL_REASONS = new Set(["appliedByTargetDamage", "partlyAppliedByTargetDamage", "appliedByCtlib", "partlyAppliedByCtlib"]);
 
 /** Milestone 7: a Malice or hero-token row (world settings, resources/world-resources.mjs). */
 const isWorldResource = op => op?.kind === "resource" && typeof op.resource === "string" && Object.hasOwn(WORLD_RESOURCES, op.resource);
@@ -420,18 +420,31 @@ const isWorldResource = op => op?.kind === "resource" && typeof op.resource === 
  * every target covered -> "external" (stays so until Target Damage undoes it); only some targets of a
  * squad op covered -> "skipped" (applying the whole hit would double the covered minions' share, so the
  * Director finishes the rest from Target Damage's rows).
+ * 1.2.0: the same for ctlib's journal (the system's per-target buttons, "Apply All Damage"): "appliedByCtlib" (external) or
+ * "partlyAppliedByCtlib" (some of a squad op's member parts covered: skipped). Both follow `respectDstdApplications`.
  */
 function externalPatch(message, res, op) {
-  if (!dstdActive() || !setting("respectDstdApplications")) return null;
+  if (!setting("respectDstdApplications")) return null;
+  const dstd = dstdActive();
+  const ctlibOn = ctlibActive();
+  if (!dstd && !ctlibOn) return null;
   // Surge rows, movement rows and synthetic cards have no Target Damage counterpart.
   if (op.surge?.kind === "damage" || op.synthetic || op.lib || MOVE_KINDS.has(op.kind)) return null;
   // Milestone 7: gain, zone, hero-token and world-resource rows are ours alone.
   if (op.kind === "gain" || op.kind === "zone" || op.heroToken || isWorldResource(op)) return null;
-  const uuids = (op.targetKeys ?? []).map(k => res.targets?.[k]?.tokenUuid).filter(Boolean);
-  const covered = dstdCoveredTokens(message, op, uuids);
-  if (!covered.size) return null;
-  if (covered.size >= new Set(uuids).size) return { status: OP_STATUS.EXTERNAL, reason: "appliedByTargetDamage" };
-  return { status: OP_STATUS.SKIPPED, reason: "partlyAppliedByTargetDamage" };
+  if (dstd) {
+    const uuids = (op.targetKeys ?? []).map(k => res.targets?.[k]?.tokenUuid).filter(Boolean);
+    const covered = dstdCoveredTokens(message, op, uuids);
+    if (covered.size >= new Set(uuids).size && covered.size) return { status: OP_STATUS.EXTERNAL, reason: "appliedByTargetDamage" };
+    if (covered.size) return { status: OP_STATUS.SKIPPED, reason: "partlyAppliedByTargetDamage" };
+  }
+  // 1.2.0: ctlib's journal says the system's per-target button (or "Apply All Damage") applied the row.
+  if (ctlibOn) {
+    const { covered, total } = ctlibCoverage(message, op);
+    if (covered && covered >= total) return { status: OP_STATUS.EXTERNAL, reason: "appliedByCtlib" };
+    if (covered) return { status: OP_STATUS.SKIPPED, reason: "partlyAppliedByCtlib" };
+  }
+  return null;
 }
 
 /**
@@ -1747,7 +1760,7 @@ export function onUpdateChatMessage(message, changed, options, userId) {
 
   // Late targets: Target Damage rewrote its target list (area auto-targeting) and we have none yet.
   const dstdTargets = changed?.flags?.[DSTD_ID]?.state?.targets;
-  if (Array.isArray(dstdTargets) && dstdTargets.length && !Object.keys(realTargets(res)).length
+  if (Array.isArray(dstdTargets) && dstdTargets.length && res.shape !== "targetResult" && !Object.keys(realTargets(res)).length
     && !targetedOps(res).some(isApplied)) {
     const uuids = dstdTargetTokenUuids(message);
     log("lateTargets", { messageId: message.id, count: uuids.length });
@@ -1756,7 +1769,9 @@ export function onUpdateChatMessage(message, changed, options, userId) {
   }
 
   // Target Damage applied or undid rows: keep our ops' "applied elsewhere" state in step.
-  if (changed?.flags?.[DSTD_ID]?.state && dstdActive() && setting("respectDstdApplications")) {
+  // 1.2.0: ctlib's journal records the same for the system's per-target buttons and "Apply All Damage".
+  if (setting("respectDstdApplications") && ((changed?.flags?.[DSTD_ID]?.state && dstdActive())
+    || (changed?.flags?.[CTLIB_ID]?.journal && ctlibActive()))) {
     reconcileExternal(message).catch(err => error("reconcile", err));
   }
 

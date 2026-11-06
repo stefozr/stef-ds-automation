@@ -15,6 +15,7 @@
  * menu, unverifiedVersion, advancedEnrichers, autoApplyOwn, dsctHandlers} (English in PROBLEM_TEXT, placeholders as written there).
  * 0.16.0: the Combat Tools family's versions against the verified list (`familyVersions`, problem `unverifiedVersion`).
  * 0.17.0: the forced-movement path bridge is retired (its `forcedBridge` row with it).
+ * 1.2.0: `dstdOnSystem12` (Target Damage is active on Draw Steel 1.2: turn it off).
  * 0.18.0 (Combat Tools 1.2.7, docs/COMBAT-TOOLS-1.2.7.md): `advancedEnrichers` (its card chips are locked like Target
  * Damage rows, but its own auto-apply bypasses every click guard), `autoApplyOwn` (this client auto-applies its own
  * abilities through Combat Tools), `dsctHandlers` (another module took over Combat Tools' movements).
@@ -43,6 +44,7 @@ import { openTallies } from "./zones/engine.mjs";
 import { openZoneUpkeeps } from "./zones/upkeep.mjs";
 import { nativeSummonStatus } from "./summons/native.mjs";
 import * as dsct from "./compat/dsct.mjs";
+import { dstdActive } from "./compat/dstd.mjs";
 import * as plan from "./engine/plan.mjs";
 
 /** The native targeted builder (docs/M8-DESIGN.md §3.2, another work package), loaded lazily: it may be absent. */
@@ -75,6 +77,7 @@ export const PROBLEM_TEXT = Object.freeze({
   unverifiedVersion: "Not verified with this version of Automation Suite: {list}. Combat Tools and its companions may have changed what we rely on; run the newest Combat Tools family live check in TESTING.md before a session.",
   advancedEnrichers: "Combat Tools' Advanced Enrichers are on: their Apply chips on automated cards are locked once Automation Suite applied, but Combat Tools' own auto-apply of enrichers is not. Turn the setting off if effects land twice.",
   autoApplyOwn: "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): its enricher auto-apply writes without a click, so it can repeat what Automation Suite applies.",
+  dstdOnSystem12: "Target Damage is active on Draw Steel 1.2: turn it off (the system's per-target sections replace it).",
   dsctHandlers: "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently.",
 });
 
@@ -348,6 +351,8 @@ export function selfCheck() {
   if (report.dsctAdvancedEnrichers === true) found.push(problem("advancedEnrichers"));
   if (report.dsctAutoApplyOwn === true) found.push(problem("autoApplyOwn"));
   if (report.dsctForeignHandlers.length) found.push(problem("dsctHandlers", { list: report.dsctForeignHandlers.join(", ") }));
+  // 1.2.0: Target Damage next to the system's per-target sections (our Target Damage paths stand down on those cards).
+  if (compat.targetResult && dstdActive()) found.push(problem("dstdOnSystem12"));
   const problems = found.map(problemText);
   if (problems.length) console.warn(`${MODULE_ID} | selfCheck problems:\n- ${problems.join("\n- ")}`);
   else console.log(`${MODULE_ID} | selfCheck: all green`);

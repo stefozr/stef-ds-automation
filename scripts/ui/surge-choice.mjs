@@ -152,18 +152,29 @@ export async function prepareSurgeChoice(message, res, ops, { covered = () => fa
 export function registerSurgeChoice() { registerPromptType("surgeChoice", handleSurgeChoice); }
 
 const nativeDialogs = new WeakMap();
+/** The actor whose surges a native damage dialog spends: a retainer's mentor, a companion's master (Draw Steel 1.2). */
+export function nativeSurgeActor(actor) {
+  if (actor?.type === "retainer") return actor.system.retainer.mentor;
+  if (actor?.type === "companion") return actor.system.companion?.master;
+  return actor;
+}
+async function nativeDialogWrapper(wrapped, roll) {
+  const actor = nativeSurgeActor(this.ability?.actor);
+  nativeDialogs.set(this, { actor, before: availableSurges(actor) });
+  try { return await wrapped(roll); } finally { nativeDialogs.delete(this); }
+}
+async function nativeRollWrapper(wrapped, roll, ...args) {
+  const context = nativeDialogs.get(this);
+  const count = context ? Math.max(0, context.before - availableSurges(context.actor)) : 0;
+  const previous = roll.options;
+  if (count) roll.options = { ...previous, dsAutoNativeSurges: (previous?.dsAutoNativeSurges ?? 0) + count };
+  try { return await wrapped(roll, ...args); } finally { roll.options = previous; }
+}
 export function registerNativeSurgeTracking() {
-  wrap("ds.data.pseudoDocuments.messageParts.AbilityResult.prototype.modifyDamageDialog", async function(wrapped, roll) {
-    let actor = this.ability?.actor;
-    if (actor?.type === "retainer") actor = actor.system.retainer.mentor;
-    nativeDialogs.set(this, { actor, before: availableSurges(actor) });
-    try { return await wrapped(roll); } finally { nativeDialogs.delete(this); }
-  }, "MIXED");
-  wrap("ds.data.pseudoDocuments.messageParts.AbilityResult.prototype.createModifiedDamageRoll", async function(wrapped, roll, ...args) {
-    const context = nativeDialogs.get(this);
-    const count = context ? Math.max(0, context.before - availableSurges(context.actor)) : 0;
-    const previous = roll.options;
-    if (count) roll.options = { ...previous, dsAutoNativeSurges: (previous?.dsAutoNativeSurges ?? 0) + count };
-    try { return await wrapped(roll, ...args); } finally { roll.options = previous; }
-  }, "MIXED");
+  // Draw Steel 1.2 adds a per-target TargetResult part with the same two methods (the per-target context menu);
+  // `wrap` skips the target on 1.1.x, which has none.
+  for (const part of ["AbilityResult", "TargetResult"]) {
+    wrap(`ds.data.pseudoDocuments.messageParts.${part}.prototype.modifyDamageDialog`, nativeDialogWrapper, "MIXED");
+    wrap(`ds.data.pseudoDocuments.messageParts.${part}.prototype.createModifiedDamageRoll`, nativeRollWrapper, "MIXED");
+  }
 }

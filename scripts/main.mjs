@@ -178,9 +178,11 @@ import { stripParts } from "./maintenance/strip.mjs";
 import { cleanup } from "./maintenance/cleanup.mjs";
 import { modeFor as actorModeFor } from "./engine/actor-category.mjs";
 import { registerPartLock } from "./ui/part-lock.mjs";
+import { registerTargetResultVeto } from "./compat/target-result-veto.mjs";
 import { registerNativeSummon } from "./summons/native.mjs";
 import { registerSourceDefeat } from "./turn/source-defeat.mjs";
 import { registerFrightenedWarning } from "./ui/frightened-warning.mjs";
+import { registerInsightDiscount } from "./ui/insight-discount.mjs";
 import { legacy } from "./maintenance/legacy.mjs";
 
 // Import time: the part type must exist before the ChatMessage schema is first built, and our special
@@ -693,6 +695,7 @@ Hooks.once("init", () => {
   safely("registerNativeSurgeTracking", registerNativeSurgeTracking);
   registerTemporaryStamina();
   registerAlone();
+  safely("registerInsightDiscount", registerInsightDiscount);
   registerMovementChoice();
   // 0.16.0: the hero-token reroll's spend type, before the system localizes the spend list (i18nInit).
   safely("registerHeroTokenSpend", registerHeroTokenSpend);
@@ -704,6 +707,8 @@ Hooks.once("init", () => {
   safely("registerTeleportMessageFold", registerTeleportMessageFold);
   // Milestone 8: per-part locks of the system's buttons on 1.2 cards (every client).
   safely("registerPartLock", registerPartLock);
+  // 1.2.0: the system's and ctlib's per-target buttons are vetoed for rows the Automation box owns.
+  safely("registerTargetResultVeto", registerTargetResultVeto);
   registerPromptDialog();
   // Milestone 2 (libWrapper; selfCheck lists what was installed).
   registerSystemFixes();

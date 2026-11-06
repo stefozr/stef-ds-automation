@@ -1,7 +1,7 @@
 {
   "key": "ability:null-field",
   "name": "Null Field",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "effects": [],
   "automation": {
     "version": 1,
@@ -45,6 +45,26 @@
         "opportunity": true,
         "optional": true,
         "label": "Gravitic Disruption"
+      },
+      {
+        "id": "pulse",
+        "event": "turn.end",
+        "targets": "aura",
+        "effects": [
+          {
+            "id": "pulse",
+            "type": "damage",
+            "value": "@I",
+            "damageType": "psychic"
+          }
+        ],
+        "filter": "enemies",
+        "require": {
+          "subject": "self",
+          "auraSize": true
+        },
+        "once": "turn",
+        "label": "Psychic Pulse"
       },
       {
         "id": "anchor",

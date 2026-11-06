@@ -47,7 +47,7 @@ globalThis.ChatMessage = {
   },
 };
 const library = (await import(pathToFileURL(paths.LIBRARY + "/dist/overlays.mjs"))).default;
-assert.equal(api.library.registerSource({ id: "features-test", overlays: library }).accepted, 175);
+assert.equal(api.library.registerSource({ id: "features-test", overlays: library }).accepted, 177);
 class Coll extends Map { get contents() { return [...this.values()]; } [Symbol.iterator]() { return this.values(); } find(fn) { return this.contents.find(fn); } }
 Effect.prototype.delete = async function() { this.parent.effects.delete(this.id); };
 const put = (o, key, value) => { const parts = key.split("."); for (const p of parts.slice(0, -1)) o = o[p] ??= {}; if (value instanceof foundry.data.operators.ForcedDeletion) delete o[parts.at(-1)]; else o[parts.at(-1)] = structuredClone(value); };

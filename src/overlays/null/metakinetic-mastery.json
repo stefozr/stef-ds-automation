@@ -1,0 +1,35 @@
+{
+  "key": "feature:metakinetic-mastery",
+  "version": "1.0.1",
+  "name": "Metakinetic Mastery",
+  "notes": "Tiers follow discipline (tracking on 1.2) at use time. Free Knockback is an offer card. A move that stability cuts to nothing still gives the surge.",
+  "effects": [],
+  "scaling": {
+    "forcedBonus": [
+      { "minResource": 2, "abilities": ["knockback"], "bonus": "@I" },
+      { "minResource": 12, "bonus": "@I" }
+    ],
+    "rollEdges": [
+      { "minResource": 6, "abilities": ["grab", "knockback"], "edges": 1 },
+      { "minResource": 10, "abilities": ["grab", "knockback"], "edges": 2 }
+    ],
+    "useBenefits": [
+      { "minResource": 12, "category": "heroic", "temporaryStamina": 10 }
+    ],
+    "offers": [
+      { "after": "inertial-shield", "ability": "knockback", "free": "triggered" }
+    ]
+  },
+  "gains": [
+    {
+      "id": "surge-damage", "event": "damage", "taker": "self", "once": "round", "resource": "surge", "minResource": 4,
+      "amount": 1, "amountBy": [{ "minResource": 8, "amount": 2 }],
+      "label": "First damage or forced move this round"
+    },
+    {
+      "id": "surge-move", "event": "forcedMove", "taker": "self", "includeResisted": true, "once": "round", "onceWith": "surge-damage", "resource": "surge",
+      "minResource": 4, "amount": 1, "amountBy": [{ "minResource": 8, "amount": 2 }],
+      "label": "First damage or forced move this round"
+    }
+  ]
+}

@@ -40,13 +40,13 @@ export function validateAutomation(value) {
     if (r.optional != null && typeof r.optional !== "boolean") bad("optional must be a checkbox");
     if (r.filter != null && !["all", "allies", "enemies", "selfAlly"].includes(r.filter)) bad("unknown side filter");
     if (r.keywords != null && (!Array.isArray(r.keywords) || r.keywords.some(k => typeof k !== "string" || k.length > 80))) bad("keywords must be a list");
-    if (r.special != null && !["shift", "blocking", "immunityChoice", "recoveryChoices", "thunderMother", "spotlight", "auraJudgedDamage", "auraRecovery", "auraSouls"].includes(r.special)) bad("unknown special rule");
+    if (r.special != null && !["shift", "blocking", "immunityChoice", "recoveryChoices", "thunderMother", "spotlight", "auraJudgedDamage", "auraRecovery", "auraSouls", "auraGrow"].includes(r.special)) bad("unknown special rule");
     for (const k of ["range", "limit"]) if (r[k] != null && formulaProblem(r[k])) bad(`invalid ${k} formula`);
     if (r.require != null) {
       if (!r.require || typeof r.require !== "object" || Array.isArray(r.require)) bad("requirements must be an object");
       else for (const [k, v] of Object.entries(r.require)) {
-        if (!["adjacent", "sourceWithin", "subjectKeyword", "subject", "dying", "dead", "auraOption", "actionType", "costsMalice", "strike"].includes(k)) bad(`unknown requirement ${k}`);
-        if (["adjacent", "dying", "dead"].includes(k) && typeof v !== "boolean") bad(`${k} must be a checkbox`);
+        if (!["adjacent", "sourceWithin", "subjectKeyword", "subject", "dying", "dead", "auraOption", "auraSize", "actionType", "costsMalice", "strike"].includes(k)) bad(`unknown requirement ${k}`);
+        if (["adjacent", "dying", "dead", "auraSize"].includes(k) && typeof v !== "boolean") bad(`${k} must be a checkbox`);
         if (k === "sourceWithin" && formulaProblem(v)) bad("invalid source range");
         if (k === "subject" && !["self", "creature"].includes(v)) bad("subject must be self or creature");
       }
@@ -167,6 +167,15 @@ export function useEffects() {
 
 export function editableAutomation(item, resolved) {
   const existing = automationFor(item, resolved?.overlay);
-  if (existing) return clone(existing);
+  if (existing) {
+    const draft = clone(existing);
+    // An overlay's own rules sit next to its effects: keep the effects by prepending them as an on-use rule.
+    if (!item?.flags?.[MODULE_ID]?.automation && (resolved?.effects ?? []).length) {
+      const id = (draft.rules ?? []).some(r => r.id === "on-use") ? "on-use-effects" : "on-use";
+      draft.rules = [{ id, event: "use", targets: "targets", effects: clone(resolved.effects).map(({entryId, ...e}) => e) }, ...(draft.rules ?? [])];
+      draft.suppress = [...new Set([...(draft.suppress ?? []), ...(resolved.suppress ?? [])])];
+    }
+    return draft;
+  }
   return { version: 1, rules: (resolved?.effects ?? []).length ? [{ id: "on-use", event: "use", targets: "targets", effects: clone(resolved.effects).map(({entryId, ...e}) => e) }] : [], suppress: [...(resolved?.suppress ?? [])], config: clone(resolved?.config ?? {}), choices: clone(resolved?.choices ?? []) };
 }

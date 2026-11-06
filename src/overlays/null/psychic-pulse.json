@@ -1,8 +1,7 @@
 {
   "key": "ability:psychic-pulse",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "Psychic Pulse",
-  "notes": "Null Field grows by 1 until your next turn; the damage to enemies in it at the end of this turn is dealt by hand.",
   "effects": [
     {
       "id": "pulse",
@@ -11,5 +10,29 @@
       "value": "2 * @I",
       "damageType": "psychic"
     }
-  ]
+  ],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "grow",
+        "event": "use",
+        "targets": "self",
+        "special": "auraGrow",
+        "label": "Psychic Pulse",
+        "effects": [
+          {
+            "id": "grown",
+            "type": "note",
+            "text": "Null Field is 1 larger until the start of your next turn. At the end of this turn each enemy in it takes Intuition psychic damage (a card then offers the rows)."
+          },
+          {
+            "id": "inactive",
+            "type": "note",
+            "text": "Null Field is not active: its size does not change and nothing more happens at the end of this turn."
+          }
+        ]
+      }
+    ]
+  }
 }

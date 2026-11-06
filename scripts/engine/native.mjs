@@ -32,6 +32,8 @@ export function nativeEffects(item) {
             end: cfg.end ?? "",
             stacking: !!cfg.properties?.has?.("stacking"),
             originDuration: !!cfg.properties?.has?.("originDuration"),
+            // Combat Tools adds this applied property: its grab button skips the size check for it.
+            ignoreSize: !!cfg.properties?.has?.("ignore-size"),
             // Prepared values: tiers inherit the characteristic of the previous tier (draw-steel.mjs:20603-20617).
             potency: { characteristic: tierData.potency?.characteristic ?? "", value: tierData.potency?.value ?? "" },
           });

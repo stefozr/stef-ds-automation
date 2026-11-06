@@ -80,3 +80,16 @@ behavior type (`stef-ds-automation.zone`) and the effect expiry `dsAutoUntil`. W
 Foundry methods (listed in the core README, "Requirements"); the 1.1.x fixes install only where the system still has
 the bug. It never writes the system's own summoner flag; on Draw Steel 1.2 builds the system's native summon goes
 through our placement (setting **Intercept native summons**).
+
+## Draw Steel 1.2
+
+- **Target Damage is off.** On Draw Steel 1.2 the system's per-target sections and ctlib's Apply / Undo replace it
+  (Combat Tools 2.2 lists it as "recommends", for Draw Steel 1.1 only). Every Target Damage path of the suite stands
+  down on a 1.2 card, and the self-check (`dstdOnSystem12`) asks the Director to turn it off.
+- **The veto.** `ds.preApplyTargetResult` (and ctlib's relayed `ctlib.preApplyTargetResult`) refuses a per-target
+  button, and ctlib's **Apply All Damage**, for rows the Automation box applied or still owns; see
+  `scripts/compat/target-result-veto.mjs`.
+- **ctlib journal.** Rows that ctlib's journal (`flags.draw-steel-ctlib.journal`) shows as applied by those buttons
+  are marked applied elsewhere (`appliedByCtlib`, or `partlyAppliedByCtlib` for part of a squad row) and follow a later
+  undo. Setting **Respect Target Damage applications** (`respectDstdApplications`) governs this too.
+  Details: [COMBAT-TOOLS-2.2.md](COMBAT-TOOLS-2.2.md).

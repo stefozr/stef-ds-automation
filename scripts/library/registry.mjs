@@ -10,7 +10,7 @@
  */
 import { MODULE_ID } from "../constants.mjs";
 import { warn } from "../log.mjs";
-import { itemKey, monsterKeys } from "./identity.mjs";
+import { actorClassDsid, itemKey, monsterKeys } from "./identity.mjs";
 import { normalizeOverlay, overlayHash, validateOverlay } from "./schema.mjs";
 
 const sources = new Map();
@@ -102,8 +102,12 @@ export function findOverlay(item, actor = item?.actor) {
     const specific = list.find(o => o.monster?.some(m => mkeys.includes(m)));
     if (specific) return specific;
   }
-  if (actor?.type === "npc") return list.find(o => !o.monster && o.npc === true) ?? null;
-  return list.find(o => !o.monster) ?? null;
+  // 1.2.0: a class-scoped overlay (essence / ferocity) applies only to heroes of that class; unscoped ones always.
+  // An actor whose class is unknown (no class item, partial data) keeps the pre-1.2.0 behavior: the overlay applies.
+  const cls = actorClassDsid(actor);
+  const classOk = o => !o.class || !cls || o.class === cls;
+  if (actor?.type === "npc") return list.find(o => !o.monster && o.npc === true && classOk(o)) ?? null;
+  return list.find(o => !o.monster && classOk(o)) ?? null;
 }
 
 export function hasOverlay(key) {
@@ -112,7 +116,7 @@ export function hasOverlay(key) {
 
 /** Summary for selfCheck and the medkit. */
 export function registryInfo() {
-  const collisions = [...index.entries()].filter(([, l]) => l.filter(o => !o.monster).length > 1).map(([k, l]) => ({ key: k, sources: l.map(o => o.source) }));
+  const collisions = [...index.entries()].filter(([, l]) => l.filter(o => !o.monster && !o.class).length > 1).map(([k, l]) => ({ key: k, sources: l.map(o => o.source) }));
   return {
     sources: [...sources.values()].map(s => ({ id: s.id, priority: s.priority, overlays: s.overlays.length })),
     keys: index.size,

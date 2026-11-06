@@ -680,6 +680,21 @@ export async function externalHold(req, user, { local = false } = {}) {
   }
 }
 
+/**
+ * 1.2.0: the source of an external hit nobody held (no damage.before reactor), from the requester's report (Battle Log's
+ * dsbl source, else Draw Steel 1.2's `options.origin`, triggers/external.mjs externalSource). Before, such hits had an
+ * unknown source, so features with `require.sourceWithin` (Ward of Nature's Affection) never fired for chat-button applies.
+ * Only token / actor uuids that resolve on this client are used (the report is author-provided).
+ */
+function reportedSource(src) {
+  const doc = uuid => (typeof uuid === "string" && uuid.length < 200 ? lookup(uuid) : null);
+  const token = doc(src?.tokenUuid);
+  const actor = token?.actor ?? doc(src?.actorUuid);
+  const known = !!(token || actor);
+  return { actorUuid: actor?.uuid ?? null, tokenUuid: token?.uuid ?? null, itemUuid: null, name: token?.name ?? actor?.name ?? null,
+    keywords: [], fromAbility: false, known };
+}
+
 /** GM side of "holdDone": commit or release the hold; damage.after for external damage. */
 export async function externalDone(req, user) {
   const r = req?.holdDone && typeof req.holdDone === "object" ? req.holdDone : (req ?? {});
@@ -724,7 +739,7 @@ export async function externalDone(req, user) {
     const event = {
       id: newId(), kind: "damage.after", sceneId: token?.parent?.id ?? null,
       subject: { actorUuid: actor.uuid, tokenUuid: token?.uuid ?? null, name: token?.name ?? actor.name, isHero: actor.type === "hero" },
-      source: p?.source ?? { actorUuid: null, tokenUuid: null, itemUuid: null, name: null, keywords: [], fromAbility: false, known: false },
+      source: p?.source ?? reportedSource(r.source),
       damage: {
         instanceKey: `ext:${newId()}`, amount: dealt, type: "", halved: false, hasPotency: false, finalAmount: dealt,
         messageId: null, targetKey: null, external: true,

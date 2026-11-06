@@ -56,7 +56,8 @@ function listHtml(items) {
 /**
  * How long the system's dialog may take to open. A module that vetoes `ds.canRenderAbilityConfigurationDialog` (Combat
  * Tools' range check against the Director's current targets) leaves the system's `use()` pending for good
- * (DSM:411-426, TESTING.md §14 T111): the button would stay disabled forever.
+ * on Draw Steel 1.1.x (DSM:411-426, TESTING.md §14 T111): the button would stay disabled forever. 1.2.0 (#2194) resolves
+ * `DSApplication.create` null on a refused render (draw-steel.mjs:401-408); the wait stays as the 1.1.x guard.
  */
 export const DIALOG_WAIT_MS = 4_000;
 

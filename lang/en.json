@@ -184,6 +184,7 @@
       "tempNotHigher": "not higher than the current temporary Stamina",
       "resisted": "resisted the potency",
       "targetedManual": "needs a source: apply it from Combat Tools or the token HUD",
+      "grabTooLarge": "too large to grab by the size rule: apply it if the Director allows it",
       "rollMissing": "the roll is no longer on the card",
       "targetMissing": "the target no longer exists",
       "effectMissing": "the effect is no longer on the ability",
@@ -198,6 +199,8 @@
       "undoError": "undo failed, see the console",
       "addedRoll": "roll added after the card was resolved",
       "appliedByTargetDamage": "already applied from Target Damage",
+      "appliedByCtlib": "already applied from the card's own button (Combat Tools Library)",
+      "partlyAppliedByCtlib": "already applied to some of these minions from the card's own buttons: finish the rest there",
       "partlyAppliedByTargetDamage": "already applied to some of these minions from Target Damage: finish the rest there",
       "noSurges": "the hero does not have enough surges",
       "statusImmune": "immune to this condition",
@@ -305,6 +308,8 @@
       "MovedTooltip": "Already moved by Automation Suite",
       "GainApplied": "Applied by Automation Suite",
       "PartApplied": "Already applied by the automation",
+      "PartOwned": "Use the Automation box on this card for this row.",
+      "Resolving": "Automation is still resolving this card.",
       "TipTitle": "Automation Suite"
     },
     "Errors": {
@@ -350,7 +355,7 @@
       },
       "autoGrab": {
         "name": "Apply grabbed automatically",
-        "hint": "Grabbing ignores size rules when applied this way and needs the Director to view the scene. Off: grabbed waits for confirmation."
+        "hint": "A grab is applied at once when the size rule allows it (abilities that grab several creatures keep every grab); a grab the size rule forbids still waits for the Director. It needs the Director to view the scene. Off: every grab waits for confirmation."
       },
       "lockDstdRows": {
         "name": "Lock Target Damage rows",
@@ -625,6 +630,10 @@
       "heroTokenRerollPowerRolls": {
         "name": "Hero tokens reroll power rolls",
         "hint": "House rule. Ability cards of heroes get a button to spend 1 hero token and reroll the power roll, as Draw Steel allows for tests. Applied rows are undone first, then the card resolves again with the new tiers. Off by default."
+      },
+      "insightDiscount": {
+        "name": "Shadow Insight discount",
+        "hint": "In combat, a Shadow's heroic ability with a power roll costs 1 less Insight when the roll has an edge (after banes) against at least one target. The Use Ability dialog shows the lower cost; typing a cost by hand wins."
       }
     },
     "Menu": {
@@ -721,6 +730,7 @@
       "unverifiedVersion": "Not verified with this version of Automation Suite: {list}. Combat Tools and its companions may have changed what we rely on; run the newest Combat Tools family live check in TESTING.md before a session.",
       "advancedEnrichers": "Combat Tools' Advanced Enrichers are on: their Apply chips on automated cards are locked once Automation Suite applied, but Combat Tools' own auto-apply of enrichers is not. Turn the setting off if effects land twice.",
       "autoApplyOwn": "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): its enricher auto-apply writes without a click, so it can repeat what Automation Suite applies.",
+      "dstdOnSystem12": "Target Damage is active on Draw Steel 1.2: turn it off (the system's per-target sections replace it).",
       "dsctHandlers": "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently."
     },
     "Targeted": {
@@ -1121,6 +1131,11 @@
     "Gain": {
       "CardTitle": "Resource gain"
     },
+    "Mastery": {
+      "OfferText": "{from} used: {name} can follow as a free triggered action.",
+      "OfferUse": "Use {name}",
+      "OfferGone": "That ability is no longer on the hero, or you do not own it."
+    },
     "Malice": {
       "CardTitle": "Malice",
       "Pool": "Malice pool",
@@ -1294,7 +1309,9 @@
       "MoonlightDust": "Moonlight Sonata: turned to dust",
       "Radical": "Use Radical Fantasia to take this as your free triggered action for this round?",
       "RecoveryOffer": "{name}: Spend 1 Recovery to regain {amount} Stamina? Stamina: {value}/{max}. Recoveries remaining: {recoveries}.",
-      "RecoveryTargets": "Choose up to {limit} recipients to offer a Recovery."
+      "RecoveryTargets": "Choose up to {limit} recipients to offer a Recovery.",
+      "DamagedBy": "{source} dealt damage to {subject}.",
+      "Affects": "Affects: {names}."
     },
     "Surge": {
       "Choose": "Spend surges",
@@ -1302,6 +1319,9 @@
       "AvailablePotency": "Available: {count} surges. Each adds {damage} damage; {cost} raise one effect's potency by 1. Leave everything unset to spend none.",
       "Potency": "Potency +1 ({cost} surges): {label}",
       "Left": "Surges left: {count}"
+    },
+    "Insight": {
+      "Discount": "Insight: 1 cheaper (edge on a target)"
     },
     "ForcedStep": {
       "Title": "Forced movement",

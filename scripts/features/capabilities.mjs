@@ -8,6 +8,7 @@ import { setting } from "../settings.mjs";
 import { currentActivation } from "../turn/lifecycle.mjs";
 import { activePerformances, canPerform, isPerformance } from "./performance.mjs";
 import { distanceSquares, relation, tokenOnScene } from "../triggers/eligibility.mjs";
+import { abilityDsid, applyUseBenefits, offerAfterUse, offersAfter, registerMasteryUI, rollEdgesFor, takeFreeUse } from "./mastery.mjs";
 
 const freeReactionActors = new Set();
 const list = c => c?.contents ?? (c ? [...c] : []);
@@ -84,6 +85,7 @@ export async function featureAbilityUse(wrapped, config = {}, dialogOptions = {}
   let radicalCredit = null;
   if (this.type === "triggered" && radicalAvailable(this.actor) && await foundry.applications.api.DialogV2.confirm({ window: { title: this.parent.name }, content: `<p>${game.i18n.localize("DSAUTO.Feature.Radical")}</p>`, rejectClose: false })) radicalCredit = await requestOp({ action: "featureRadical", itemUuid: this.parent.uuid });
   if (radicalCredit?.ok === false) { ui.notifications.warn(game.i18n.localize("DSAUTO.Feature.Restricted")); return null; }
+  const masteryFree = takeFreeUse(this.parent?.uuid);
   const freeSearch = ["search", "dsct-search"].includes(this._dsid) && hasBenefit(this.actor, "concealment") && this.actor.flags?.[MODULE_ID]?.freeSearchUsed !== actionCredit(this.actor);
   const freeReaction = this.type === "triggered" && this.actor.flags?.[MODULE_ID]?.radicalCard?.itemUuid === this.parent.uuid && this.actor.flags[MODULE_ID].radicalCard.combatId === game.combat?.id && this.actor.flags[MODULE_ID].radicalCard.round === game.combat?.round && !this.actor.flags[MODULE_ID].radicalCard.used;
   if (freeReaction) freeReactionActors.add(this.actor.uuid);
@@ -98,6 +100,12 @@ export async function featureAbilityUse(wrapped, config = {}, dialogOptions = {}
     await this.actor.update({ [`flags.${MODULE_ID}.freeSearchUsed`]: actionCredit(this.actor) });
     await result.update({ [`flags.${MODULE_ID}.freeManeuver`]: true });
   }
+  if (result && masteryFree) await result.update({ [`flags.${MODULE_ID}.${masteryFree.free === "maneuver" ? "freeManeuver" : "freeTriggered"}`]: true });
+  // 1.2.0 feature scaling (features/mastery.mjs): use benefits (temporary Stamina) and offers (a free use of another ability).
+  if (result && this.actor?.type === "hero") {
+    await applyUseBenefits(this, this.actor);
+    if (offersAfter(this.actor, abilityDsid(this)).length) await offerAfterUse(this, this.actor);
+  }
   if (result && hasBenefit(this.actor, "moonlight") && ["main", "maneuver"].includes(this.type)) await this.actor.update({ [`flags.${MODULE_ID}.moonlightAction`]: actionCredit(this.actor) });
   if (result && this._dsid === "revitalizing-limerick" && setting("enabled") !== false && setting("libraryEnabled") !== false
     && !this.parent.flags?.[MODULE_ID]?.disabled && isPerformance(this.parent) && game.combat?.started && canPerform(this.actor)) {
@@ -107,13 +115,20 @@ export async function featureAbilityUse(wrapped, config = {}, dialogOptions = {}
 }
 
 export function registerFeatureCapabilities() {
+  registerMasteryUI();
   wrap("CONFIG.Item.dataModels.ability.prototype.validTarget", function(wrapped, token) {
     return !targetRestricted(this, token) && wrapped(token);
   });
-  wrap("CONFIG.Item.dataModels.ability.prototype.getActorModifiers", function(wrapped, options) {
-    const result = wrapped(options);
+  // Draw Steel 1.1.x: getActorModifiers(options) adds to options.modifiers and returns nothing. 1.2.0: getActorModifiers()
+  // takes no argument and returns the modifiers object ({banes, edges, bonuses}). Add ours to whichever the system uses.
+  wrap("CONFIG.Item.dataModels.ability.prototype.getActorModifiers", function(wrapped, ...args) {
+    const result = wrapped(...args);
+    const options = result && typeof result === "object" ? { modifiers: result } : (args[0] ?? {});
     options.modifiers ??= {};
     if (hasBenefit(this.actor, "dying")) options.modifiers.edges = (options.modifiers.edges ?? 0) + 1;
+    // 1.2.0 feature scaling: edges only for the abilities a feature names, by the hero's live heroic resource.
+    const scaled = rollEdgesFor(this.actor, abilityDsid(this));
+    if (scaled) options.modifiers.edges = (options.modifiers.edges ?? 0) + scaled;
     const auraKeys = new Set();
     for (const effect of list(this.actor?.effects)) {
       if (effect.disabled) continue;
@@ -146,7 +161,9 @@ export function registerFeatureCapabilities() {
       return cost?.(from, to, distance, segment) ?? distance;
     };
   });
-  for (const target of ["ds.data.Actor.HeroModel.prototype.spendRecovery", "ds.data.Actor.RetainerModel.prototype.spendRecovery"]) wrap(target, function(wrapped, ...args) {
+  // Draw Steel 1.2 adds the companion actor type (CompanionModel.spendRecovery); `wrap` skips targets a 1.1.x system lacks.
+  for (const target of ["ds.data.Actor.HeroModel.prototype.spendRecovery", "ds.data.Actor.RetainerModel.prototype.spendRecovery",
+    "ds.data.Actor.CompanionModel.prototype.spendRecovery"]) wrap(target, function(wrapped, ...args) {
     if (hasBenefit(this.parent, "moonlight")) { ui.notifications.warn(game.i18n.localize("DSAUTO.Feature.Restricted")); return null; }
     return wrapped(...args);
   }, "MIXED");

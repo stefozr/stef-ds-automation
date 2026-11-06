@@ -20,6 +20,7 @@ import { error } from "../log.mjs";
 import { setting } from "../settings.mjs";
 import { combatFor } from "../triggers/budget.mjs";
 import { tokenDocForActorUuid } from "../engine/targets.mjs";
+import { resourceLevel } from "../features/mastery.mjs";
 
 const RESOURCES_UI_ID = () => C.RESOURCES_UI_ID ?? "draw-steel-resources-ui";
 const TRIGGERS_ID = () => C.TRIGGERS_ID ?? "draw-steel-triggers";
@@ -67,7 +68,7 @@ export function normalizeRule(raw) {
   if (r.event === "abilityUse" || r.event === "naturalRoll") r.user ??= "any";
   if (r.event === "damage") r.notTypes = Array.isArray(r.notTypes) ? r.notTypes : [];
   if (r.event === "winded") r.states = Array.isArray(r.states) && r.states.length ? r.states : ["winded"];
-  r.confirm = !!r.confirm;
+  r.confirm = false;   // deprecated: accepted and ignored (a gain waits only for a real decision)
   r.loe = !!r.loe;
   return r;
 }
@@ -81,11 +82,15 @@ function amountOf(a) {
 }
 
 /** The amount of a rule for a hero owning the item dsids `owned` (§1.1 replace semantics: the highest present wins). */
-export function ruleAmount(rule, owned) {
+export function ruleAmount(rule, owned, level = null) {
   let best = amountOf(rule?.amount) ?? { amount: 1, formula: null };
   let bestN = best.amount ?? 0;
   for (const by of rule?.amountBy ?? []) {
-    if (!by?.feature || !owned.has(by.feature)) continue;
+    // 1.2.0: `{minResource, amount}` entries count once the hero's heroic resource (tracking-aware) reaches the number;
+    // they are only seen when a `level` is given (features/mastery.mjs resourceLevel), never from the cached view.
+    if (by?.minResource != null) {
+      if (level == null || level < by.minResource) continue;
+    } else if (!by?.feature || !owned.has(by.feature)) continue;
     const a = amountOf(by.amount);
     if (!a) continue;
     // Integers compare by value; a dice entry counts as its own (normalizeOverlay sorts integers first, so the planner
@@ -97,6 +102,17 @@ export function ruleAmount(rule, owned) {
     }
   }
   return best;
+}
+
+/**
+ * 1.2.0: the amount of a gain rule for this hero right now: the cached view's amount, or (a rule with `minResource`
+ * amounts) recomputed from the hero's current heroic resource, so the thresholds follow the live value.
+ */
+export function liveAmount(view, actor) {
+  const rule = view?.rule;
+  if (!rule?.amountBy?.some(by => by?.minResource != null)) return { amount: view?.amount ?? null, formula: view?.formula ?? null };
+  const owned = new Set(list(actor?.items).map(i => itemDsid(i)).filter(Boolean));
+  return ruleAmount(rule, owned, resourceLevel(actor));
 }
 
 /**
@@ -126,7 +142,8 @@ export function gainRulesOf(actor) {
         if (!raw?.id || !raw?.event) continue;
         const rule = normalizeRule(raw);
         const { amount, formula } = ruleAmount(rule, owned);
-        out.push({ featureKey: overlay.key ?? key, featureDsid, ruleKey: `${featureDsid}:${rule.id}`, rule, amount, formula });
+        out.push({ featureKey: overlay.key ?? key, featureDsid, ruleKey: `${featureDsid}:${rule.id}`, rule, amount, formula,
+          ...(rule.onceWith ? { ledgerRuleKey: `${featureDsid}:${rule.onceWith}` } : {}) });
       }
     }
   } catch (err) {

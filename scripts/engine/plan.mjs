@@ -10,9 +10,11 @@ import { auraPotencyBonus } from "../features/auras.mjs";
  */
 import { OP_STATUS } from "../constants.mjs";
 import { dsctConditionEnabled, dsctConditionsOn } from "../compat/dsct.mjs";
+import { abilityDsid, forcedBonusFor } from "../features/mastery.mjs";
 import { forcedDelegate, needsPick, sizeBonus, stabilityOf } from "../delegation/forced-movement.mjs";
 import { setting } from "../settings.mjs";
 import { opId } from "./keys.mjs";
+import { gateGrabMode } from "./targeted.mjs";
 import { REACTIVE_PART } from "./reactive.mjs";
 import { areaOnly, pickedOnly } from "./record.mjs";
 import { effectDisplay, effectStatuses, nativeEffects } from "./native.mjs";
@@ -290,7 +292,7 @@ export function buildPlan({
         if (route === "off") Object.assign(op, { mode: "manual", noApply: true, reason: op.reason ?? "targetedManual" });
         else {
           op.route = route;
-          if (eff.effectId === "grabbed" && !setting("autoGrab") && op.mode === "auto") op.mode = "prompt";
+          if (eff.effectId === "grabbed") gateGrabMode(op, { sourceActor: item?.actor ?? null, targetActor: actor, ignoreSize: !!eff.ignoreSize });
         }
       }
       if (native.chooseGated && op.mode === "auto") {
@@ -398,7 +400,10 @@ export function buildForcedOp({ eff, td, item, actor, target, key, mode, sourceT
   }
   const sourceDoc = sourceTokenUuid ? fromUuidSync(sourceTokenUuid) : null;
   const bonus = sizeBonus(sourceDoc?.actor ?? item.actor, actor, item.system?.keywords);
-  const distances = Object.fromEntries(td.movements.map(m => [m, Math.max(0, base + Number(eff.bonuses?.[m] ?? 0) + bonus)]));
+  // 1.2.0 feature scaling (features/mastery.mjs forcedBonus, Metakinetic Mastery): the mover's own bonus squares, by its
+  // live heroic resource. Added to the op's distances, so Combat Tools and our own movers both carry them.
+  const featureBonus = forcedBonusFor(item.actor, abilityDsid(item), f => forcedDistance(f, item, spend));
+  const distances = Object.fromEntries(td.movements.map(m => [m, Math.max(0, base + Number(eff.bonuses?.[m] ?? 0) + bonus + featureBonus)]));
   const props = new Set(td.properties);
   const vertical = props.has("vertical");
   const flying = !!actor.statuses?.has?.("fly");
@@ -412,7 +417,7 @@ export function buildForcedOp({ eff, td, item, actor, target, key, mode, sourceT
     partId: target.partId, preId: eff.preId, tier: target.tier, targetKeys: [key],
     movements: [...td.movements], movement: td.movements.length === 1 ? td.movements[0] : null, distances,
     vertical, ignoreStability: props.has("ignoresImmunity") || props.has("ignore-stability"),
-    properties: td.properties.filter(p => p.startsWith("no-")), sizeBonus: bonus || null,
+    properties: td.properties.filter(p => p.startsWith("no-")), sizeBonus: bonus || null, featureBonus: featureBonus || null,
     stability: stabilityOf(actor), interactive, flying: flying || null, choosePath: choosePath || null,
     potency: potencyRecord(potency),
   };

@@ -94,10 +94,14 @@ export function summonerTokenFor(actor) {
 
 /** @this {AbilityModel} */
 async function nativeSummonWrapper(wrapped, uuid, options = {}) {
-  const { count = 1, effects = [] } = options ?? {};
+  const { count = 1, effects = [], items = [] } = options ?? {};
   if (!setting("enabled") || (setting("summonInterceptNative") ?? true) === false || !game.users?.activeGM) {
     return wrapped(uuid, options);
   }
+  // 1.2's portfolio summon (and the companion choice) also passes `items`, extra abilities the system adds to the new
+  // actor (ds.utils.performSummon). The relay carries effects only, so those summons stay on the system's own path
+  // rather than lose the items.
+  if (Array.isArray(items) ? items.length : items?.size) return wrapped(uuid, options);
   const item = this?.parent;
   if (!item?.actor) return wrapped(uuid, options);
   try {

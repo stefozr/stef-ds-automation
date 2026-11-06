@@ -1,0 +1,9 @@
+{
+  "key": "ability:breath-of-dawn-remembered",
+  "version": "1.0.0",
+  "name": "Breath of Dawn Remembered",
+  "notes": "The target's Recoveries (1 + essence spent) wait for a click; never more than they have left.",
+  "effects": [
+    { "id": "recover", "type": "heal", "recoveries": "1 + @spend", "manual": true }
+  ]
+}

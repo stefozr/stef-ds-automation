@@ -7,7 +7,7 @@
   "gains": [
     {
       "id": "heroes-same-turn", "event": "abilityUse", "user": "hero", "heroesInTurn": 3, "once": "encounter", "amount": 2,
-      "confirm": true, "label": "Three heroes used abilities this turn"
+      "label": "Three heroes used abilities this turn"
     },
     {
       "id": "hero-winded", "event": "winded", "taker": "hero", "states": ["winded"], "once": "encounter", "amount": 2,
@@ -15,7 +15,7 @@
     },
     {
       "id": "natural-high", "event": "naturalRoll", "user": "any", "natural": [19, 20], "loe": true, "once": "each",
-      "amount": 3, "confirm": true, "label": "Natural 19 or 20 in sight"
+      "amount": 3, "label": "Natural 19 or 20 in sight"
     },
     {
       "id": "hero-died", "event": "heroDeath", "taker": "hero", "once": "each", "amount": 10, "label": "A hero died"

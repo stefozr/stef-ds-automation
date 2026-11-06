@@ -165,6 +165,7 @@ function gainLints(overlay, index) {
   const warnings = [];
   for (const [i, g] of (Array.isArray(overlay.gains) ? overlay.gains : []).entries()) {
     const where = `gains[${i}]${g?.id ? ` (${g.id})` : ""}`;
+    if (g?.confirm != null) warnings.push(`${where}: \`confirm\` is deprecated and ignored (a gain applies whenever the rule can be checked)`);
     for (const [k, a] of (Array.isArray(g?.amountBy) ? g.amountBy : []).entries()) {
       if (a?.feature && !index.features?.[`feature:${a.feature}`]) errors.push(`${where}: amountBy[${k}]: the system has no class feature "${a.feature}"`);
     }
@@ -302,7 +303,12 @@ export function checkAll(index) {
     if (named && overlay.name?.trim().toLowerCase() !== named.name.trim().toLowerCase()) {
       errors.push(at(`name "${overlay.name}" is not the ${feature ? "feature" : "ability"}'s name "${named.name}"`));
     }
-    if (feature?.duplicates) warnings.push(at(`the system has ${feature.duplicates} class features with this dsid`));
+    // A class scope that names one of the colliding classes resolves the duplicate; an unknown class is an error.
+    if (overlay.class != null && !isFeature) errors.push(at('"class" only goes on a feature overlay (feature:<dsid>)'));
+    if (overlay.class != null && feature && !(feature.classes ?? []).includes(overlay.class)) {
+      errors.push(at(`class "${overlay.class}" has no class feature ${overlay.key} (classes: ${(feature.classes ?? []).join(", ") || "unknown"})`));
+    }
+    if (feature?.duplicates && !(overlay.class != null && (feature.classes ?? []).includes(overlay.class))) warnings.push(at(`the system has ${feature.duplicates} class features with this dsid (scope the overlay with "class")`));
     const id = `${overlay.key}${overlay.monster ? `@${overlay.monster.join("|")}` : ""}`;
     if (seen.has(id)) errors.push(at(`duplicate of ${seen.get(id)}`));
     seen.set(id, rel);

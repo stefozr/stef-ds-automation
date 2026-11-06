@@ -1,6 +1,7 @@
 {
   "key": "feature:ferocity",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "class": "fury",
   "name": "Ferocity",
   "notes": "The turn-start gain is the system's. Higher turn gains from later features stay by hand.",
   "effects": [],

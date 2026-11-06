@@ -15,6 +15,7 @@ import { onTurnEvent, currentActivation } from "../turn/lifecycle.mjs";
 import { setting } from "../settings.mjs";
 import { error } from "../log.mjs";
 import { holdsAura } from "../persistent/registry.mjs";
+import { zoneArea, zoneShapes } from "../zones/shapes.mjs";
 
 const list = c => c?.contents ?? [...(c ?? [])];
 let chain = Promise.resolve(), timer;
@@ -22,6 +23,11 @@ const schedule = fn => { const run = chain.then(fn); chain = run.catch(e => erro
 export const auraDefinition = item => automationFor(item, findOverlay(item))?.aura ?? null;
 export function auraActive(item) {
   return setting("enabled") !== false && setting("libraryEnabled") !== false && !item?.flags?.[MODULE_ID]?.disabled && !!auraDefinition(item) && !!item.flags?.[MODULE_ID]?.aura?.active && !["dying", "dead", "defeated"].includes(incapacitated(item.actor, game.combat));
+}
+/** Squares: the ability's distance, the strained Reflector Field's +1 and a granted `sizeBonus` (Psychic Pulse). */
+export function auraRadius(item) {
+  const state = item.flags?.[MODULE_ID]?.aura;
+  return evaluateInt(item.system?.distance?.primary ?? 0, item) + (state?.strained && item.system._dsid === "reflector-field" ? 1 : 0) + (Number(state?.sizeBonus) || 0);
 }
 export function auraItems(scene = globalThis.canvas?.scene) {
   const actors = new Map(list(scene?.tokens).filter(t => t.actor).map(t => [t.actor.uuid, t.actor]));
@@ -31,7 +37,7 @@ export function auraRecipients(item, { filter = "all", positions = null } = {}) 
   const state = item.flags?.[MODULE_ID]?.aura;
   const source = fromUuidSync(state?.tokenUuid ?? "");
   if (!source || !auraActive(item)) return [];
-  const radius = evaluateInt(item.system?.distance?.primary ?? 0, item) + (state.strained && item.system._dsid === "reflector-field" ? 1 : 0);
+  const radius = auraRadius(item);
   return list(source.parent.tokens).filter(t => {
     if (!t.actor || t.actor.system?.isObject) return false;
     const side = relation(source, t);
@@ -66,6 +72,27 @@ export async function setAura(item, active, { message = null } = {}) {
   await item.update({ [`flags.${MODULE_ID}.aura`]: foundry.data.operators.ForcedReplacement.create(state) });
   await refreshAuras();
   return { before, state };
+}
+/** Redraw the attached aura region at the current radius (the region keeps its centre on the token). Never throws on a missing region. */
+export async function resizeAuraRegion(item) {
+  const token = fromUuidSync(item.flags?.[MODULE_ID]?.aura?.tokenUuid ?? "");
+  if (!token?.parent) return;
+  const { attachedAuraRegion } = await import("../engine/areas.mjs");
+  const region = attachedAuraRegion(item, token);
+  if (!region) return;
+  const area = zoneArea(item, { shape: "ability", size: auraRadius(item) }, v => evaluateInt(v, item));
+  const shapes = zoneShapes(area, { scene: token.parent, creatorDoc: token });
+  const hole = region.shapes?.[0]?.base?.hole;
+  if (hole !== undefined) for (const shape of shapes) if (shape.base) shape.base.hole = hole;
+  await region.update({ shapes });
+}
+/** Psychic Pulse: Null Field grows by `bonus` until the start of its user's next turn (cleared in expireAuraTurn). */
+export async function growAura(item, bonus, { messageId = null } = {}) {
+  const combatant = list(game.combat?.combatants).find(c => c.actor?.uuid === item.actor.uuid);
+  const activation = currentActivation(game.combat?.id, combatant?.id)?.n ?? game.combat?.turn ?? null;
+  await item.update({ [`flags.${MODULE_ID}.aura.sizeBonus`]: bonus, [`flags.${MODULE_ID}.aura.sizeBonusActivation`]: activation, [`flags.${MODULE_ID}.aura.sizeBonusMessageId`]: messageId });
+  await resizeAuraRegion(item);
+  await refreshAuras();
 }
 async function clearAuraEffects(item, { removeRegion = false } = {}) {
   if (removeRegion) {
@@ -153,6 +180,8 @@ export function auraRuleMatches(item, rule, event) {
   if (rule.require?.auraOption && item.flags[MODULE_ID].aura.option !== rule.require.auraOption) return false;
   const subject = fromUuidSync(event.subject?.tokenUuid ?? "");
   if (["damage.after", "ability.use"].includes(event.kind) && !auraRecipients(item, { filter: rule.filter, positions: event.positions }).some(t => t.uuid === subject?.uuid)) return false;
+  // Psychic Pulse's end-of-turn damage: only in the turn (activation) in which the field was enlarged.
+  if (rule.require?.auraSize && !(item.flags[MODULE_ID].aura.sizeBonus > 0 && item.flags[MODULE_ID].aura.sizeBonusActivation === event.activation)) return false;
   if (rule.require?.actionType && event.ability?.type !== rule.require.actionType) return false;
   if (rule.require?.costsMalice && !(event.ability?.malice > 0)) return false;
   if (rule.require?.strike && !event.ability?.keywords?.includes("strike")) return false;
@@ -160,6 +189,12 @@ export function auraRuleMatches(item, rule, event) {
 }
 export async function prepareAuraSpecial(item, rule, event, tokens) {
   if (!rule.special?.startsWith("aura")) return { tokens, effects: rule.effects };
+  if (rule.special === "auraGrow") {
+    // effects[0] reports the growth, effects[1] a field that is not active (nothing changes then).
+    const field = list(item.actor.items).find(i => i.system?._dsid === "null-field" && auraActive(i));
+    if (field) await growAura(field, 1, { messageId: event.id ?? null });
+    return { tokens, effects: [field ? rule.effects[0] : rule.effects[1]].filter(Boolean) };
+  }
   const effects = rule.effects.map(e => ({ ...e }));
   if (rule.special === "auraJudgedDamage") {
     const token = tokens[0];
@@ -234,6 +269,13 @@ export async function expireAuraTurn(e) {
       const next = e.activation !== state.activation, held = !!hold && (e.event === "turnStart" || hold.kept);
       if (!held && ((end === "sourceNextTurnStart" && e.event === "turnStart" && next) || (end === "sourceNextTurnEnd" && e.event === "turnEnd" && next))) await setAura(item, false);
       else if (item.system._dsid === "null-field" && e.event === "turnStart" && state.optionCredit) await item.update({ [`flags.${MODULE_ID}.aura.option`]: null, [`flags.${MODULE_ID}.aura.optionCredit`]: null, [`flags.${MODULE_ID}.aura.optionMessageId`]: null });
+    }
+    // Psychic Pulse: the size bonus ends at the start of the user's next turn, never at the end of the turn it was granted in.
+    if (e.event === "turnStart") for (const item of auraItems(e.combatant?.token?.parent)) {
+      const state = item.flags[MODULE_ID].aura;
+      if (item.actor.uuid !== e.actor?.uuid || !(state.sizeBonus > 0) || e.activation === state.sizeBonusActivation) continue;
+      await item.update({ [`flags.${MODULE_ID}.aura.sizeBonus`]: new foundry.data.operators.ForcedDeletion(), [`flags.${MODULE_ID}.aura.sizeBonusActivation`]: new foundry.data.operators.ForcedDeletion(), [`flags.${MODULE_ID}.aura.sizeBonusMessageId`]: new foundry.data.operators.ForcedDeletion() });
+      await resizeAuraRegion(item);
     }
     await refreshAuras();
 }

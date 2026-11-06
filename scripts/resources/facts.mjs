@@ -141,11 +141,14 @@ export function factsFromPatches(message, resLive, ops, patches) {
       f.after = op.group ? null : (p.after ?? null);
       f.opIds.push(id);
       f.surges = damageSurges(resLive, patches, opsById, f.baseOpId);
-    } else if (op.kind === "forced" && ((Number(p.movedDistance) || 0) > 0 || p.moves?.length)) {
+    } else if (op.kind === "forced") {
+      // 1.2.0: a forced move that stability (or a blocked path) cut to nothing is still a fact, marked `resisted`; only
+      // gains with `includeResisted` count it (Metakinetic Mastery: "even if you resist the effect").
+      const moved = (Number(p.movedDistance) || 0) > 0 || !!p.moves?.length;
       const mover = record(op.targetKeys?.[0]);
       forced.push({
         kind: "forcedMove", id: `${messageId}:${id}`, sceneId: sceneIdOf(mover.tokenUuid), mover,
-        squares: Number(p.movedDistance) || 1, messageId, opIds: [id],
+        squares: moved ? (Number(p.movedDistance) || 1) : 0, resisted: !moved, messageId, opIds: [id],
       });
     }
   }

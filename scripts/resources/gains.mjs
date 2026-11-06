@@ -29,7 +29,9 @@ import { setting } from "../settings.mjs";
 import { stricterMode, typeOverride } from "../engine/actor-category.mjs";
 import { combatFor, uuidKey } from "../triggers/budget.mjs";
 import { distanceSquares, lineOfEffect, relation, tokenOnScene } from "../triggers/eligibility.mjs";
-import { gainCandidates, gainsActive } from "./rules.mjs";
+import { gainCandidates, gainsActive, liveAmount } from "./rules.mjs";
+import { resourceLevel } from "../features/mastery.mjs";
+import { auraActive } from "../features/auras.mjs";
 import { withResourceChain } from "./world-resources.mjs";
 
 const GAIN_FLAG = () => C.GAIN_FLAG ?? "eventGains";
@@ -275,10 +277,20 @@ export function carriesEffectOf(actor, gainer, spec) {
   return false;
 }
 
-/** Radius of the gainer's ability with that dsid (`system.distance.primary`), null when it has none. */
+/**
+ * Abilities whose aura only exists while the hero keeps it up (an activation recorded by features/auras.mjs on the
+ * item's `flags.<module>.aura`). `withinAbility` of one of these counts only while that aura is ACTIVE.
+ */
+const SUSTAINED_AURAS = Object.freeze(new Set(["null-field"]));
+
+/**
+ * Radius of the gainer's ability with that dsid (`system.distance.primary`), null when it has none. A sustained aura
+ * (Null Field) that is not up has no radius: null, so no gain (when the state cannot be told, nothing is gained).
+ */
 function abilityRadius(actor, dsid) {
   const item = list(actor?.items).find(i => itemDsid(i) === dsid);
   if (!item) return null;
+  if (SUSTAINED_AURAS.has(dsid) && !auraActive(item)) return null;
   const v = item.system?.distance?.primary;
   const n = Number(v);
   if (Number.isFinite(n)) return n;
@@ -299,6 +311,7 @@ export function matches(rule, fact, cand, _combat = null) {
         && (!rule.takerEffect || carriesEffectOf(actorOfParty(t), cand.actor, rule.takerEffect)));
     }
     case "forcedMove":
+      if (fact.resisted && !rule.includeResisted) return false;
       return partyMatches(rule.taker ?? "selfOrCreature", cand, fact.mover, sceneId) && withinOf(rule.within, cand, fact.mover, sceneId);
     case "abilityUse": {
       if (!userMatches(rule.user, cand, fact.user, sceneId)) return false;
@@ -348,7 +361,6 @@ export function gainMode(rule, fact, gainer = null) {
 function baseGainMode(rule, fact) {
   const s = setting("resourceGains") ?? "auto";
   if (s === "prompt" || s === "manual") return s;
-  if (rule?.confirm) return "prompt";
   const needsVouch = (rule?.dealer && rule.dealer !== "any") || !!rule?.dealerEffect || (rule?.notTypes?.length > 0)
     || !!rule?.minSurges;
   if (fact?.vouched === "player" && needsVouch) return "prompt";
@@ -399,13 +411,17 @@ export function planGains(facts, ctx = {}) {
         for (const v of cand.rules) {
           const rule = v.rule;
           if (rule.event !== fact.kind) continue;
-          const seenKey = `${cand.actor.uuid}|${v.ruleKey}|${rule.once === "each" ? fact.id : ""}`;
+          // 1.2.0: `minResource` gates the rule on the gainer's heroic resource now (tracking-aware, features/mastery.mjs).
+          if (rule.minResource != null && resourceLevel(cand.actor) < rule.minResource) continue;
+          const ledgerRule = v.ledgerRuleKey ?? v.ruleKey;   // `onceWith`: rules sharing one slot
+          const seenKey = `${cand.actor.uuid}|${ledgerRule}|${rule.once === "each" ? fact.id : ""}`;
           if (seen.has(seenKey)) continue;
           if (!matches(rule, fact, cand, combat)) continue;
           if (globalThis.Hooks?.call?.(HOOK_PRE_GAIN(), cand.actor, rule, fact) === false) continue;
+          const now = liveAmount(v, cand.actor);   // `amountBy` entries with `minResource` follow the live resource
           const mode = gainMode(rule, fact, cand);
           const dedupeKey = fact.dedupeKey ?? null;
-          const ledgerKey = ledgerKeyOf(v.ruleKey, rule.once, dedupeKey);
+          const ledgerKey = ledgerKeyOf(ledgerRule, rule.once, dedupeKey);
           const scope = ledgerKey ? scopeOf(rule.once, combat, !!dedupeKey) : null;
           if (scope && ledgerHas(combat, scope, cand.actor.uuid, ledgerKey)) {   // already this round / encounter
             // 0.16.0 diagnostic (Tactician Focus seen more than once a round).
@@ -426,10 +442,11 @@ export function planGains(facts, ctx = {}) {
           log("gain.ledger", { ruleKey: v.ruleKey, gainer: cand.actor.name, combatId: combat.id, round: combat.round ?? null, scopeKey: scope?.scopeKey ?? null, ledgerKey, claimed: !!claim, mode, fact: fact.id ?? null });
           made.push({
             opId: id, order: maxOrder + 1 + made.length / 100, kind: "gain", mode, status: OP_STATUS.PENDING, tier: null,
-            targetKeys: [key], resource: rule.resource ?? "heroic", amount: v.amount ?? null, formula: v.formula ?? null,
+            targetKeys: [key], resource: rule.resource ?? "heroic", amount: now.amount ?? null, formula: now.formula ?? null,
             gain: {
               v: 1, featureKey: v.featureKey, ruleId: rule.id, ruleKey: v.ruleKey, label: rule.label ?? "", event: rule.event,
-              once: rule.once, confirm: !!rule.confirm, combatId: combat.id, round: combat.round ?? null,
+              ...(v.ledgerRuleKey ? { ledgerRuleKey: v.ledgerRuleKey } : {}),
+              once: rule.once, confirm: false, combatId: combat.id, round: combat.round ?? null,
               gainerActorUuid: cand.actor.uuid, causeOpIds: [...(fact.opIds ?? [])], causeKey: fact.id ?? null, dedupeKey,
               vouched: fact.vouched === "player" ? "player" : "gm",
             },
@@ -485,7 +502,7 @@ export async function applyGainOp(message, res, op) {
       return { status: OP_STATUS.SKIPPED, reason: "nothingGained", rolled };
     }
     const combat = g.combatId ? (game.combats?.get?.(g.combatId) ?? null) : null;
-    const ledgerKey = ledgerKeyOf(g.ruleKey, g.once, g.dedupeKey);
+    const ledgerKey = ledgerKeyOf(g.ledgerRuleKey ?? g.ruleKey, g.once, g.dedupeKey);
     let ledger = null;
     if (ledgerKey && combat?.started && (g.once !== "round" || combat.round === g.round)) {
       const flag = g.once === "round" ? GAIN_FLAG() : GAIN_ENC_FLAG();

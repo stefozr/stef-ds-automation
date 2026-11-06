@@ -79,7 +79,7 @@ const DEFINITIONS = {
       off: "DSAUTO.Settings.targetedConditions.off",
     },
   },
-  autoGrab: { menu: "conditions", scope: "world", type: Boolean, default: false },
+  autoGrab: { menu: "conditions", scope: "world", type: Boolean, default: true },
   // Milestone 8: a frightened creature's owner is warned when it moves closer to its source (WP-C).
   frightenedMoveWarning: { menu: "conditions", scope: "world", type: Boolean, default: true },
   lockDstdRows: { menu: "compat", scope: "world", type: Boolean, default: true },
@@ -210,6 +210,8 @@ const DEFINITIONS = {
   // 0.16.0 (house rule): a hero token rerolls an ability's power roll (resources/hero-token-reroll.mjs).
   heroTokenRerollPowerRolls: { menu: "resources", scope: "world", type: Boolean, default: false },
   maliceReminders: { menu: "resources", scope: "world", type: Boolean, default: true },
+  // 1.2.0: Shadow Insight costs 1 less with an edge on a target (ui/insight-discount.mjs).
+  insightDiscount: { menu: "resources", scope: "world", type: Boolean, default: true },
   villainActionTracking: { menu: "resources", scope: "world", type: Boolean, default: true },
   zoneMode: { menu: "modes", scope: "world", type: String, default: "auto", choices: MODE_CHOICES },
   zoneDamage: { menu: "modes", scope: "world", type: String, default: "auto", choices: MODE_CHOICES },

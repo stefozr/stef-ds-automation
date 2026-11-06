@@ -146,9 +146,14 @@ export function resolveAbility(item) {
   const automation = on ? automationFor(item, usable) : null;
   out.automation = automation;
   if (automation) {
-    out.effects = useEffects(automation);
-    out.suppress = new Set(automation.suppress ?? []);
-    if (item?.flags?.[MODULE_ID]?.automation) out.layer = "detached";
+    // Only item-flag automation replaces the effects (editableAutomation moves them into an on-use rule). An
+    // overlay's own automation.rules sit next to its effects, which must keep running.
+    const fromFlag = !!item?.flags?.[MODULE_ID]?.automation;
+    if (fromFlag) {
+      out.effects = useEffects(automation);
+      out.layer = "detached";
+      out.suppress = new Set(automation.suppress ?? []);
+    } else if (automation.suppress?.length) out.suppress = new Set([...out.suppress, ...automation.suppress]);
   }
   // Combat Tools automates some kinds itself.
   if (covered.size && out.effects.length) {

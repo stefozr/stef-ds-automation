@@ -33,11 +33,11 @@ Then enable **Stef's Automation Suite for Draw Steel** (and libWrapper) in your 
 | Module | Required? | What it adds or why |
 |---|---|---|
 | Foundry VTT 14 | yes | Verified on 14.369. |
-| [Draw Steel](https://github.com/MetaMorphic-Digital/draw-steel) system | yes | Verified on 1.1.2 (1.2 development builds are read per card, see below). |
+| [Draw Steel](https://github.com/MetaMorphic-Digital/draw-steel) system | yes | Supported: Draw Steel 1.1.2 to 1.2.0 (1.2.0 is verified, see below). |
 | [libWrapper](https://github.com/ruipin/fvtt-lib-wrapper) | yes | Saves, ongoing damage, turn deduplication, triggered actions and the system fixes wrap system methods through it. |
-| Draw Steel: Combat Tools | recommended (verified 1.2.8) | Forced movement, teleports, areas and range checks go through its engine and undo log; without it the suite moves tokens in a straight line itself. Targeted conditions can use its builder. |
-| Draw Steel: Target Damage | recommended (verified 1.0.8) | Its apply buttons are locked for results the suite already applied. |
-| Draw Steel: ctlib, Death Tracker, Battle Log | recommended (verified 1.5.1, 1.2.2, 1.5.0) | Shared services, revival on undo, battle log entries. |
+| Draw Steel: Combat Tools | recommended (verified 2.2.0) | Forced movement, teleports, areas and range checks go through its engine and undo log; without it the suite moves tokens in a straight line itself. Targeted conditions can use its builder. |
+| Draw Steel: Target Damage | recommended on Draw Steel 1.1 only (verified 1.0.8) | Its apply buttons are locked for results the suite already applied. On Draw Steel 1.2 the system's per-target sections replace it: turn it off. |
+| Draw Steel: ctlib, Death Tracker, Battle Log | recommended (verified 2.0.0, 2.0.0, 2.0.0) | Shared services, revival on undo, battle log entries. |
 | Draw Steel: Triggers | keep disabled | The suite's own triggered actions and gains replace it. |
 | [Stef's Auto FX for Draw Steel](https://github.com/stefozr/stef-ds-fx) | optional | An animation per target at the tier the suite resolved. |
 | [Stef's Quality of Life Improvements for Draw Steel](https://github.com/stefozr/stef-ds-qol) | optional | Compact ability cards and table fixes; its teleport fix hands abilities the library teleports to the suite. |
@@ -81,8 +81,8 @@ When an ability is used and its card appears in chat:
    - **conditions and effects** after the **potency check** against the target's characteristic, with a
      duration that ends on the right creature's turn (the system's multi-target bug is avoided);
      conditions the target is **immune** to are skipped;
-   - **frightened and taunted**, with their source, through Combat Tools or the native builder; **grabbed** waits for
-     confirmation unless "Apply grabbed automatically" is on;
+   - **frightened and taunted**, with their source, through Combat Tools or the native builder; **grabbed** applies at once unless the size rule forbids it
+     (then it waits) or "Apply grabbed automatically" is off;
    - **forced movement** (push, pull, slide) after the hit, with the tier's distance, the ability's and kit
      bonuses, +1 for a larger creature using a melee weapon, and the potency check; see below.
 3. An **Automation** section at the bottom of the card is the card's apply / undo surface: one line per target
@@ -389,12 +389,14 @@ relying on its HUD toggle.
 
 Native taunted needs the attacker's token controlled for the system's roll modifier. Native frightened warns the
 moving player when they move closer; it does not block movement. Native grabs do not enforce one grab per grabber
-or make the grabbed token follow its source. Grab still waits for confirmation unless automatic grabs are enabled.
+or make the grabbed token follow its source. A grab applies at once unless the size rule forbids it (or automatic grabs are turned off).
 
 ## Draw Steel 1.2
 
-Support is implemented against the 1.2.x development source contract recorded in the M8 design. It has not been
-verified in a live development world or against a released 1.2 system; the manifests continue to verify **1.1.2**.
+Draw Steel 1.1.2 to 1.2.0 are supported. 1.2.0 with the Combat Tools 2.x family (Combat Tools 2.2.0, ctlib 2.0.0,
+Death Tracker 2.0.0, Battle Log 2.0.0) is verified; see [docs/COMBAT-TOOLS-2.2.md](docs/COMBAT-TOOLS-2.2.md).
+**Draw Steel: Target Damage is for Draw Steel 1.1 only**: on 1.2 the system's per-target sections and ctlib's Apply
+and Undo replace it, and the suite asks you to turn it off.
 
 The reader is chosen per card: old and untargeted cards use tier parts, while supported targetResult cards match
 by token identifier, or by actor when no token identifier is supplied. Ambiguous tiers become manual under
@@ -558,8 +560,9 @@ With an older core nothing changes: the coverage report stays in the settings li
 See [the coexistence contract](docs/COEXISTENCE.md) for the settings and APIs read from Combat Tools,
 ctlib, Target Damage, Death Tracker, Battle Log, Triggers, Resources UI, Stef's Quality of Life Improvements and Draw Steel Plus.
 
-**Verified family versions:** Combat Tools 1.2.8, ctlib 1.5.1, Death Tracker 1.2.2, Target Damage 1.0.8,
-Battle Log 1.5.0; Draw Steel: Triggers is meant to stay disabled (the suite's triggered actions and gains run instead).
+**Verified family versions:** Combat Tools 2.2.0, ctlib 2.0.0, Death Tracker 2.0.0, Battle Log 2.0.0,
+Triggers 2.0.0 (disabled), Draw Steel 1.1.2 and 1.2.0, Foundry 14.370; Draw Steel: Triggers is meant to stay disabled
+(the suite's triggered actions and gains run instead).
 `selfCheck()` reports a family module outside this list (`unverifiedVersion`) and the Director gets one warning per
 version set.
 
@@ -570,7 +573,7 @@ version set.
 - Nothing is applied while no Director is connected; the card waits and **Resolve now** catches up.
 - Live-verified with Draw Steel 1.1.2 and the Combat Tools family listed above. Other versions are reported by
   `selfCheck()` (`unverifiedVersion`); check a session's worth of abilities after updating that family.
-- Draw Steel 1.2 support is implemented against development builds only (see above).
+- Draw Steel 1.2.0 is verified live with the Combat Tools 2.x family listed above.
 
 ## Uninstall
 
@@ -738,7 +741,7 @@ end of the encounter** (those whose ability says so), **Summoner potency link** 
 `flags["stef-ds-automation"].summons`; the system's own summoner flag is never written.
 
 Feature overlays (`key: "feature:<dsid>"`) may carry `gains` (event `damage` | `forcedMove` | `abilityUse` |
-`naturalRoll` | `winded` | `heroDeath`, filters, `once`, resource, amount and `amountBy` upgrades, `confirm`); overlays
+`naturalRoll` | `winded` | `heroDeath`, filters, `once`, resource, amount and `amountBy` upgrades); overlays
 may carry `zone` effects (`zoneEvents`, `once`, `onceShared`, `perSquare`, `affects`, `exceptKeywords`,
 `exceptMonsters`, `shape`, `size`, `width`, `range`, `lasts`, `upkeep`, `forcedCounts`; always on the user's own
 row); generic overlays reach NPCs only with `npc: true`. See [docs/API.md](docs/API.md) and [docs/AUTHORING.md](docs/AUTHORING.md).

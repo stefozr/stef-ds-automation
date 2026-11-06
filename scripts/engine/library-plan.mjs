@@ -32,6 +32,7 @@ import { opId } from "./keys.mjs";
 import { sideOnly } from "./record.mjs";
 import { alliesNear, isFlanking } from "./proximity.mjs";
 import { targetedRoute } from "./plan.mjs";
+import { gateGrabMode } from "./targeted.mjs";
 import { effectDisplay, statusConfig } from "./native.mjs";
 
 /** Feature setting that decides each library effect type's mode. */
@@ -349,6 +350,19 @@ function damageRow(base, eff, item, actor, ctx) {
 function healRow(base, eff, item, actor, ctx, spender = null) {
   if (eff.recoveries) {
     const op = { ...base, kind: "heal", recoveries: eff.recoveries };
+    // A formula ("1 + @spend"): evaluated now, clamped to 1..(what the payer has left); a payer with none is skipped.
+    if (typeof eff.recoveries === "string") {
+      const payer = eff.spender === "self" ? spender : actor;
+      const rec = payer?.system?.recoveries;
+      if (!rec || !("value" in rec) || !((rec.value ?? 0) >= 1)) return { ...op, recoveries: 1, amount: 0, status: OP_STATUS.SKIPPED, reason: "noRecoveries", ...(eff.spender === "self" && payer ? { spenderUuid: payer.uuid } : {}) };
+      const wanted = evaluateInt(eff.recoveries, item, ctx, { min: 1, max: 100 });
+      if (wanted == null) return { ...op, recoveries: 1, amount: 0, status: OP_STATUS.FAILED, reason: "formulaInvalid" };
+      op.recoveries = Math.max(1, Math.min(wanted, rec.value));
+      if (eff.spender === "self") op.spenderUuid = payer.uuid;
+      op.amount = op.recoveries * (Number((eff.spender === "self" ? rec : actor.system.recoveries).recoveryValue ?? 0) || 0);
+      if (actor.isMinion) return { ...op, status: OP_STATUS.SKIPPED, reason: "minionHeal" };
+      return op;
+    }
     // The user pays the Recovery and the target regains the user's recovery value.
     if (eff.spender === "self") {
       if (!spender) return { ...op, amount: 0, status: OP_STATUS.SKIPPED, reason: "noRecoveries" };
@@ -396,7 +410,7 @@ function conditionRow(base, eff, item, actor, _use) {
     const route = targetedRoute(eff.status);
     if (route === "off") return { ...op, mode: "manual", noApply: true, reason: "targetedManual" };
     op.route = route;
-    if (eff.status === "grabbed" && !setting("autoGrab") && op.mode === "auto") op.mode = "prompt";
+    if (eff.status === "grabbed") gateGrabMode(op, { sourceActor: item?.actor ?? null, targetActor: actor, ignoreSize: !!eff.ignoreSize });
   }
   return op;
 }

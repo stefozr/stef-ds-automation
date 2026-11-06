@@ -170,6 +170,10 @@ async function main() {
   const features = {};
   const classDocs = await readPack(path.join(SYSTEM, "packs", "classes"), COPY_DIR);
   const classFolders = new Map(classDocs.filter(d => !d.system).map(d => [d._id, d]));
+  // Class folder id -> hero class dsid (the feature folder's parent is the class folder, e.g. Summoner > Features).
+  const classByFolder = new Map();
+  for (const d of classDocs) if (d.type === "class" && d.folder && d.system?._dsid && !classByFolder.has(d.folder)) classByFolder.set(d.folder, d.system._dsid);
+  const classOf = d => classByFolder.get(classFolders.get(d.folder)?.folder) ?? null;
   for (const d of classDocs) {
     if (d.type !== "feature") continue;
     const dsid = dsidOf(d);
@@ -177,11 +181,15 @@ async function main() {
     const key = `feature:${dsid}`;
     if (features[key]) {
       features[key].duplicates = (features[key].duplicates ?? 1) + 1;
+      const cls = classOf(d);
+      if (cls && !features[key].classes.includes(cls)) features[key].classes.push(cls);
       continue;
     }
     features[key] = {
       uuid: `Compendium.draw-steel.classes.Item.${d._id}`, name: d.name,
       folder: classFolders.get(d.folder)?.name ?? "",
+      // Hero classes that carry a feature with this dsid (several when the dsid collides between classes).
+      classes: [classOf(d)].filter(Boolean),
       text: strip(d.system?.description?.value ?? d.system?.description ?? ""),
     };
   }

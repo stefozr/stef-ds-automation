@@ -667,7 +667,7 @@ console.log("ok next-turn gravitic reservation and visible aura card labels");
   const { familyVersions, unverifiedFamily, verifiedVersion } = await imp("compat/version-gate.mjs");
   const { versionBanner } = await imp("ui/version-banner.mjs");
   const { selfCheck } = await imp("self-check.mjs");
-  assert.equal(verifiedVersion("draw-steel-combat-tools", "1.2.8"), true); assert.equal(verifiedVersion("draw-steel-combat-tools", "1.2.9"), false);
+  assert.equal(verifiedVersion("draw-steel-combat-tools", "1.2.8"), true); assert.equal(verifiedVersion("draw-steel-combat-tools", "2.2.0"), true); assert.equal(verifiedVersion("draw-steel-combat-tools", "2.2.1"), false);
   assert.equal(verifiedVersion("some-other-module", "0.0.1"), true, "modules outside the family are not judged");
   game.modules.set("draw-steel-combat-tools", { active: true, version: "1.2.6" });
   game.modules.set("draw-steel-ctlib", { active: true, version: "1.4.0" });

@@ -11,7 +11,7 @@
  * the session (per client).
  */
 import { CTLIB_ID, loc } from "../constants.mjs";
-import { dstdActive, dstdState } from "../compat/dstd.mjs";
+import { dstdActive, dstdOnCard, dstdState } from "../compat/dstd.mjs";
 import { ctlib } from "../compat/ctlib.mjs";
 import { debug } from "../log.mjs";
 import { setting } from "../settings.mjs";
@@ -59,7 +59,7 @@ export function badgeCount(panel) {
 /** Whether this message's Target Damage panel folds for this client (setting, record, Target Damage state). */
 export function wantsFold(message) {
   if (setting("foldDetails") === false) return false;
-  return shouldFoldPanel(getResolution(message), { dstd: dstdActive(), state: dstdState(message) });
+  return shouldFoldPanel(getResolution(message), { dstd: dstdOnCard(message), state: dstdState(message) });
 }
 
 /** Idempotent: class on the li, the toggle's state and badge. Runs any number of times, before or after the panel exists. */

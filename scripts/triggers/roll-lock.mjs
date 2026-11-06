@@ -18,7 +18,8 @@
  *     `context.modifiers.edges` (read by the system's _processFormData, DSM:2326);
  *   - two-phase commit (deviation 11): `preRollDone {applied: true}` once the roll is submitted with the edge;
  *     closing without rolling (or no edge added) releases it.
- * `ds.canRenderAbilityConfigurationDialog` is never vetoed (a veto hangs DSApplication.create, DSM:411-426).
+ * `ds.canRenderAbilityConfigurationDialog` is never vetoed: on Draw Steel 1.1.x a veto hangs DSApplication.create
+ * (DSM:411-426); 1.2.0 (#2194) resolves it null (draw-steel.mjs:401-408), but the guard stays for 1.1.x.
  *
  * GM (relay actions `preRoll`, `preRollCancel`, `preRollDone`): one `roll.before` offer per dialog, at most a
  * double edge in all; accepted decisions wait in memory until `preRollDone`, the round changes or 10 minutes

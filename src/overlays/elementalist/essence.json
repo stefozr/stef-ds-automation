@@ -1,6 +1,7 @@
 {
   "key": "feature:essence",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "class": "elementalist",
   "name": "Essence",
   "effects": [],
   "gains": [

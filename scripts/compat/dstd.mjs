@@ -1,7 +1,26 @@
 /** Draw Steel: Target Damage facade: read-only access to its private card state. */
 import { DSTD_ID } from "../constants.mjs";
+import { getResolution } from "../engine/record.mjs";
 
 export const dstdActive = () => !!game.modules.get(DSTD_ID)?.active;
+
+/** Is this a Draw Steel 1.2 card (one `targetResult` part per target; our record says so, or the parts show it)? */
+export function isTargetResultCard(message) {
+  const shape = getResolution(message)?.shape;
+  if (shape) return shape === "targetResult";
+  try {
+    return Array.from(message?.system?.parts ?? []).some(p => p?.type === "targetResult");
+  } catch (_err) {
+    return false;
+  }
+}
+
+/**
+ * 1.2.0: does Target Damage's panel / state exist on this card for us to work with? On 1.2 cards the system's per-target
+ * sections replace Target Damage, so every Target Damage path of the suite stands down there even if the module is on
+ * (the self-check asks the Director to turn it off).
+ */
+export const dstdOnCard = message => dstdActive() && !isTargetResultCard(message);
 
 export function dstdState(message) {
   return message?.flags?.[DSTD_ID]?.state ?? null;

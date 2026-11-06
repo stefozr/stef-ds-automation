@@ -1,6 +1,6 @@
-# stef-ds-automation 1.1.1: coverage of Draw Steel 1.1.2
+# stef-ds-automation 1.2.0: coverage of Draw Steel 1.2.0
 
-175 overlays (14 monster-specific); 11 overlays with triggers, 2 with trackers, 6 with summons, 7 with areas, 8 with resource gains.
+177 overlays (14 monster-specific); 11 overlays with triggers, 2 with trackers, 6 with summons, 7 with areas, 9 with resource gains.
 "overlay" = the library adds automation (\* = the system describes nothing structured for it);
 "native" = only the system's own power roll effects; "manual" = nothing automated.
 
@@ -9,15 +9,17 @@
 | (character-options) | 9 | 1 | 4 | 4 |
 | (origins) | 17 | 1 | 6 | 10 |
 | Basic Abilities | 15 | 5 | 4 | 6 |
+| Beastheart | 58 | 0 | 41 | 17 |
 | Censor | 46 | 15 | 23 | 8 |
 | Conduit | 68 | 7 | 35 | 26 |
-| Elementalist | 53 | 13 | 22 | 18 |
+| Elementalist | 53 | 14 | 23 | 16 |
 | Fury | 50 | 10 | 32 | 8 |
 | Imbue Abilities | 3 | 0 | 2 | 1 |
 | Kits | 21 | 2 | 19 | 0 |
 | Null | 48 | 9 | 25 | 14 |
-| Perks | 3 | 0 | 0 | 3 |
+| Perks | 5 | 0 | 0 | 5 |
 | Shadow | 52 | 13 | 27 | 12 |
+| Summoner | 27 | 0 | 7 | 20 |
 | Tactician | 43 | 13 | 13 | 17 |
 | Talent | 56 | 24 | 16 | 16 |
 | Troubadour | 61 | 24 | 22 | 15 |
@@ -44,7 +46,7 @@ Aura of Souls *, Blessing of Steel *, Blessing of the Blade *, Blessing of the M
 
 ## Elementalist
 
-Luminous Champion Aloft *, Magma Titan *, No More Than a Breeze *, Practical Magic *, Subverted Perception of Space, Summon Source of Earth *, Swarm of Spirits, Test of Rain, The Flesh, a Crucible, The Green Defends Its Servants *, The Green Within, the Green Without, Unquiet Ground, Wall of Fire *
+Breath of Dawn Remembered *, Luminous Champion Aloft *, Magma Titan *, No More Than a Breeze *, Practical Magic *, Subverted Perception of Space, Summon Source of Earth *, Swarm of Spirits, Test of Rain, The Flesh, a Crucible, The Green Defends Its Servants *, The Green Within, the Green Without, Unquiet Ground, Wall of Fire *
 
 ## Fury
 
@@ -76,29 +78,31 @@ Acrobatics *, Blocking *, Choreography *, Dramatic Monologue *, Dramatic Reversa
 
 ## Gains
 
-8 class features gain their heroic resource from events.
+9 class features gain their heroic resource from events.
 
 | Feature | Rule | Event | Once | Amount |
 |---|---|---|---|---|
 | Clarity and Strain | A creature force moved, first this round | forcedMove | round | 1; Mind Recovery 2, Clear Mind 3 |
-| Discipline | Enemy main action in your field, first this round (Director confirms) | abilityUse | round | 1; Regenerative Field 2 |
+| Discipline | Enemy main action in your field, first this round | abilityUse | round | 1; Regenerative Field 2 |
 | Discipline | Director's Malice ability, first this round | abilityUse | round | 1 |
-| Drama | Three heroes used abilities this turn (Director confirms) | abilityUse | encounter | 2 |
+| Drama | Three heroes used abilities this turn | abilityUse | encounter | 2 |
 | Drama | First hero winded this encounter | winded | encounter | 2 |
-| Drama | Natural 19 or 20 in sight (Director confirms) | naturalRoll | each | 3 |
+| Drama | Natural 19 or 20 in sight | naturalRoll | each | 3 |
 | Drama | A hero died | heroDeath | each | 10 |
-| Essence | Typed damage within 10, first this round | damage | round | 1; Font of Essence 2 |
-| Ferocity | First damage taken this round | damage | round | 1; Damaging Ferocity 2, Primordial Ferocity 3 |
-| Ferocity | First time winded or dying this encounter | winded | encounter | 1d3 |
+| Essence (elementalist only) | Typed damage within 10, first this round | damage | round | 1; Font of Essence 2 |
+| Ferocity (fury only) | First damage taken this round | damage | round | 1; Damaging Ferocity 2, Primordial Ferocity 3 |
+| Ferocity (fury only) | First time winded or dying this encounter | winded | encounter | 1d3 |
 | Focus | Your marked foe damaged, first this round | damage | round | 1; Focus on Their Weakness 2 |
 | Focus | Ally's heroic ability within 10, first this round | abilityUse | round | 1 |
 | Insight | Damage with a surge, first this round | damage | round | 1; Surge of Insight 2, Death Pool 3 |
+| Metakinetic Mastery | First damage or forced move this round | damage | round | 1; undefined 2 |
+| Metakinetic Mastery | First damage or forced move this round | forcedMove | round | 1; undefined 2 |
 | Wrath | Your judged foe damaged you, first this round | damage | round | 1 |
 | Wrath | You damaged your judged foe, first this round | damage | round | 1; Wrath Beyond Wrath 2 |
 
 ## Generic feature rules
 
-47 overlays use version 1 feature rules.
+48 overlays use version 1 feature rules.
 
 | Feature or ability | Event | Recipients | Effects |
 |---|---|---|---|
@@ -125,7 +129,9 @@ Acrobatics *, Blocking *, Choreography *, Dramatic Monologue *, Dramatic Reversa
 | “Never-Ending Hero” | turn.start | aura | dying |
 | Null Field | aura.continuous | aura | condition |
 | Null Field | damage.after | subject | forced |
+| Null Field | turn.end | aura | damage |
 | Null Field | turn.start | aura | noShift |
+| Psychic Pulse | use | self | note, note |
 | Radical Fantasia | turn.start | aura | condition, radical |
 | Reflector Field | aura.continuous | aura | reflector |
 | Revitalizing Limerick | turn.end | aura | heal |

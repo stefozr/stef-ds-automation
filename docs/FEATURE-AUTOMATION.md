@@ -34,6 +34,10 @@ Acrobatics asks whether an otherwise unclassified test qualifies; Take Two recom
 and native damage after the accepted reroll. Fire Up the Night marks the first Search card as a free
 maneuver; Draw Steel does not enforce a global main/maneuver action economy.
 
+Psychic Pulse (Null): while Null Field is active, using it enlarges the field by 1 until the start of the user's next
+turn (region redrawn, recipients refreshed); at the end of that turn a Null Field card deals Intuition psychic damage to
+each enemy inside the enlarged field. Harness24 covers it and the Ward of Nature's Affection engine path.
+
 Offline verification: harness12 exercises authoring validation, independent presets, custom tiers,
 self recipients, mitigation, Undo, frequency claims, shared Goblin Mode costs/prompts, Ward and
 Barbed Tail integration, modifier preservation, performance activation/moving auras, temporary
@@ -44,3 +48,12 @@ Live validation remains necessary after reloading Foundry: check short-height Sm
 player-owned prompts, native roll dialogs for Take Two/Acrobatics, DSCT cover/concealment pills,
 Moonlight turns with Death Tracker, and any third-party terrain-cost integration. No live result
 for this change is claimed by the offline harnesses.
+
+## Metakinetic Mastery (Null, 1.2.0)
+
+Overlay `src/overlays/null/metakinetic-mastery.json`; discipline is `system.hero.primary.tracking` on Draw Steel 1.2
+(`primary.value` on 1.1.x), read at use time. 2: Knockback forced distance + Intuition. 4 / 8: 1 / 2 surges the first
+time each round you take damage or are force moved (one shared slot, `onceWith`). 6 / 10: edge / double edge on Grab and
+Knockback only. 12: every forced move you cause gets + Intuition (replaces the Knockback row, no doubling) and each
+heroic ability use gives 10 temporary Stamina. Inertial Shield posts an offer card whose button runs Knockback as a
+free triggered use (Draw Steel does not enforce action economy). Harness: tests/harness25.mjs.

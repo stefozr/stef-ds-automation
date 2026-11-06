@@ -21,14 +21,14 @@ import { BATTLE_LOG_ID, CTLIB_ID, DSCT_ID, DSPLUS_ID, DSTD_ID, DT_ADVENTURE_ID, 
 
 export const compat = {};
 
-/** The live-verified versions of the Combat Tools family (TESTING.md §24, §27, §28); update after each live matrix. */
+/** The live-verified versions of the Combat Tools family (TESTING.md §24, §27, §28, §30); update after each live matrix. */
 export const VERIFIED = Object.freeze({
-  [DSCT_ID]: Object.freeze(["1.2.3", "1.2.6", "1.2.7", "1.2.8"]),
-  [CTLIB_ID]: Object.freeze(["1.2.1", "1.4.0", "1.5.0", "1.5.1"]),
-  [DT_ID]: Object.freeze(["1.1.3", "1.2.1", "1.2.2"]),
+  [DSCT_ID]: Object.freeze(["1.2.3", "1.2.6", "1.2.7", "1.2.8", "2.2.0"]),
+  [CTLIB_ID]: Object.freeze(["1.2.1", "1.4.0", "1.5.0", "1.5.1", "2.0.0"]),
+  [DT_ID]: Object.freeze(["1.1.3", "1.2.1", "1.2.2", "2.0.0"]),
   [DSTD_ID]: Object.freeze(["1.0.8"]),
-  [BATTLE_LOG_ID]: Object.freeze(["1.3.0", "1.4.1", "1.5.0"]),
-  [TRIGGERS_ID]: Object.freeze(["1.1.0", "1.2.0", "1.3.0"]),
+  [BATTLE_LOG_ID]: Object.freeze(["1.3.0", "1.4.1", "1.5.0", "2.0.0"]),
+  [TRIGGERS_ID]: Object.freeze(["1.1.0", "1.2.0", "1.3.0", "2.0.0"]),
 });
 
 /** Is `version` (default: the installed one) of module `id` on the verified list? Unlisted modules: true. */

@@ -81,7 +81,7 @@ code). Read its header first; this file is the how-to.
 | type | fields | notes |
 |---|---|---|
 | `condition` (also `until`: `yourNextTurnStart` / `yourNextTurnEnd`, the user's next turn, in combat) | `status` (bleeding, dazed, frightened, grabbed, prone, restrained, slowed, surprised, taunted, weakened, ...) or `effect` (the ability's own ActiveEffect id from the index) or `uuid` (a compendium effect), `end` (`turn` = EoT, `save`, `encounter`, `respite`) | `[[/apply <id>]]` with the ability's effect id -> `effect`; `[[/apply taunted turn]]` -> `status` + `end`. The ability's own effects keep their own duration unless `end` is given. Frightened, taunted and grabbed go through Combat Tools. |
-| `heal` | `value` (formula) and `temporary`, or `recoveries` (n) with `spender` (`target` default, or `self`: the user pays and the target regains the user's recovery value) | "spend a Recovery and regain Stamina equal to your recovery value" = `recoveries: 1` (on whoever spends it). "regain Stamina equal to X" without spending = `value`. `[[/heal 10 type=temporary]]` = `value: 10, temporary: true`. `@target.<path>` reads the healed creature's own data. |
+| `heal` | `value` (formula) and `temporary`, or `recoveries` (n) with `spender` (`target` default, or `self`: the user pays and the target regains the user's recovery value) | "spend a Recovery and regain Stamina equal to your recovery value" = `recoveries: 1` (on whoever spends it). `recoveries` may also be a formula (`"1 + @spend"`, "an additional Recovery for each essence spent"): it is evaluated when the card resolves with the use's spend, then clamped to 1 up to the payer's remaining Recoveries (a payer with none is skipped). "regain Stamina equal to X" without spending = `value`. `[[/heal 10 type=temporary]]` = `value: 10, temporary: true`. `@target.<path>` reads the healed creature's own data. |
 | `cleanse` | `statuses` and/or `ends` (`save`, `turn`, `encounter`, `respite`), `count` (null = all) | "end one effect that is ended by a saving throw or ends at the end of their turn" = `ends: ["save", "turn"], count: 1`. "stand up" = `statuses: ["prone"]`. With more candidates than `count`, the card asks which (core 0.14.0: the affected creature's owner is asked first, the Director for an NPC). |
 | `resource` | `resource` (`surge`, `heroic`, `epic`, `recovery`), `value` | `[[/surge 2]]` = surge 2; `[[/gain 1 heroic]]` = heroic 1. Heroes (and retainers for recovery) only. |
 | `forced` | `movement` (`push`, `pull`, `slide` or a list), `distance`, `vertical`, `ignoresStability`, `properties` (Combat Tools' `no-collision-damage`, `no-mover-collision-damage`, `no-obstacle-collision-damage`) | Only when the system has no forced effect for it. |
@@ -142,6 +142,14 @@ monsters are `Compendium.draw-steel-delian-tomb.monsters.Actor.<id>`.
 From 0.4.0 (core 0.9.0): `gains` (a class feature's resource gains, **Resource gains**) and `npc: true`. An
 NPC gets only monster-specific overlays of its ability's key; a generic overlay that is right for monsters
 too opts in with `npc: true` (never together with `monster`). No shipped overlay sets it.
+
+From 1.2.0 (Draw Steel 1.2.0): `class` (a hero class dsid, only on a `feature:<dsid>` overlay, never with `monster`)
+scopes the overlay to heroes of that class: `findOverlay` skips it for any other class (read from the actor's
+class item, `actor.system.class`, `_dsid`), so gains of an Elementalist's `essence` never apply to a Summoner's
+`essence` feature. Use it when two classes' features share a dsid (`essence`: Elementalist / Summoner; `ferocity`:
+Fury / Beastheart); `npm run library:validate` warns about such a dsid until the overlay names its class (the class
+must be one of those that carry the feature, resolved by the pack folder in the system index). An actor whose class is unknown (no class item) still gets the overlay, as before. Overlays without
+`class` apply to every hero, as before. Shipped: `feature:essence` is `elementalist`, `feature:ferocity` is `fury`.
 
 ## Triggers and trackers
 
@@ -262,6 +270,9 @@ rules per feature.
 | `resource` | `heroic`, `surge`, `epic` | `heroic` | |
 | `amount` | 1-20, or dice `1d3` / `1d3 + 1` | `1` | dice are rolled when the row applies |
 | `amountBy` | up to 4 `{feature, amount}` | none | upgrades that **replace** the amount when the hero has that feature (the highest present wins: Damaging Ferocity 2, Primordial Ferocity 3). The build checks the feature dsids |
+| `minResource` | 1-30 | none | the rule applies only while the hero's heroic resource is at least this (tracking-aware: Draw Steel 1.2 `primary.tracking`, else `primary.value`), read when the event happens |
+| `amountBy` by level | `{minResource, amount}` entries | none | like `{feature, amount}`, but the entry applies while the live heroic resource reaches `minResource` (the highest reached replaces the amount) |
+| `onceWith` | the id of another gain of the same overlay (same `once`) | none | both rules share one slot per round/encounter ("the first time you take damage or are force moved") |
 | `taker` | `self`, `ally`, `selfOrAlly`, `enemy`, `creature`, `selfOrCreature`, `hero` | damage, winded, heroDeath: `self`; forcedMove: `selfOrCreature` | who took the damage / was moved / became winded / died (heroDeath: `self`, `hero`, `ally`, `selfOrAlly`) |
 | `dealer` | `any`, `self`, `ally`, `selfOrAlly`, `enemy`, `director` | `any` | damage: who dealt it (`director` = an NPC, or a GM's card without a source) |
 | `user` | `any`, `self`, `ally`, `enemy`, `hero`, `director` | `any` | abilityUse, naturalRoll: who used the ability / rolled |
@@ -277,7 +288,7 @@ rules per feature.
 | `natural` | list of 2-20 | required for naturalRoll | the natural results |
 | `loe` | `true`, `false` | `false` | naturalRoll: the roller must be in the gainer's line of effect |
 | `states` | `winded`, `dying` | `["winded"]` | winded: which states count |
-| `confirm` | `true`, `false` | `false` | the row waits for the Director (rules the engine can only approximate) |
+| `confirm` | `true`, `false` | `false` | deprecated: accepted and ignored (the validator warns); a gain waits only for a real decision |
 | `label` | short text | required | the row's text, our own words (linted against the feature's text) |
 
 A field that does not belong to the event is an error ("field `user` does not go with forcedMove").
@@ -285,6 +296,23 @@ Examples: `src/overlays/fury/ferocity.json` (damage with upgrades, winded or dyi
 `src/overlays/tactician/focus.json` (marked creature, an ally's heroic ability), `src/overlays/troubadour/drama.json`.
 What stays manual: Conduit prayer and domains, Melodrama's extra events, the revival at 30 drama, Talent strain
 damage, Mind Recovery's swap, the Shadow's cheaper cost, level-raised turn gains.
+
+## Scaling (feature overlays)
+
+`scaling` on a `feature:<dsid>` overlay holds benefits that follow the hero's heroic resource (tracking-aware, see
+`minResource` above). They are computed when used (a roll, a forced move, an ability use), never stored as effects, so
+they turn on and off as the resource changes. In each list the entry with the highest `minResource` reached (and
+naming the ability, when `abilities` is given) replaces the lesser ones; benefits never stack across entries.
+
+| List | Entry | What it does |
+|---|---|---|
+| `rollEdges` | `{minResource, abilities?, edges: 1 or 2}` | edges on the hero's own power rolls of those abilities (the `getActorModifiers` wrapper) |
+| `forcedBonus` | `{minResource, abilities?, bonus: formula}` | squares added to every forced movement the hero's abilities cause (`engine/plan.mjs buildForcedOp`, so Combat Tools moves carry it) |
+| `useBenefits` | `{minResource, category?, temporaryStamina}` | temporary Stamina when the hero uses an ability of that category (the higher of the pool and the amount; no Undo) |
+| `offers` | `{after, ability, free?: "triggered" or "maneuver"}` | after the hero uses `after`, a whispered card offers `ability` as a free use (its card gets `freeTriggered` / `freeManeuver`) |
+
+Example: `src/overlays/null/metakinetic-mastery.json`. Limits: forced moves built by Combat Tools reactions
+(`engine/synthetic.mjs`) and Judgement do not carry `forcedBonus`; a forced move that stability cuts to nothing only counts for `forcedMove` gains with `includeResisted: true`.
 
 ## Zone effects
 
@@ -388,3 +416,11 @@ and supported modifier keys live in core's `scripts/library/custom.mjs`. Smart A
 item-local authoring and world presets without changing compendiums. Use the existing monster key
 list (or explicit NPC opt-in) for monster content. Validate and rebuild after changing overlays;
 `dist/coverage.md` includes a feature-rule section.
+
+Aura-related rule fields (Null Field, Psychic Pulse): `special: "auraGrow"` (on a `use` rule of the user's own
+ability) makes the user's active Null Field 1 larger (`aura.sizeBonus`, redrawn region, recipients refreshed) until the start
+of the user's next turn, never ending at the end of the current turn; `effects[0]` is the card note when it grew,
+`effects[1]` the note when Null Field is not active (nothing changes). `require: {auraSize: true}` limits a rule of the
+aura item to the activation in which the field was enlarged (Null Field's end-of-turn Pulse damage, `once: "turn"`).
+`targets: "aura"` uses the enlarged radius. A `damage.after` rule waits for an in-flight run of the same rule instead of
+being dropped, and `debug` logs `feature.skip` / `feature.queued` when a rule skips (missing source or owner token, range).
