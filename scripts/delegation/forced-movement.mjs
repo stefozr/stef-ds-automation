@@ -158,12 +158,16 @@ export const dsctMoved = result => !!(result?.undoLog && result.moveId && !resul
 
 /** The applied record of a Combat Tools move. `finalPos`: the token's settled position (taken here when not given). */
 export async function dsctResultPatch(result, { targetDoc, movement, distance, startPos, finalPos = null }) {
+  // Combat Tools' `finalPos` is read while its animation still runs (fractional pixels, seen live):
+  // the position is taken from the token once it has settled.
+  const settled = finalPos ?? await settledPosition(targetDoc);
   return {
-    status: OP_STATUS.APPLIED, delegated: "dsct", movedType: movement, movedDistance: distance,
+    status: OP_STATUS.APPLIED, delegated: "dsct", movedType: movement,
+    // A cancelled "Ally Collision" confirm or a blocked push still returns a result with an undo log (damage, a
+    // no-op position update): a token that did not change position moved 0 squares.
+    movedDistance: samePosition(startPos, settled) ? 0 : distance,
     undoLog: result.undoLog, staminaAfter: staminaSnapshots(result.undoLog), moveId: result.moveId ?? null,
-    // Combat Tools' `finalPos` is read while its animation still runs (fractional pixels, seen live):
-    // the position is taken from the token once it has settled.
-    startPos, finalPos: finalPos ?? await settledPosition(targetDoc), hadDamage: !!result.hadDamage,
+    startPos, finalPos: settled, hadDamage: !!result.hadDamage,
     summary: stripHtml(result.content), collisionLeft: null,
     grabsEnded: (result.grabsToRestore ?? []).map(g => ({ grabberTokenId: g.grabberTokenId, grabbedTokenId: g.grabbedTokenId })),
   };
@@ -182,8 +186,17 @@ async function runDsct(args) {
     log("forced.refused", { type: spec.type, distance, targetId: spec.targetId, sourceId: spec.sourceId, fastMove: spec.fastMove, interactive, noMove: !!result?.noMove });
     return { status: OP_STATUS.SKIPPED, reason: "notMoved" };
   }
-  return dsctResultPatch(result, { targetDoc, movement, distance: distance + dsctForcedTaken(targetDoc.actor), startPos });
+  const finalPos = await settledPosition(targetDoc);
+  // Same position and no damage: a cancelled Ally Collision confirm (result still has a moveId and undo log).
+  if (dsctUnmoved(result, startPos, finalPos)) {
+    log("forced.refused", { type: spec.type, distance, targetId: spec.targetId, sourceId: spec.sourceId, fastMove: spec.fastMove, interactive, samePosition: true });
+    return { status: OP_STATUS.SKIPPED, reason: "notMoved" };
+  }
+  return dsctResultPatch(result, { targetDoc, movement, distance: distance + dsctForcedTaken(targetDoc.actor), startPos, finalPos });
 }
+
+/** A Combat Tools result that left the target where it was and dealt no damage: nothing to record or undo. */
+export const dsctUnmoved = (result, startPos, finalPos) => samePosition(startPos, finalPos) && !result?.hadDamage;
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 

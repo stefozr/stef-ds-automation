@@ -18,7 +18,8 @@
  * 1.2.0: `dstdOnSystem12` (Target Damage is active on Draw Steel 1.2: turn it off).
  * 0.18.0 (Combat Tools 1.2.7, docs/COMBAT-TOOLS-1.2.7.md): `advancedEnrichers` (its card chips are locked like Target
  * Damage rows, but its own auto-apply bypasses every click guard), `autoApplyOwn` (this client auto-applies its own
- * abilities through Combat Tools), `dsctHandlers` (another module took over Combat Tools' movements).
+ * abilities through Combat Tools; 2.2.1.1: on Draw Steel 1.2 it runs Combat Tools' whole Apply All on every card this client
+ * posts, which ui/family-apply-guard.mjs blocks on rows the box owns), `dsctHandlers` (another module took over Combat Tools' movements).
  */
 import { DSCT_ID, DSTD_ID, DT_ID, MODULE_ID, PART_TYPE, QUERY_OP, QUERY_PROMPT, RESOURCES_UI_ID, TRIGGERS_ID } from "./constants.mjs";
 import { compat, detectCompat, familyVersions, unverifiedFamily } from "./compat/version-gate.mjs";
@@ -76,7 +77,7 @@ export const PROBLEM_TEXT = Object.freeze({
   menu: "The automation settings window is not registered: world settings can only be changed through the API.",
   unverifiedVersion: "Not verified with this version of Automation Suite: {list}. Combat Tools and its companions may have changed what we rely on; run the newest Combat Tools family live check in TESTING.md before a session.",
   advancedEnrichers: "Combat Tools' Advanced Enrichers are on: their Apply chips on automated cards are locked once Automation Suite applied, but Combat Tools' own auto-apply of enrichers is not. Turn the setting off if effects land twice.",
-  autoApplyOwn: "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): its enricher auto-apply writes without a click, so it can repeat what Automation Suite applies.",
+  autoApplyOwn: "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): on Draw Steel 1.2 it runs Combat Tools' whole Apply All on every card this client posts, and its enricher auto-apply writes without a click. Automation Suite blocks its clicks on rows the Automation box owns, but keep this setting off.",
   dstdOnSystem12: "Target Damage is active on Draw Steel 1.2: turn it off (the system's per-target sections replace it).",
   dsctHandlers: "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently.",
 });

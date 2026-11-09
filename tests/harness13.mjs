@@ -326,6 +326,22 @@ console.log("ok Combat Tools teleport mode for owners, cancel, refusals with rol
   assert.deepEqual([resisted.status, resisted.reason, enemy.x], ["skipped", "notMoved", 100], "Combat Tools' noMove is not an applied move");
   assert.equal(dsctMoved({ undoLog: [], moveId: null, noMove: true }), false); assert.equal(dsctMoved(undefined), false);
   assert.equal(dsctMoved({ undoLog: [], moveId: "x" }), true);
+  // Cancelled Ally Collision confirm: a result with moveId + undo log, but the token never moved.
+  const noopLog = () => [{ op: "update", uuid: enemy.uuid, data: { x: 100, y: 100 } }];
+  home();
+  answer = () => ({ undoLog: noopLog(), moveId: "m20", hadDamage: false, content: "Friendly fire reduced Push 2 to 0." });
+  const cancelledPush = await applyMoveOp(authorMessage, fmRes, pushOp);
+  assert.deepEqual([cancelledPush.status, cancelledPush.reason, enemy.x], ["skipped", "notMoved", 100], "same position, no damage: not a move");
+  // Same position but damage dealt (blocked): applied so the damage can be undone, 0 squares moved.
+  home();
+  answer = () => ({ undoLog: noopLog(), moveId: "m21", hadDamage: true, content: "" });
+  const blockedPush = await applyMoveOp(authorMessage, fmRes, pushOp);
+  assert.deepEqual([blockedPush.status, blockedPush.movedDistance, blockedPush.hadDamage], ["applied", 0, true], "blocked with damage: applied, 0 moved");
+  // A real move keeps the distance.
+  home();
+  answer = () => { enemy.x = 300; return { undoLog: noopLog(), moveId: "m22", hadDamage: false, content: "" }; };
+  const realPush = await applyMoveOp(authorMessage, fmRes, pushOp);
+  assert.deepEqual([realPush.status, realPush.movedDistance], ["applied", 2], "moved: applied with the distance");
   // A player's pick 4 squares long: the row allows 2 + forcedMovementTaken 2.
   const savedFilter = game.users.filter, savedPermission = hero.testUserPermission;
   game.users.filter = fn => [w.users.player].filter(fn);

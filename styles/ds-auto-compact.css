@@ -132,3 +132,10 @@ li.chat-message.ds-auto-fold-dstd > section.draw-steel-target-damage-panel { dis
   font-size: 10px;
 }
 :is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-folded-teleport--open > .ds-auto-tp-toggle > i { transform: rotate(180deg); }
+
+/* ---- Death Tracker's card for a death our box shows as a "Fallen" row (ui/death-fold.mjs) ---- */
+li.chat-message.ds-auto-death-folded,
+:is(.chat-sidebar, #chat-notifications, .chat-popout) li.chat-message.ds-auto-death-folded { display: none; }
+.ds-auto-row-fallen { color: var(--ds-auto-bad); font-size: 0.9em; margin: 2px 0 0 30px; }
+.ds-auto-compact .ds-auto-row--one > .ds-auto-row-fallen { order: 98; flex-basis: 100%; margin: 1px 0 0 24px; }
+.ds-auto-compact .ds-auto-row--many > .ds-auto-row-fallen { margin: 1px 0 0 24px; }

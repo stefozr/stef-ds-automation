@@ -32,6 +32,7 @@ import { summonReasonText } from "../summons/place.mjs";
 import { keepKeyOf as persistentKeepKey } from "../persistent/registry.mjs";
 import { dstdActive, dstdState } from "../compat/dstd.mjs";
 import { shouldFoldPanel } from "../ui/dstd-fold.mjs";
+import { fallenForTarget } from "../ui/death-fold.mjs";
 import { heroRerollShown } from "../resources/hero-token-reroll.mjs";
 
 /**
@@ -791,6 +792,9 @@ export function buildView(message, res) {
         : (t.tier ? loc("DSAUTO.Card.TierShort", { tier: t.tier }) : (res.noPowerRoll ? "" : loc("DSAUTO.Card.NoTierShort")));
     // A target of a power-roll card without a tier (added after the roll): the chip is a dash, styled as text.
     row.noTier = !t.dropped && !selfOnly && !gainOnly && !t.tier && !res.noPowerRoll;
+    // 1.2.0: a creature this card's damage or movement killed (Death Tracker's card is folded into this line).
+    const fallen = t.dropped || gainOnly ? null : fallenForTarget(message, t);
+    if (fallen) row.fallen = loc(fallen.object ? "DSAUTO.Row.Destroyed" : "DSAUTO.Row.Fallen");
     rows.push(row);
     byKey.set(key, row);
   }
@@ -808,6 +812,8 @@ export function buildView(message, res) {
         rows.push(row);
       }
       row.ops.push(opView(message, res, op, surges, opWarnings, compact));
+      // 1.2.0: minions of the squad are not rows of their own: the squad row names the fallen ones.
+      row.fallenKeys = [...new Set([...(row.fallenKeys ?? []), ...op.targetKeys.filter(k => res.targets?.[k] && !res.targets[k].dropped && fallenForTarget(message, res.targets[k]))])];
       continue;
     }
     const row = byKey.get(op.targetKeys[0]);
@@ -817,6 +823,13 @@ export function buildView(message, res) {
   const squadMembers = new Set(ops.filter(o => o.group).flatMap(o => o.targetKeys));
   // A gain-only record without rows (its gain row went with an undone resolve) is not shown.
   const visibleRows = rows.filter(r => r.squad || r.ops.length || (!squadMembers.has(r.key) && !r.gainOnly));
+  // 1.2.1: the squad row names only the fallen minions without a row of their own (each death shows once).
+  const ownRows = new Set(visibleRows.filter(r => !r.squad).map(r => r.key));
+  for (const r of visibleRows.filter(r => r.squad)) {
+    const dead = (r.fallenKeys ?? []).filter(k => !ownRows.has(k));
+    r.fallen = dead.length ? `${loc("DSAUTO.Row.Fallen")}: ${dead.map(k => res.targets[k].name).join(", ")}` : null;
+    delete r.fallenKeys;
+  }
   // Milestone 7: classes the resources stylesheet styles (styles/ds-auto-resources.css).
   for (const r of visibleRows) {
     const kinds = new Set(r.ops.map(o => o.kind));

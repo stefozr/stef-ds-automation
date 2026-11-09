@@ -61,7 +61,7 @@ import { applyModifier, applyRuleDuration } from "./modifiers.mjs";
  */
 import { CTLIB_ID, DSTD_ID, HOOKS, MODULE_ID, OP_STATUS } from "../constants.mjs";
 import { ctlibActive, ctlibCoverage, damageBatch } from "../compat/ctlib.mjs";
-import { noteDamageCause } from "../compat/death-tracker.mjs";
+import { keepCardCause, noteCardCause } from "../compat/death-tracker.mjs";
 import { dstdActive, dstdCoveredTokens, dstdTargetTokenUuids } from "../compat/dstd.mjs";
 import { debug, error, log, warn } from "../log.mjs";
 import { setting } from "../settings.mjs";
@@ -570,6 +570,11 @@ async function applyOpList(message, res, opList, { userId = game.userId, clientM
     let patch;
     const staminaActor = ["damage", "heal", "temp"].includes(op.kind) && !op.group ? fromUuidSync(resLive.targets?.[op.targetKeys?.[0]]?.actorUuid ?? "") : null;
     const temporaryBefore = staminaActor ? temporarySnapshot(staminaActor) : null;
+    // 1.2.0: every op that can deal damage links its deaths to this card, right before it runs (the batch above
+    // notes once for its rows; a forced move's collision, a teleport's fall, a zone, a summon and a single-row Apply
+    // run outside it).
+    // Kept fresh while the op runs: a move can wait on a picker or Combat Tools' Ally Collision confirm (seen live).
+    const stopCause = DEALS_DAMAGE_KINDS.has(op.kind) || op.recoveries ? keepCardCause(message, res) : () => {};
     try {
       // Milestone 7 (C24): the new kinds before every generic branch (world resources before `resource`, hero-token
       // heals before the Stamina path).
@@ -594,6 +599,8 @@ async function applyOpList(message, res, opList, { userId = game.userId, clientM
     } catch (err) {
       error("applyOp", err, { opId: op.opId });
       patch = { status: OP_STATUS.FAILED, reason: "error", error: String(err?.message ?? err) };
+    } finally {
+      stopCause();
     }
     if (surgeCount) {
       if (patch.status === OP_STATUS.APPLIED) patch.surgesPaid = surgeCount;
@@ -651,7 +658,7 @@ async function applyOpList(message, res, opList, { userId = game.userId, clientM
   const placedOps = ops.filter(o => PLACED_KINDS.has(o.kind));
   for (const op of ops.filter(o => o.featureCost)) await runOne(op);
   if (damageOps.length) {
-    noteDamageCause({ userId: res.authorUserId, sourceActorUuid: res.sourceActorUuid, messageId: message.id });
+    noteCardCause(message, res);
     await damageBatch(async () => {
       for (const op of damageOps) await runOne(op);
     });
@@ -757,6 +764,8 @@ async function runGainStep(message, resLive, ops, patches, runOne) {
 }
 
 const MOVE_KINDS = new Set(["forced", "teleport"]);
+/** Op kinds that can end with a death (Death Tracker cause, noteCardCause). */
+const DEALS_DAMAGE_KINDS = new Set(["damage", "heal", "temp", "forced", "teleport", "featureMove", "zone", "summon"]);
 
 /**
  * Milestone 9 (D6): the boost of a teleport that landed with `boostSpent` (engine/forced.mjs checked the amount): a

@@ -23,8 +23,9 @@ import { getResolution } from "../engine/record.mjs";
 import { routePrompt } from "../relay/prompt-router.mjs";
 import { log } from "../log.mjs";
 import { stepRecipient } from "../ui/teleport-followup.mjs";
-import { callDsctForced, dsctForcedSpec, dsctMoved, dsctResultPatch, forcedRefusal, settledPosition } from "./forced-movement.mjs";
+import { callDsctForced, dsctForcedSpec, dsctMoved, dsctResultPatch, dsctUnmoved, forcedRefusal, settledPosition } from "./forced-movement.mjs";
 import { dsctForcedTaken } from "../compat/dsct.mjs";
+import { keepCardCause } from "../compat/death-tracker.mjs";
 import { moveTokenTo, positionOf } from "./teleport.mjs";
 
 const ASK_MS = 300_000;
@@ -202,6 +203,8 @@ export async function forcedByPicker(message, res, op, targetDoc) {
   // The movement the recipient used: the row's own, or one of the row's choices.
   const moved = movement ? (answer.movement === movement ? movement : null) : (op.movements?.includes(answer.movement) ? answer.movement : null);
   const finalPos = await settledPosition(targetDoc);
+  // Cancelled Ally Collision confirm: a result with a moveId, but the token stayed and nothing was damaged.
+  if (dsctUnmoved(answer, startPos, finalPos)) return { status: OP_STATUS.PENDING, reason: "notMoved" };
   // Combat Tools adds the target's forcedMovementTaken squares to the move (1.2.7).
   const allowed = moved ? rowDistance(op, moved) + dsctForcedTaken(targetDoc.actor) : 0;
   if (!trusted) {
@@ -261,7 +264,14 @@ export async function handleForcedStep(payload, { user } = {}) {
     const refused = forcedRefusal({ ...args, taken: dsctForcedTaken(targetDoc.actor) });
     if (refused) return { refused };
     const onScene = sourceDoc?.object && sourceDoc.parent?.id === targetDoc.parent?.id ? sourceDoc : null;
-    const result = await callDsctForced(dsctForcedSpec({ ...args, sourceDoc: onScene, interactive: true }));
+    // The pick can take longer than Death Tracker keeps a cause: link the collision damage to the card now.
+    const stopCause = keepCardCause(message, res);
+    let result;
+    try {
+      result = await callDsctForced(dsctForcedSpec({ ...args, sourceDoc: onScene, interactive: true }));
+    } finally {
+      stopCause();
+    }
     if (!dsctMoved(result)) return { cancelled: true, movement };
     return {
       movement, moveId: String(result.moveId), undoLog: result.undoLog, hadDamage: !!result.hadDamage,

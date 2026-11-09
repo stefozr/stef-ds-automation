@@ -108,6 +108,7 @@ import { registerTestCardLock } from "./ui/test-card-lock.mjs";
 import { loadDsctHandlerProbes as dsctHandlerProbes } from "./compat/dsct.mjs";
 import { registerDstdFold } from "./ui/dstd-fold.mjs";
 import { registerTeleportMessageFold } from "./ui/teleport-message-fold.mjs";
+import { registerDeathFold } from "./ui/death-fold.mjs";
 import { rerenderCards } from "./ui/rerender.mjs";
 import { registerPromptDialog } from "./ui/prompt-dialog.mjs";
 import { registerSystemFixes } from "./compat/system-fixes.mjs";
@@ -178,6 +179,7 @@ import { stripParts } from "./maintenance/strip.mjs";
 import { cleanup } from "./maintenance/cleanup.mjs";
 import { modeFor as actorModeFor } from "./engine/actor-category.mjs";
 import { registerPartLock } from "./ui/part-lock.mjs";
+import { registerFamilyApplyGuard } from "./ui/family-apply-guard.mjs";
 import { registerTargetResultVeto } from "./compat/target-result-veto.mjs";
 import { registerNativeSummon } from "./summons/native.mjs";
 import { registerSourceDefeat } from "./turn/source-defeat.mjs";
@@ -705,8 +707,11 @@ Hooks.once("init", () => {
   // 0.13.0: Target Damage's panel folded under "Details"; Combat Tools' teleport messages for our rows folded.
   safely("registerDstdFold", registerDstdFold);
   safely("registerTeleportMessageFold", registerTeleportMessageFold);
+  safely("registerDeathFold", registerDeathFold);
   // Milestone 8: per-part locks of the system's buttons on 1.2 cards (every client).
   safely("registerPartLock", registerPartLock);
+  // 2.2.1.1: Combat Tools' own apply-all row and per-target buttons on cards the box handles (decoration + capture guard).
+  safely("registerFamilyApplyGuard", registerFamilyApplyGuard);
   // 1.2.0: the system's and ctlib's per-target buttons are vetoed for rows the Automation box owns.
   safely("registerTargetResultVeto", registerTargetResultVeto);
   registerPromptDialog();

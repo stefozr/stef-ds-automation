@@ -2,6 +2,28 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.2.1] - 2026-11-10
+
+### Changed
+- Verified with Draw Steel 1.2.1, Combat Tools 2.2.1.1, ctlib 2.1.0, Death Tracker 2.0.1 and Battle Log 2.0.1.
+- The self-check note about Combat Tools' "auto-apply own abilities" now says what it does on Draw Steel 1.2: it runs
+  Combat Tools' whole Apply All on every card that client posts.
+
+### Fixed
+- Combat Tools 2.2.1 adds its own **Apply All / Undo All** row to Draw Steel 1.2 cards (and an apply button on each
+  minion squad). On cards the Automation box handles, these are locked, so the box stays the one place to apply and
+  undo. Combat Tools' own buttons under each target (forced movement, grab, frightened, taunted, flat effects) are locked
+  while the card is still resolving and for every row the box applied or still has pending. Combat Tools' Apply All and
+  its auto-apply of your own abilities can no longer push or apply a condition a second time.
+- A push that Combat Tools cancelled (for example **Cancel** on its "Ally Collision" prompt) is no longer recorded as a
+  move. Gains that count forced movement no longer fire for it. A push stopped in place that still dealt collision
+  damage stays undoable and counts as resisted.
+- Deaths a card causes now show in its Automation box as a **💀 Fallen** row under that target ("Destroyed" for an
+  object) instead of a separate Death Tracker card. Undo all revives the creature as before. This covers every op that
+  can kill: damage, a forced move's collision or fall, teleports, zones, and single-row applies. The card stays the
+  cause even while a move waits on a picker or Combat Tools' Ally Collision prompt. Deaths that no card caused keep
+  Death Tracker's own card.
+
 ## [1.2.0] - 2026-11-05
 
 ### Added

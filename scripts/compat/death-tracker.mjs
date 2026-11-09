@@ -17,6 +17,32 @@ export function noteDamageCause({ userId, sourceActorUuid, messageId }) {
   } catch (_err) { /* attribution is best effort */ }
 }
 
+/**
+ * Link what the card is about to do to the card: Death Tracker's cause lives about 8 s, so this is called right before
+ * every op that can deal damage (the batch, a forced move's collision and fall damage, a teleport's fall, zones,
+ * summons), also for the single-row applies, and again before a picker move. The card's Automation box then shows
+ * the death as a "Fallen" row and Death Tracker's own card is folded (ui/death-fold.mjs).
+ */
+export function noteCardCause(message, res) {
+  if (!message?.id || !res) return;
+  noteDamageCause({ userId: res.authorUserId, sourceActorUuid: res.sourceActorUuid, messageId: message.id });
+}
+
+/** How often a long op re-notes its card as the cause (Death Tracker forgets a cause after about 8 s). */
+const CAUSE_REFRESH_MS = 4000;
+
+/**
+ * Note the card as the cause now and keep it fresh until the returned `stop()` is called: a forced move can wait on a
+ * picker or on Combat Tools' "Ally Collision" confirm for longer than Death Tracker keeps a cause (seen live).
+ * @returns {() => void} stop
+ */
+export function keepCardCause(message, res) {
+  noteCardCause(message, res);
+  if (!message?.id || !res) return () => {};
+  const timer = setInterval(() => noteCardCause(message, res), CAUSE_REFRESH_MS);
+  return () => clearInterval(timer);
+}
+
 /** Mark a minion token as hit before the squad pool write so the right minion is defeated. */
 export function reportSquadDamage(tokenId) {
   if (!tokenId) return;

@@ -79,7 +79,7 @@ export function ownedOps(message, { strict = true } = {}) {
 /** Does any owned op of `message` cover this button of part `partId`? See opCoversButton. */
 export const partOwnedBySuite = (message, partId, action, what) => ownedOps(message).some(o => opCoversButton(o, partId, action, what));
 
-function lock(button, tipKey = "DSAUTO.Lock.PartApplied") {
+export function lock(button, tipKey = "DSAUTO.Lock.PartApplied") {
   button.disabled = true;
   button.classList?.add?.("ds-auto-locked");
   if (button.dataset) button.dataset.tooltip = loc(tipKey);
