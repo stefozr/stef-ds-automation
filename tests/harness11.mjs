@@ -2060,7 +2060,7 @@ const SETTINGS = {
   triggersEnabled: false, triggerPromptSeconds: 20, triggerFallback: "director", triggerNpcs: true, deferToTriggersModule: true,
   triggerExternalDamage: true, summonMode: "auto", summonPlacement: "pick", summonTurnChain: true, summonUpkeepSeconds: 30,
   resourceGains: "auto", heroTokenPrompt: true, maliceReminders: true, villainActionTracking: true, zoneMode: "auto", zoneDamage: "auto",
-  libraryDefersToCombatTools: true, respectDstdApplications: true,
+  respectDstdApplications: true,
 };
 async function fresh({ tokens = 0, maliceValue = 0 } = {}) {
   await settleAll(10);

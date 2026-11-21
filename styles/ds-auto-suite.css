@@ -134,6 +134,11 @@
   cursor: not-allowed !important;
 }
 
+/* A native Draw Steel control the Automation box already shows in its own words (e.g. the Persistent button). */
+.ds-auto-hidden-native {
+  display: none !important;
+}
+
 /* Milestone 1.5: op warnings, surge buttons, notes. */
 .ds-auto-op-warning {
   display: block;

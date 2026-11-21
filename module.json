@@ -2,7 +2,7 @@
   "id": "stef-ds-automation",
   "title": "Stef's Automation Suite for Draw Steel",
   "description": "Automation for the Draw Steel system: when an ability is used, damage, healing, conditions and forced movement are applied to each target at its own tier of success, with immunities, weaknesses, minion squads, potency and surges handled, a per-target summary on the chat card, and undo. Saves, ongoing damage and encounter effects run themselves; a built-in ability library adds conditions from the ability text, triggered actions (Parry, Inertial Shield and more) offered with a countdown, summons placed on the canvas, heroic resource gains, Malice and villain actions, and lasting areas such as Wall of Fire. Smart Automation adds an Automation window to item and actor sheets, a custom automation editor and a coverage report. Applied by the Director's client; works alongside Draw Steel: Combat Tools and Target Damage. Stef's Automation Suite for Draw Steel is not affiliated with MCDM Productions, LLC. Draw Steel is a trademark of MCDM Productions, LLC.",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "authors": [
     {
       "name": "Stefan",
@@ -67,7 +67,7 @@
         "type": "system",
         "compatibility": {
           "minimum": "1.1.2",
-          "verified": "1.2.1"
+          "verified": "1.2.2"
         },
         "reason": "Built on the Draw Steel system's abilities, power rolls, conditions and chat cards."
       }
@@ -84,7 +84,7 @@
         "id": "draw-steel-combat-tools",
         "type": "module",
         "compatibility": {
-          "verified": "2.2.1.1"
+          "verified": "2.2.4"
         },
         "reason": "Forced movement, teleports, areas and range checks go through its engine and undo log; without it the suite moves tokens in a straight line itself."
       },
@@ -100,7 +100,7 @@
         "id": "draw-steel-ctlib",
         "type": "module",
         "compatibility": {
-          "verified": "2.1.0"
+          "verified": "2.1.3"
         },
         "reason": "Shared services of the Combat Tools family (token visibility, squads)."
       },
@@ -116,7 +116,7 @@
         "id": "draw-steel-battle-log",
         "type": "module",
         "compatibility": {
-          "verified": "2.0.1"
+          "verified": "2.1.1"
         },
         "reason": "Applied results appear in the battle log."
       },

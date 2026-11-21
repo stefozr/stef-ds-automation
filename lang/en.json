@@ -85,6 +85,8 @@
       "CollisionLeft": "stopped {count} short: collision damage by hand",
       "TeleportNeedsCanvas": "Open the scene with your token to pick where it teleports.",
       "CleanseCount": "End {count} effect(s): {what}",
+      "SpendApply": "Spend {cost} {name}",
+      "SpendShort": "Needs {cost} {name}: not enough",
       "Cleanse": "End effects: {what}",
       "HealRecoveries": "Spend {count} Recovery: +{amount} Stamina",
       "PicksSquareSelf": "the token's owner picks the square",
@@ -219,6 +221,7 @@
       "badDestination": "invalid destination",
       "partnerMissing": "needs a partner token",
       "nothingToEnd": "nothing to end",
+      "notEnoughResource": "not enough of the hero's resource",
       "notChosen": "not chosen",
       "tooFar": "the move was longer than allowed",
       "chooseEffects": "choose which effects end",
@@ -294,7 +297,6 @@
       "hookManual": "Another module switched this card to manual.",
       "itemMissing": "The ability no longer exists; nothing can be applied.",
       "forcedDistanceInvalid": "This forced movement's distance could not be worked out: move it by hand.",
-      "libraryDefersToCombatTools": "Combat Tools automates part of this ability itself (its buttons on the card); the library left those parts to it.",
       "adoptedCard": "This card was not prepared by its author; the Director took its targets from the rolls.",
       "selfMissing": "The ability's user has no token or actor here: effects on them were left out.",
       "triggerPotencyLate": "The potency change came after the effect was applied: adjust it by hand.",
@@ -304,6 +306,24 @@
       "devBuildPairing": "This Draw Steel development build may pair targets with the wrong rolls: every row is manual.",
       "potencyAdjusted": "Potency was already adjusted on the card"
     },
+    "Overlap": {
+      "title": "Combat Tools overlap",
+      "intro": "Combat Tools also automates these, which the Automation Suite already does. Turn them off so nothing happens twice.",
+      "clientNote": "Auto-apply of your own abilities is a setting of this client only: turning it off here changes it for you, not for the players.",
+      "turnOff": "Turn these off in Combat Tools",
+      "notNow": "Not now",
+      "none": "Combat Tools has nothing switched on that the Automation Suite also does.",
+      "menuLabel": "Combat Tools overlap: review",
+      "menuHint": "Lists the Combat Tools switches that do the same as the Automation Suite and offers to turn them off.",
+      "hiw": "Hesitation is Weakness",
+      "hiwDoes": "the Automation Suite offers it at the end of a turn, and hides Combat Tools' own card",
+      "judgement": "Judgement automation",
+      "judgementDoes": "the Automation Suite applies Judgement from the ability card, and hides Combat Tools' Apply Judgement button",
+      "mark": "Mark automation",
+      "markDoes": "the Automation Suite applies Mark from the ability card, and hides Combat Tools' Mark buttons",
+      "autoApply": "Auto-apply own abilities (this client)",
+      "autoApplyDoes": "the Automation box applies each card's effects; Combat Tools' auto-apply would repeat them"
+    },
     "Lock": {
       "TestCard": "Applied from the ability card: use its row (and Undo there).",
       "AlreadyApplied": "Already applied by Automation Suite. Undo it on the Automation section first.",
@@ -312,6 +332,7 @@
       "MovedTooltip": "Already moved by Automation Suite",
       "GainApplied": "Applied by Automation Suite",
       "BoxOwnsCard": "The Automation box applies and undoes this card.",
+      "PersistentTurnStart": "Kept at your turn start: Automation Suite asks you then.",
       "PartApplied": "Already applied by the automation",
       "PartOwned": "Use the Automation box on this card for this row.",
       "Resolving": "Automation is still resolving this card.",
@@ -505,10 +526,6 @@
         "name": "Ability library",
         "hint": "Use automation from library modules (such as the suite's built-in library) and detached automation on items, on top of what the system describes. Off: only the system's own power roll effects are automated."
       },
-      "libraryDefersToCombatTools": {
-        "name": "Library: leave Combat Tools' own automation alone",
-        "hint": "When an ability carries Combat Tools' automation of a kind (its heal, cleanse, teleport, damage, condition or resource buttons on the card), the library does not add rows of that kind."
-      },
       "resourceMode": {
         "name": "Resources",
         "hint": "Surges, heroic resource and Recoveries that library abilities grant."
@@ -663,6 +680,8 @@
       "ResetTab": "Reset this tab to defaults",
       "ResetAll": "Reset everything to defaults",
       "ResetConfirm": "Reset {count} settings to their defaults?",
+      "Saved": "Automation settings saved.",
+      "Unchanged": "Automation settings: nothing changed.",
       "ActorType": {
         "hero": "Heroes",
         "retainer": "Retainers",
@@ -736,7 +755,8 @@
       "advancedEnrichers": "Combat Tools' Advanced Enrichers are on: their Apply chips on automated cards are locked once Automation Suite applied, but Combat Tools' own auto-apply of enrichers is not. Turn the setting off if effects land twice.",
       "autoApplyOwn": "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): on Draw Steel 1.2 it runs Combat Tools' whole Apply All on every card this client posts, and its enricher auto-apply writes without a click. Automation Suite blocks its clicks on rows the Automation box owns, but keep this setting off.",
       "dstdOnSystem12": "Target Damage is active on Draw Steel 1.2: turn it off (the system's per-target sections replace it).",
-      "dsctHandlers": "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently."
+      "dsctHandlers": "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently.",
+      "ctOverlap": "Combat Tools also automates these, which Automation Suite already does: {list}. Turn them off so nothing happens twice (Automation settings, Maintenance, \"Combat Tools overlap: review\")."
     },
     "Targeted": {
       "FrightenedCloser": "{name} is frightened of {source} and cannot willingly move closer.",
@@ -1018,7 +1038,10 @@
         "Edge": "{count} edge(s) on {target}'s roll",
         "Use": "Uses {ability} on {target}",
         "FreeStrike": "{name} makes a free strike against {target}",
-        "TakeTurn": "Takes the next turn"
+        "TakeTurn": "Takes the next turn",
+        "Bane": "{count} bane(s) on {target}'s roll",
+        "SpeedZero": "{target}'s speed is 0 until the end of the turn",
+        "Damage": "{target} takes {value} {type} damage"
       },
       "Waiting": "Waiting for triggered actions: {names}",
       "HalvedBy": "halved by {ability} ({name})",
@@ -1046,6 +1069,7 @@
           "turnEnd": "{subject} ended their turn.",
           "forcedBefore": "{subject} is about to be force-moved.",
           "moveBefore": "{subject} is about to move.",
+          "abilityUsed": "{subject} used {ability}.",
           "zero": "{subject} was reduced to 0 Stamina."
         },
         "Option": "{ability}: {steps}",
@@ -1075,6 +1099,10 @@
         "potency": "potency {delta}",
         "edge1": "an edge",
         "edge2": "a double edge",
+        "bane1": "a bane",
+        "bane2": "a double bane",
+        "speedZero": "speed 0 until the end of the turn",
+        "damage": "{value} {type} damage",
         "use": "use {ability}",
         "freeStrike": "free strike against the attacker",
         "takeTurnNext": "take the next turn",
@@ -1444,10 +1472,6 @@
         "label": "Unavailable",
         "hint": "The library overlay needs a module that is not active."
       },
-      "covered": {
-        "label": "Combat Tools",
-        "hint": "Combat Tools automates everything the library would add to this ability."
-      },
       "configurable": {
         "label": "Configurable",
         "hint": "Automated by the library, with options you can set."
@@ -1496,7 +1520,7 @@
       "CombatTools": "Combat Tools",
       "Enhanced": "enhanced version",
       "EnhancedLocked": "refresh locked",
-      "LeftToCombatTools": "Left to Combat Tools",
+      "CombatToolsAlsoHas": "Combat Tools also has buttons for (the suite's rows win)",
       "Native": "The system's own effects",
       "NoNative": "None.",
       "Replaced": "replaced by the library",
@@ -1622,7 +1646,8 @@
         "turnStart": "at turn start",
         "turnEnd": "at turn end",
         "forcedBefore": "before a forced move",
-        "moveBefore": "before a move"
+        "moveBefore": "before a move",
+        "abilityUsed": "when an ability is used"
       },
       "Subject": {
         "self": "you",

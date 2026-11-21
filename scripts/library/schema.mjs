@@ -27,19 +27,39 @@ import { modifierKeyOk, validateAutomation } from "./custom.mjs";
  *   }
  *
  * Trigger (vocabulary in triggers/taxonomy.mjs; defaults filled in by normalizeOverlay):
- *   id, event ("damage.before" | "damage.after" | "roll.before" | "turn.start" | "turn.end" | "forced.before" | "move.before"),
+ *   id, event ("damage.before" | "damage.after" | "roll.before" | "turn.start" | "turn.end" | "forced.before" | "move.before" |
+ *     "ability.used"),
  *   subject? ("self" default | "ally" | "selfOrAlly" | "enemy" | "creature" | "selfOrCreature"),
  *   attacker? ("any" default | "creature" | "enemy"; damage.* events only),
  *   free? (true: never uses the round's triggered action; default: the item's type decides),
  *   range? ("ability" default | "unlimited" | formula), loe? (default true),
  *   cost? (0-10 heroic resource; default the item's own cost),
  *   spend? {cost (1-5), range? (formula), label?}       an optional extra the owner may pay
- *   require? {keywords?, fromAbility?, damaging?, subjectType?, notStartedByThis?, meleeReach?, recoveries?}
+ *   require? {keywords?, fromAbility?, damaging?, subjectType?, notStartedByThis?, meleeReach?, recoveries?, subjectEffect?,
+ *     sourceEffect?, singleTarget?, actionType?, shifting?, adjacent?}   (REQUIRE_KEYS lists the events each goes with)
+ *   1.2.2 events and requirements:
+ *     ability.used     the subject used an ability (one event per ability card, active GM); steps damage | note; require.actionType
+ *                      (a GAIN_ACTIONS value) compares with the used item's `system.type`.
+ *     require.subjectEffect {ability: <dsid>, effect?: <effect id>}   any event: the subject carries that effect applied BY THE
+ *                      REACTOR (carriesEffectOf, as a gain's takerEffect): "a creature judged by you".
+ *     require.sourceEffect {ability, effect?}   damage.before: the damage source creature carries it from the reactor.
+ *     require.singleTarget true   damage.before: the source ability targets exactly one creature.
+ *     require.damaging  roll.before fires for ANY power roll; normalizeOverlay fills in `damaging: true` for a roll.before trigger
+ *                      that does not mention it (the old damaging-only behaviour), `damaging: false` opts out.
+ *     require.shifting true / require.adjacent true   move.before: only a shift / the subject is adjacent to the reactor.
+ *   yieldsTo? ("judgementAutomation" | "markAutomation"): while Combat Tools is active and that world setting is on, a
+ *     judged / marked effect Combat Tools made itself (its `judgement` / `mark` flag) does not count for `subjectEffect` /
+ *     `sourceEffect`: Combat Tools' own extras handle those. The suite's own effects always count (ctYieldFlag in
+ *     compat/dsct.mjs). Feature rules take the same field.
  *   label? (the prompt's subtitle), steps: [Step, ...] (1-6, at least one that is not a plain note: a note
  *   with `effect: true` counts, as the engine's realStep)
- * Step: type ("halve" | "potency" | "edge" | "use" | "freeStrike" | "takeTurnNext" | "note", as the event
+ * Step: type ("halve" | "potency" | "edge" | "bane" | "use" | "freeStrike" | "takeTurnNext" | "speedZero" | "damage" | "note", as the event
  *   allows), when? {spend}, and per type: potency delta (-3..3) + scope? ("all" | "one"); edge amount (1 | 2);
  *   use targets? ("subject" | "source" | "none"); freeStrike by? ("subject" | "reactor"); note text.
+ *   1.2.2: bane amount (1 | 2; roll.before, a bane on the roll, capped like edges); damage value (formula rolled with the reactor's
+ *   item roll data, "2*@P") + damageType? on the subject (ability.used, damage.after, turn.start; a recorded, undoable damage row
+ *   of the trigger card); speedZero (move.before: the subject's speed is 0 until the end of its turn, a recorded modifier on
+ *   system.movement.value, and the gated shift is cancelled). A free strike on move.before is `by: "reactor"` against the mover.
  * Tracker: id, effect (the ability's own effect id, applied by a condition effect of the overlay),
  *   onZero ("retarget"), endPrevious? (default true), endOnSourceDying? (default false), label?
  *
@@ -114,7 +134,7 @@ import { modifierKeyOk, validateAutomation } from "./custom.mjs";
  */
 import {
   ATTACKERS, EVENT_STEPS, FREE_STRIKE_BY, LIMITS, POTENCY_SCOPES, RANGE_WORDS, REQUIRE_KEYS, STEP_TYPES, SUBJECTS,
-  SUBJECT_TYPES, TRACKER_ON_ZERO, TRIGGER_EVENTS, USE_TARGETS, realStep,
+  SUBJECT_TYPES, TRACKER_ON_ZERO, TRIGGER_EVENTS, USE_TARGETS, YIELDS_TO, realStep,
 } from "../triggers/taxonomy.mjs";
 
 export const SCHEMA_VERSION = 1;
@@ -900,10 +920,11 @@ export function scalingProblems(o) {
 /*  Triggers and trackers (Milestone 5)         */
 /* -------------------------------------------- */
 
-const TRIGGER_FIELDS = ["id", "event", "subject", "attacker", "free", "range", "loe", "cost", "spend", "require", "label", "steps"];
+const TRIGGER_FIELDS = ["id", "event", "subject", "attacker", "free", "range", "loe", "cost", "spend", "require", "label", "yieldsTo", "steps"];
 /** Fields a step type may carry besides `type` and `when`. */
 const STEP_FIELDS = Object.freeze({
-  halve: [], potency: ["delta", "scope"], edge: ["amount"], use: ["targets"], freeStrike: ["by"], takeTurnNext: [], note: ["text", "effect"],
+  halve: [], potency: ["delta", "scope"], edge: ["amount"], bane: ["amount"], use: ["targets"], freeStrike: ["by"], takeTurnNext: [], speedZero: [],
+  damage: ["value", "damageType"], note: ["text", "effect"],
 });
 const TRACKER_FIELDS = ["id", "effect", "onZero", "endPrevious", "endOnSourceDying", "label"];
 const EFFECT_ID_RE = /^[A-Za-z0-9]{16}$/;
@@ -973,12 +994,22 @@ export function triggerProblems(o, _ctx = {}) {
             }
           } else if (k === "subjectType") {
             if (!SUBJECT_TYPES.includes(v)) bad(`\`require.subjectType\` must be ${SUBJECT_TYPES.join(" or ")}`);
+          } else if (k === "subjectEffect" || k === "sourceEffect") {
+            if (!(isObj(v) && Object.keys(v).every(f => ["ability", "effect"].includes(f)) && isStr(v.ability) && DSID_RE.test(v.ability)
+                && (v.effect == null || (isStr(v.effect) && EFFECT_ID_RE.test(v.effect))))) {
+              bad("require." + k + " must be {ability: <dsid>, effect?: <effect id>}");
+            }
+          } else if (k === "actionType") {
+            if (!GAIN_ACTIONS.includes(v)) bad("require.actionType must be one of " + GAIN_ACTIONS.join(", "));
+          } else if (k === "damaging") {
+            if (typeof v !== "boolean") bad("require.damaging must be true or false (false: any power roll)");
           } else if (k === "recoveries") {
             if (!intIn(v, 1, 3)) bad("`require.recoveries` must be an integer 1-3");
           } else if (v !== true) bad(`\`require.${k}\` can only be true`);
         }
       }
     }
+    if (t.yieldsTo != null && !YIELDS_TO.includes(t.yieldsTo)) bad("unknown yieldsTo " + JSON.stringify(t.yieldsTo) + " (" + YIELDS_TO.join(" | ") + ")");
     // 10. label
     if (t.label != null && !shortText(t.label)) bad(`\`label\` must be 1-${MAX_TEXT} characters without markup`);
     // 7-9. steps
@@ -1005,10 +1036,19 @@ export function triggerProblems(o, _ctx = {}) {
         case "edge":
           if (s.amount !== 1 && s.amount !== 2) at("edge needs an `amount` of 1 or 2");
           break;
+        case "bane":
+          if (s.amount !== 1 && s.amount !== 2) at("bane needs an amount of 1 or 2");
+          break;
+        case "damage":
+          if (!isFormula(s.value)) at('damage needs a formula value ("2*@P")');
+          if (s.damageType != null && !(isStr(s.damageType) && /^[a-z]{1,20}$/.test(s.damageType))) at("damageType must be a lowercase damage type");
+          break;
         case "use":
           if (s.targets != null && !USE_TARGETS.includes(s.targets)) at(`\`targets\` must be ${USE_TARGETS.join(", ")}`);
           break;
         case "freeStrike":
+          // A move has no attacking source: the reactor strikes the mover.
+          if (t.event === "move.before" && s.by !== "reactor") at('a free strike on move.before needs by: "reactor"');
           if (s.by != null && !FREE_STRIKE_BY.includes(s.by)) at(`\`by\` must be ${FREE_STRIKE_BY.join(" or ")}`);
           break;
         case "note":
@@ -1176,6 +1216,8 @@ export function normalizeOverlay(overlay, source = null) {
     // `attacker` is valid on damage.* events only (rule 3), so only they get the default.
     ...(t.event?.startsWith("damage.") ? { attacker: "any" } : {}),
     ...t,
+    // 1.2.2: roll.before fires for any power roll; a trigger that does not say keeps the old damaging-only behaviour.
+    ...(t.event === "roll.before" ? { require: { damaging: true, ...(t.require ?? {}) } } : {}),
     steps: (t.steps ?? []).map(s => ({
       ...s,
       ...(s.type === "potency" ? { scope: s.scope ?? "all" } : {}),

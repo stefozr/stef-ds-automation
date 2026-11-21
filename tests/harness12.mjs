@@ -161,6 +161,48 @@ assert.equal(hit.featureBonus?.amount, 3);
 assert.equal(hit.finalAmount, 11, "extra strike damage added before immunity");
 console.log("ok installed Ward and Barbed Tail integration");
 
+{
+  const { frequencyKey } = await imp("features/engine.mjs");
+  const tailRule = featureRules(tail)[0];
+  const strikeAgain = async () => {
+    const m = postAbility(strike, { 2: [tA] }, { 2: [{ total: 10, options: { type: "fire" } }] });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return Object.values(getResolution(m).ops).find(o => o.kind === "damage");
+  };
+  const dialogsBefore = dialogs.length;
+  const key0 = frequencyKey(tailRule, {}, combat);
+  assert.equal(key0, "fight:0:round:1", "frequencyKey carries the run (default 0)");
+  tail.flags ??= {}; tail.flags["stef-ds-automation"] ??= {};
+  tail.flags["stef-ds-automation"].ruleUses = { [tailRule.id]: key0 };
+  assert.equal((await strikeAgain()).featureBonus, undefined, "a used mark blocks a second strike in the same round");
+  assert.equal(dialogs.length, dialogsBefore, "no prompt while the mark holds");
+  // Old format (before runs) never matches.
+  tail.flags["stef-ds-automation"].ruleUses = { [tailRule.id]: "fight:round:1" };
+  assert.equal((await strikeAgain()).featureBonus?.amount, 3, "an old-format key no longer blocks");
+  // Rewind: the active GM rotates the run in the same update.
+  tail.flags["stef-ds-automation"].ruleUses = { [tailRule.id]: key0 };
+  combat.round = 2;
+  tail.flags["stef-ds-automation"].ruleUses = { [tailRule.id]: frequencyKey(tailRule, {}, combat) };
+  combat.flags["stef-ds-automation"] = { encounterRuleUses: { x: "fight:0:encounter" } };
+  const options = {}, changes = { round: 1 };
+  Hooks.callAll("preUpdateCombat", combat, changes, options, "u");
+  assert.equal(options.dsAutoPrevRound, 2);
+  assert.ok(changes.flags["stef-ds-automation"].run, "run rotated in the same update");
+  await combat.update(changes); Hooks.callAll("updateCombat", combat, changes, options, "u");
+  assert.equal(combat.round, 1);
+  assert.equal(Object.keys(combat.flags["stef-ds-automation"].encounterRuleUses ?? {}).length, 0, "encounter claims cleared");
+  const key1 = frequencyKey(tailRule, {}, combat);
+  assert.notEqual(key1, key0, "the rewound round gets a new key");
+  assert.match(key1, /^fight:[^:]+:round:1$/);
+  assert.equal((await strikeAgain()).featureBonus?.amount, 3, "after a rewind the prompt is offered again");
+  // Forward rounds keep the run.
+  const up = { round: 2 }, upOptions = {};
+  Hooks.callAll("preUpdateCombat", combat, up, upOptions, "u");
+  assert.equal(up.flags, undefined);
+  combat.round = 1; delete tail.flags["stef-ds-automation"].ruleUses;
+  console.log("ok combat run rotation: rewind clears once-per-round marks, old keys ignored");
+}
+
 hero.effects.clear();
 const choreo = feature("Choreography", hero, "ability", "choreography");
 choreo.system.distance = { type: "aura", primary: "5" }; choreo.system.target = { type: "selfAlly" };

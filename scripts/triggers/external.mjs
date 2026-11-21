@@ -576,7 +576,7 @@ export async function preUpdateMovementWrapper(wrapped, movement, operation) {
     gated.add(id);
     if (gated.size > MAX_GATED) gated.delete(gated.values().next().value);
     if (!mayHold("move.before", this.parent?.id ?? null)) return r;
-    const req = { tokenUuid: this.uuid, kind: "move", movementId: String(id).slice(0, 40) };
+    const req = { tokenUuid: this.uuid, kind: "move", movementId: String(id).slice(0, 40), shifting };
     const res = isActiveGM() ? await handleMoveGate(req, game.user) : await requestOp({ action: "moveGate", moveGate: req });
     return res?.allow === false ? false : r;
   } catch (err) {
@@ -650,6 +650,7 @@ export async function handleMoveGate(req, user) {
   const token = lookup(r?.tokenUuid);
   if (!token) return { ok: true, allow: true };
   if (!mayRequestHold(user, token)) throw new Error("DSAUTO.Relay.Denied");
+  let allow = true;
   try {
     const actor = token.actor ?? null;
     const forced = r.kind === "forced";
@@ -658,7 +659,7 @@ export async function handleMoveGate(req, user) {
       subject: { actorUuid: actor?.uuid ?? null, tokenUuid: token.uuid, name: actor?.name ?? token.name ?? "", isHero: actor?.type === "hero" },
       source: { actorUuid: null, tokenUuid: null, itemUuid: null, name: null, keywords: [], fromAbility: false, known: false },
       move: {
-        tokenUuid: token.uuid, forced,
+        tokenUuid: token.uuid, forced, shifting: r.shifting === true,
         ...(forced && typeof r.type === "string" ? { type: r.type } : {}),
         ...(Number.isFinite(r.distance) ? { distance: r.distance } : {}),
       },
@@ -666,9 +667,12 @@ export async function handleMoveGate(req, user) {
     };
     const decisions = await offer([event], { phase: "gate", deadline: clock.now() + promptMs() + 5_000 });
     reportDecisions(decisions);
-    // No wave-2 step changes a move, so there is nothing to commit later: cards at once.
+    // 1.2.2: the gate can cancel the move. A used speedZero step (Judgement: a judged creature starts to shift) sets the
+    // mover's speed to 0, which means it does not move: the held shift is cancelled (allow false) and the card applies
+    // the speed-0 effect and runs the free strike. Other steps have nothing to commit later: cards at once.
     for (const d of decisions) {
       if (d?.outcome !== "used") continue;
+      if ((d.steps ?? []).some(s => s.type === "speedZero")) allow = false;
       setTimeout(() => {
         Promise.resolve(runAfter({ holdDecisions: [d] })).catch(err => error("triggers.after", err));
       }, 0);
@@ -676,7 +680,7 @@ export async function handleMoveGate(req, user) {
   } catch (err) {
     error("triggers.moveGate", err);
   }
-  return { ok: true, allow: true };   // the field is reserved
+  return { ok: true, allow };
 }
 
 /** Combat Tools' path picker or vertical distance popup is open on this client (a move waits for its user). */

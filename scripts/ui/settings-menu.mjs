@@ -379,7 +379,8 @@ export function automationSettingsClass() {
       classes: ["ds-auto-settings"],
       window: { title: "DSAUTO.Menu.title", icon: "fa-solid fa-wand-magic-sparkles", resizable: true, contentClasses: ["standard-form"] },
       position: { width: 760, height: 700 },
-      form: { handler: AutomationSettings.#onSubmit, closeOnSubmit: false, submitOnChange: false },
+      // Save closes the window, as Foundry's own settings do (1.2.2: it used to stay open with no sign it had saved).
+      form: { handler: AutomationSettings.#onSubmit, closeOnSubmit: true, submitOnChange: false },
       actions: Object.fromEntries(Object.keys(menuActions).map(name => [name, action(name)])),
     };
 
@@ -428,9 +429,11 @@ export function automationSettingsClass() {
 
     static async #onSubmit(_event, _form, formData) {
       const values = foundry.utils.expandObject(formData?.object ?? {});
-      const { reload } = await saveSettings(values);
+      const { changed, reload } = await saveSettings(values);
+      try {
+        ui.notifications?.info?.(loc(changed.length ? "DSAUTO.Menu.Saved" : "DSAUTO.Menu.Unchanged"));
+      } catch (_err) { /* no notifications (harness) */ }
       await reloadPrompt(reload);
-      this.render();
     }
   }
   MenuClass = AutomationSettings;

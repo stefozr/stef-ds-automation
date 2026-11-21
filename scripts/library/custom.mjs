@@ -1,6 +1,7 @@
 /** Versioned, item-local automation and independently copied world presets. */
 import { MODULE_ID } from "../constants.mjs";
 import { validateOverlay, formulaProblem } from "./schema.mjs";
+import { YIELDS_TO } from "../triggers/taxonomy.mjs";
 
 export const RULE_EVENTS = Object.freeze(["use", "passive", "damage.after", "turn.start", "turn.end", "round.start", "round.end", "strike.damage", "judgement.applied", "ability.beforeRoll", "aura.continuous", "aura.exit", "ability.use"]);
 export const RULE_TARGETS = Object.freeze(["targets", "self", "subject", "source", "aura", "encounter"]);
@@ -30,7 +31,8 @@ export function validateAutomation(value) {
     if (!r || typeof r !== "object") { bad("must be an object"); continue; }
     if (!/^[a-z0-9-]{1,24}$/.test(r.id ?? "") || ids.has(r.id)) bad("needs a unique lowercase ID");
     ids.add(r.id);
-    for (const k of Object.keys(r)) if (!["id", "event", "activateOnUse", "targets", "optional", "once", "range", "filter", "keywords", "end", "effects", "label", "cost", "require", "limit", "special", "perTarget", "opportunity"].includes(k)) bad(`unknown field ${k}`);
+    for (const k of Object.keys(r)) if (!["id", "event", "activateOnUse", "targets", "optional", "once", "range", "filter", "keywords", "end", "effects", "label", "cost", "require", "limit", "special", "perTarget", "opportunity", "yieldsTo"].includes(k)) bad(`unknown field ${k}`);
+    if (r.yieldsTo != null && !YIELDS_TO.includes(r.yieldsTo)) bad("unknown yieldsTo (" + YIELDS_TO.join(" | ") + ")");
     if (!RULE_EVENTS.includes(r.event)) bad("unknown activation event");
     if (!RULE_TARGETS.includes(r.targets ?? "targets")) bad("unknown targets");
     if (!RULE_ENDS.includes(r.end ?? "")) bad("unknown duration");
@@ -45,7 +47,10 @@ export function validateAutomation(value) {
     if (r.require != null) {
       if (!r.require || typeof r.require !== "object" || Array.isArray(r.require)) bad("requirements must be an object");
       else for (const [k, v] of Object.entries(r.require)) {
-        if (!["adjacent", "sourceWithin", "subjectKeyword", "subject", "dying", "dead", "auraOption", "auraSize", "actionType", "costsMalice", "strike"].includes(k)) bad(`unknown requirement ${k}`);
+        if (!["adjacent", "sourceWithin", "subjectKeyword", "subject", "dying", "dead", "auraOption", "auraSize", "actionType", "costsMalice", "strike", "dealer", "melee", "subjectEffect"].includes(k)) bad(`unknown requirement ${k}`);
+        if (k === "dealer" && v !== "self") bad("dealer must be self");
+        if (k === "melee" && typeof v !== "boolean") bad("melee must be a checkbox");
+        if (k === "subjectEffect" && !(v && typeof v === "object" && typeof v.ability === "string" && /^[a-z0-9][a-z0-9-]{0,59}$/.test(v.ability) && (v.effect == null || /^[A-Za-z0-9]{16}$/.test(v.effect)) && Object.keys(v).every(f => ["ability", "effect"].includes(f)))) bad("subjectEffect must be {ability, effect?}");
         if (["adjacent", "dying", "dead", "auraSize"].includes(k) && typeof v !== "boolean") bad(`${k} must be a checkbox`);
         if (k === "sourceWithin" && formulaProblem(v)) bad("invalid source range");
         if (k === "subject" && !["self", "creature"].includes(v)) bad("subject must be self or creature");

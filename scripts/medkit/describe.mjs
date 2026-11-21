@@ -158,6 +158,9 @@ function stepWords(step, item) {
     case "halve": return game.i18n.localize("DSAUTO.Trigger.Step.halve");
     case "potency": return game.i18n.format("DSAUTO.Trigger.Step.potency", { delta: step.delta > 0 ? `+${step.delta}` : String(step.delta) });
     case "edge": return game.i18n.localize(step.amount === 2 ? "DSAUTO.Trigger.Step.edge2" : "DSAUTO.Trigger.Step.edge1");
+    case "bane": return game.i18n.localize(step.amount === 2 ? "DSAUTO.Trigger.Step.bane2" : "DSAUTO.Trigger.Step.bane1");
+    case "speedZero": return game.i18n.localize("DSAUTO.Trigger.Step.speedZero");
+    case "damage": return game.i18n.format("DSAUTO.Trigger.Step.damage", { value: String(step.value), type: step.damageType ?? "" }).trim();
     case "use": return game.i18n.format("DSAUTO.Trigger.Step.use", { ability: item?.name ?? "" });
     case "freeStrike": return game.i18n.localize("DSAUTO.Trigger.Step.freeStrike");
     case "takeTurnNext": return game.i18n.localize("DSAUTO.Trigger.Step.takeTurnNext");

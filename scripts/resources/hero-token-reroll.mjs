@@ -9,10 +9,15 @@
  * 2. one hero token is spent through the system (spend type `dsAutoRerollPower`, which adds the system's hero-token
  *    part to the card);
  * 3. the 2d10 is rolled again once for every target, each target keeping its edges, banes and bonuses (the PowerRoll
- *    options carry them, `appliedModifier`), and the rolls are grouped into tier parts with each tier's damage rolls
- *    (as AbilityModel#use: the damage type picked on the first roll and the dialog's spend);
+ *    options carry them, `appliedModifier`), and the damage rolls are rebuilt for the new tiers (as AbilityModel#use: the
+ *    damage type picked on the first roll and the dialog's spend);
  * 4. the result parts are replaced and the card is resolved again, its undone rows rebuilt from the new tiers.
- * A failure after the spend gives the token back. Draw Steel 1.1.2 cards (tier parts) only.
+ * A failure after the spend gives the token back.
+ *
+ * Both card shapes (engine/readers.mjs cardShape): Draw Steel 1.1.2 and untargeted 1.2 cards (tier parts: the rolls are
+ * regrouped into one `abilityResult` part per new tier) and 1.2 cards with targets (one `targetResult` part per target:
+ * every part keeps its id, target and token, only its tier and rolls change, so no part is deleted; a squad's minion
+ * count is read back from its damage roll's data, `squadMinions`).
  *
  * i18n keys: DSAUTO.HeroToken.{RerollLabel, RerollMessage, Reroll, RerollHint, RerollNone}.
  */
@@ -21,6 +26,7 @@ import { setting } from "../settings.mjs";
 import { log } from "../log.mjs";
 import { isAuthor } from "../relay/auth.mjs";
 import { spendValues } from "../engine/spend.mjs";
+import { cardShape } from "../engine/readers.mjs";
 
 export const REROLL_SPEND = "dsAutoRerollPower";
 const LABEL = "DSAUTO.HeroToken.RerollLabel";
@@ -48,22 +54,35 @@ function lookup(uuid) {
   }
 }
 
-/** The card's result parts and their power / damage rolls (Draw Steel 1.1.2 tier parts), or null. */
+/**
+ * The card's result parts and their power / damage rolls, or null (no power roll, or a 1.2 build without token uuids):
+ * `{shape, parts, power, damage, targetOf, perPart}`; `targetOf` maps each power roll to its target's actor uuid and
+ * `perPart` lists `{part, power, damage}` per result part.
+ */
 export function cardRolls(message) {
   const PowerRoll = globalThis.ds?.rolls?.PowerRoll;
   const DamageRoll = globalThis.ds?.rolls?.DamageRoll;
   const all = message?.system?.parts?.contents ?? [];
-  if (!PowerRoll || all.some(p => p?.type === "targetResult")) return null;
-  const parts = all.filter(p => p?.type === "abilityResult");
+  const shape = cardShape(all);
+  if (!PowerRoll || shape === "unknown") return null;
+  const type = shape === "targetResult" ? "targetResult" : "abilityResult";
+  const parts = all.filter(p => p?.type === type);
   const power = [];
   const damage = [];
+  const targetOf = new Map();
+  const perPart = [];
   for (const p of parts) {
+    const entry = { part: p, power: [], damage: [] };
     for (const r of p.rolls ?? []) {
-      if (DamageRoll && r instanceof DamageRoll) damage.push(r);
-      else if (r instanceof PowerRoll) power.push(r);
+      if (DamageRoll && r instanceof DamageRoll) entry.damage.push(r);
+      else if (r instanceof PowerRoll) entry.power.push(r);
     }
+    for (const r of entry.power) targetOf.set(r, shape === "targetResult" ? p.targetUuid : r.options?.target);
+    power.push(...entry.power);
+    damage.push(...entry.damage);
+    perPart.push(entry);
   }
-  return power.length ? { parts, power, damage } : null;
+  return power.length ? { shape, parts, power, damage, targetOf, perPart } : null;
 }
 
 const heroTokens = () => Number(game.actors?.heroTokens?.value ?? 0) || 0;
@@ -85,7 +104,8 @@ export const heroRerollShown = (message, res, user = game.user) => heroTokens() 
 
 /**
  * The new result parts for a reroll: `{update, tiers, total}`. `update` is for ChatMessage#update (replaced parts as
- * sources, removed ones as deletions); `tiers` maps each target's actor uuid to its new tier.
+ * sources, removed ones as deletions); `tiers` maps each target's actor uuid to its new tier
+ * (a power roll's `options.target` on tier parts, the part's `targetUuid` on target parts).
  */
 export async function rerolledParts(message, item, res) {
   const card = cardRolls(message);
@@ -93,36 +113,62 @@ export async function rerolledParts(message, item, res) {
   const [first] = card.power;
   const base = first.clone();
   await base.evaluate({ allowInteractive: false });
-  const rolled = [];
+  const rolled = new Map();
   for (const old of card.power) {
     if (old === first) {
-      rolled.push(base);
+      rolled.set(old, base);
       continue;
     }
     const roll = old.clone();
     roll.terms[0] = base.terms[0];   // one 2d10 for every target, as AbilityModel#use
     await roll.evaluate({ allowInteractive: false });
-    rolled.push(roll);
+    rolled.set(old, roll);
   }
-  const grouped = Object.groupBy(rolled, r => r.product);
   const damageSelection = card.damage.find(r => r.options?.type)?.options?.type;
   const spend = spendValues(res?.spend ?? null);
-  const update = {};
-  const keep = new Set();
-  for (const [tier, rolls] of Object.entries(grouped)) {
-    const id = `tier${tier}Result`.padEnd(16, "0");
-    keep.add(id);
-    const all = [...rolls];
-    for (const effect of item.system?.power?.effects?.documentsByType?.damage ?? []) {
-      const damage = effect.toDamageRoll(Number(tier), { damageSelection, ...(spend?.length ? { spend } : {}) });
+  const damageEffects = item.system?.power?.effects?.documentsByType?.damage ?? [];
+  const damageFor = async (tier, squadMinions) => {
+    const out = [];
+    for (const effect of damageEffects) {
+      const damage = effect.toDamageRoll(tier, { damageSelection, ...(spend?.length ? { spend } : {}), ...(squadMinions ? { squadMinions } : {}) });
       if (!damage) continue;
       await damage.evaluate();
-      all.push(damage);
+      out.push(damage);
     }
-    update[`system.parts.${id}`] = { _id: id, type: "abilityResult", tier: Number(tier), abilityUuid: item.uuid, flavor: "", rolls: all.map(r => JSON.stringify(r)) };
+    return out;
+  };
+  const update = {};
+  if (card.shape === "targetResult") {
+    for (const { part, power, damage } of card.perPart) {
+      const roll = rolled.get(power[0]);
+      const tier = Number(roll.product);
+      // DS drops `minions` from the roll options after the use; the squad's count survives in its damage rolls' data.
+      const squad = damage.map(r => r.data?.squadMinions).find(n => n != null);
+      const squadMinions = roll.options?.minions ?? (squad != null ? Number(squad) + 1 : undefined);
+      const source = part.toObject?.() ?? part._source ?? {};
+      const data = {
+        ...source, _id: part.id, type: "targetResult", tier, abilityUuid: item.uuid,
+        targetUuid: part.targetUuid ?? source.targetUuid, tokenUuid: part.tokenUuid ?? source.tokenUuid,
+        rolls: [roll, ...await damageFor(tier, squadMinions)].map(r => JSON.stringify(r)),
+      };
+      // The part is merged into the stored one: `potencies` (manual adjustments) stay as they are, and leaving the key out
+      // keeps the potency listener (engine.mjs, a changed `potencies`) quiet.
+      delete data.potencies;
+      if (data.tokenUuid == null) delete data.tokenUuid;
+      update[`system.parts.${part.id}`] = data;
+    }
+  } else {
+    const grouped = Object.groupBy([...rolled.values()], r => r.product);
+    const keep = new Set();
+    for (const [tier, rolls] of Object.entries(grouped)) {
+      const id = `tier${tier}Result`.padEnd(16, "0");
+      keep.add(id);
+      const all = [...rolls, ...await damageFor(Number(tier))];
+      update[`system.parts.${id}`] = { _id: id, type: "abilityResult", tier: Number(tier), abilityUuid: item.uuid, flavor: "", rolls: all.map(r => JSON.stringify(r)) };
+    }
+    for (const p of card.parts) if (!keep.has(p.id)) update[`system.parts.${p.id}`] = new foundry.data.operators.ForcedDeletion();
   }
-  for (const p of card.parts) if (!keep.has(p.id)) update[`system.parts.${p.id}`] = new foundry.data.operators.ForcedDeletion();
-  const tiers = Object.fromEntries(rolled.filter(r => r.options?.target).map(r => [r.options.target, r.product]));
+  const tiers = Object.fromEntries([...rolled].filter(([old]) => card.targetOf.get(old)).map(([old, r]) => [card.targetOf.get(old), r.product]));
   return { update, tiers, total: base.total };
 }
 
@@ -144,7 +190,8 @@ export async function rerollPowerRoll(message, { user = game.user } = {}) {
     res = getResolution(message);
     if (Object.values(res?.ops ?? {}).some(o => o.status === OP_STATUS.APPLIED)) return { ok: false, refused: "undo" };
   }
-  const before = Object.fromEntries((cardRolls(message)?.power ?? []).filter(r => r.options?.target).map(r => [r.options.target, r.product]));
+  const beforeCard = cardRolls(message);
+  const before = Object.fromEntries((beforeCard?.power ?? []).filter(r => beforeCard.targetOf.get(r)).map(r => [beforeCard.targetOf.get(r), r.product]));
   const spent = await game.actors.heroTokens.spendToken(REROLL_SPEND, { messageId: message.id });
   if (spent === false) return { ok: false, refused: "spend" };
   try {

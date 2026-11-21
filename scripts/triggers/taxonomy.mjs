@@ -9,33 +9,37 @@ export const TRIGGER_EVENTS = Object.freeze([
   "turn.start",      // H:  the subject's turn starts (turn-order.mjs; no wave-2 content)
   "turn.end",        // H:  the subject's turn ended
   "forced.before",   // G:  the subject is about to be force-moved (DSCT gate; no wave-2 content)
-  "move.before",     // F:  the subject's token is about to move (core movement; no wave-2 content)
+  "move.before",     // F:  the subject's token is about to move (core movement; Judgement's shift option)
+  "ability.used",    // 1.2.2: the subject used an ability (one event per ability card)
 ]);
 /** When the engine evaluates an event kind. */
 export const EVENT_PHASE = Object.freeze({
   "damage.before": "hold", "damage.after": "after", "roll.before": "preRoll",
-  "turn.start": "turn", "turn.end": "turn", "forced.before": "gate", "move.before": "gate",
+  "turn.start": "turn", "turn.end": "turn", "forced.before": "gate", "move.before": "gate", "ability.used": "after",
 });
 /** Who the event's subject must be, seen from the reactor (token dispositions, DSM:6679-6695). */
 export const SUBJECTS = Object.freeze(["self", "ally", "selfOrAlly", "enemy", "creature", "selfOrCreature"]);
 /** Who the event's source must be, seen from the reactor ("any": no check; "creature": a source actor exists). */
 export const ATTACKERS = Object.freeze(["any", "creature", "enemy"]);
 export const SUBJECT_TYPES = Object.freeze(["hero", "npc"]);
-export const STEP_TYPES = Object.freeze(["halve", "potency", "edge", "use", "freeStrike", "takeTurnNext", "note"]);
+export const STEP_TYPES = Object.freeze(["halve", "potency", "edge", "bane", "use", "freeStrike", "takeTurnNext", "speedZero", "damage", "note"]);
 /** When a step takes effect. "hold"/"preRoll" steps change the pending event; the others run afterwards. */
 export const STEP_PHASE = Object.freeze({
-  halve: "hold", potency: "hold", edge: "preRoll", use: "after", freeStrike: "after", takeTurnNext: "turn", note: "after",
+  halve: "hold", potency: "hold", edge: "preRoll", bane: "preRoll", use: "after", freeStrike: "after", takeTurnNext: "turn",
+  speedZero: "after", damage: "after", note: "after",
 });
 /** Step types an event kind may carry. */
 export const EVENT_STEPS = Object.freeze({
   "damage.before": ["halve", "potency", "use", "freeStrike", "note"],
-  "damage.after": ["use", "freeStrike", "note"],
-  "roll.before": ["edge", "note"],
-  "turn.start": ["use", "note"],
+  "damage.after": ["use", "freeStrike", "damage", "note"],
+  "roll.before": ["edge", "bane", "note"],
+  "turn.start": ["use", "damage", "note"],
   // Hesitation is Weakness only (turn-order.mjs runHiw): a turn.end trigger takes the next turn (schema).
   "turn.end": ["takeTurnNext", "note"],
   "forced.before": ["note"],
-  "move.before": ["use", "note"],
+  // 1.2.2: a gated move may be answered with a free strike (by the reactor) and speed 0 (the shift is cancelled).
+  "move.before": ["use", "freeStrike", "speedZero", "note"],
+  "ability.used": ["damage", "note"],
 });
 /** "none": no preset target; for an item whose own target type is "self", the reactor's own token (§3.7). */
 export const USE_TARGETS = Object.freeze(["subject", "source", "none"]);
@@ -43,12 +47,26 @@ export const FREE_STRIKE_BY = Object.freeze(["subject", "reactor"]);
 export const POTENCY_SCOPES = Object.freeze(["all", "one"]);
 export const RANGE_WORDS = Object.freeze(["ability", "unlimited"]);
 export const TRACKER_ON_ZERO = Object.freeze(["retarget"]);
+/**
+ * 1.2.2 `yieldsTo`: Combat Tools world settings whose automation does the same job. While Combat Tools is active and the
+ * setting is on, effects Combat Tools made (its flag) are left to it in the effect requirements, so nothing happens twice;
+ * the suite's own judged / marked effects keep the suite's extras.
+ */
+export const YIELDS_TO = Object.freeze(["judgementAutomation", "markAutomation"]);
 /** `require` keys and the events they may be used on. */
 export const REQUIRE_KEYS = Object.freeze({
   keywords: ["damage.before", "damage.after"],          // source ability has all of these keywords
   fromAbility: ["damage.before", "damage.after"],       // the damage comes from an ability card (not external, not synthetic)
-  damaging: ["roll.before"],                            // the rolled ability has a damage power roll effect
+  // The rolled ability has a damage power roll effect. The normalizers fill in `true` for a roll.before trigger that does
+  // not mention it (1.2.2: roll.before also fires for non-damaging power rolls); `false` opts out of the check.
+  damaging: ["roll.before"],
   subjectType: TRIGGER_EVENTS,                          // "hero" | "npc"
+  subjectEffect: TRIGGER_EVENTS,                        // 1.2.2: the subject carries {ability, effect} applied by the reactor
+  sourceEffect: ["damage.before"],                      // 1.2.2: the damage source creature carries {ability, effect} from the reactor
+  singleTarget: ["damage.before"],                      // 1.2.2: the source ability targets exactly one creature
+  actionType: ["ability.used"],                         // 1.2.2: the used ability's `system.type`
+  shifting: ["move.before"],                            // 1.2.2: only a shift
+  adjacent: ["move.before"],                            // 1.2.2: the subject is adjacent to the reactor when the move starts
   notStartedByThis: ["turn.end"],                       // the subject did not start that turn through this ability
   meleeReach: ["damage.before", "damage.after"],        // a source ability that also has the "ranged" keyword counts only
                                                         // when source-to-subject distance <= its melee distance (review rules-ux 14)

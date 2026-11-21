@@ -19,6 +19,8 @@ import { MALICE_DEBIT_KEY, worldValue } from "../resources/world-resources.mjs";
 import { evaluateInt } from "../library/formula.mjs";
 import { itemKey } from "../library/identity.mjs";
 import { ctlib } from "../compat/ctlib.mjs";
+import { ctYieldFlag } from "../compat/dsct.mjs";
+import { carriesEffectOf } from "./carries.mjs";
 import { debug } from "../log.mjs";
 import { setting } from "../settings.mjs";
 import { available, pendingDebit } from "./budget.mjs";
@@ -368,12 +370,44 @@ export function resourceValue(actor) {
   return Number.isFinite(v) ? v : null;
 }
 
-export function requirementsMet(trigger, event, { subjectToken, combat, reactorActor } = {}) {
+/**
+ * 1.2.2: the Combat Tools effect flag a trigger leaves to Combat Tools (`yieldsTo` an automation that is on), or null.
+ * Applied per effect in `subjectEffect` / `sourceEffect` (carriesEffectOf skipCtFlag), never to the whole trigger:
+ * Combat Tools' Judgement extras only fire for judgements Combat Tools made.
+ */
+export const triggerYieldFlag = trigger => ctYieldFlag(trigger?.yieldsTo);
+
+/**
+ * The creature a free strike step hits: the damage source of a damage.* event, else (move.before) the subject, the mover.
+ * Null when it cannot be told.
+ */
+export function strikeTargetOf(event) {
+  return String(event?.kind ?? "").startsWith("damage.")
+    ? { tokenUuid: event.source?.tokenUuid ?? null, name: event.source?.name ?? "" }
+    : { tokenUuid: event?.subject?.tokenUuid ?? null, name: event?.subject?.name ?? "" };
+}
+
+export function requirementsMet(trigger, event, { subjectToken, combat, reactorActor, reactorToken } = {}) {
   const req = trigger?.require ?? {};
   const keywords = (event?.source?.keywords ?? []).map(k => String(k).toLowerCase());
   if (req.keywords?.length && !req.keywords.every(k => keywords.includes(String(k).toLowerCase()))) return false;
   if (req.fromAbility && !event?.source?.fromAbility) return false;
-  if (req.damaging && !event?.roll?.damaging) return false;
+  if (req.damaging === true && !event?.roll?.damaging) return false;
+  if (req.actionType && event?.ability?.actionType !== req.actionType) return false;
+  if (req.subjectEffect) {
+    const subject = lookup(event?.subject?.actorUuid) ?? subjectToken?.actor ?? null;
+    if (!carriesEffectOf(subject, reactorActor, req.subjectEffect, { skipCtFlag: triggerYieldFlag(trigger) })) return false;
+  }
+  if (req.sourceEffect) {
+    const source = lookup(event?.source?.actorUuid) ?? sourceToken(event)?.actor ?? null;
+    if (!carriesEffectOf(source, reactorActor, req.sourceEffect, { skipCtFlag: triggerYieldFlag(trigger) })) return false;
+  }
+  if (req.singleTarget && event?.damage?.targetCount !== 1) return false;
+  if (req.shifting && event?.move?.shifting !== true) return false;
+  if (req.adjacent) {
+    const mover = subjectToken ?? lookup(event?.subject?.tokenUuid);
+    if (!reactorToken || !mover || distanceSquares(reactorToken, mover, event?.positions) > 1) return false;
+  }
   if (req.subjectType) {
     const subject = lookup(event?.subject?.actorUuid);
     const isHero = subject ? subject.type === "hero" : !!event?.subject?.isHero;
@@ -447,7 +481,7 @@ export function evaluate({ event, reactorActor: A, reactorToken: RT, item, trigg
     const rel = A.uuid === event.subject?.actorUuid ? "self" : relation(RT, ST);
     if (!subjectMatches(trigger.subject ?? "self", rel)) return no("subject");
     if (String(event.kind).startsWith("damage") && !attackerMatches(trigger.attacker ?? "any", RT, event)) return no("attacker");
-    if (!requirementsMet(trigger, event, { subjectToken: ST, combat, reactorActor: A })) return no("require");
+    if (!requirementsMet(trigger, event, { subjectToken: ST, combat, reactorActor: A, reactorToken: RT })) return no("require");
     let spendMode = "none";
     if (rel !== "self" && trigger.range !== "unlimited") {
       const base = rangeOf(trigger, item);
@@ -470,10 +504,12 @@ export function evaluate({ event, reactorActor: A, reactorToken: RT, item, trigg
     // A dead subject (the hit that just killed it, damage.after) is neither healed nor makes a free strike.
     const SA = lookup(event.subject?.actorUuid) ?? ST?.actor ?? null;
     const subjectDead = !!SA && incapacitated(SA, combat) === "dead";
+    const strike = strikeTargetOf(event);
     const moot = s => (s.type === "halve" && !!event.damage?.halved) || (s.type === "potency" && !event.damage?.hasPotency)
       || (s.type === "use" && s.targets === "source" && !event.source?.tokenUuid)
       || (s.type === "use" && s.targets === "subject" && subjectDead)
-      || (s.type === "freeStrike" && (!event.source?.tokenUuid || (s.by === "subject" && subjectDead)));
+      || (s.type === "freeStrike" && (!strike.tokenUuid || (s.by === "subject" && subjectDead)))
+      || ((s.type === "damage" || s.type === "speedZero") && (!event.subject?.tokenUuid || subjectDead));
     let base = spendMode === "required" ? [] : stepsFor(trigger, false).filter(s => !moot(s));
     let spend = spendMode === "none" ? [] : stepsFor(trigger, true).filter(s => !moot(s));
     // A spend that adds nothing is not offered (Parry within its base reach).

@@ -3,7 +3,7 @@ import { registerPerformanceRolls } from "./features/rolls.mjs";
 import { registerFeatureCapabilities } from "./features/capabilities.mjs";
 import { registerTemporaryResources } from "./features/temporary-resources.mjs";
 import { registerPerformances } from "./features/performance.mjs";
-import { registerFeatureEngine } from "./features/engine.mjs";
+import { registerFeatureEngine, registerCombatRun } from "./features/engine.mjs";
 import { registerSurgeChoice, registerNativeSurgeTracking } from "./ui/surge-choice.mjs";
 import { registerTemporaryStamina } from "./features/temporary-stamina.mjs";
 import { registerAlone } from "./features/alone.mjs";
@@ -104,6 +104,8 @@ import { getResolution } from "./engine/record.mjs";
 import { partActions, registerResolutionPart } from "./parts/resolution-part.mjs";
 import { registerRelay, requestOp } from "./relay/queries.mjs";
 import { registerDstdLock } from "./ui/dstd-lock.mjs";
+import { registerCtDuplicates } from "./ui/ct-duplicates.mjs";
+import { registerDsctOverlap } from "./compat/dsct-overlap.mjs";
 import { registerTestCardLock } from "./ui/test-card-lock.mjs";
 import { loadDsctHandlerProbes as dsctHandlerProbes } from "./compat/dsct.mjs";
 import { registerDstdFold } from "./ui/dstd-fold.mjs";
@@ -137,6 +139,7 @@ import { budgetInfo, registerBudget } from "./triggers/budget.mjs";
 import { registerTriggerCards } from "./triggers/card.mjs";
 import { cancelPrompt, openPrompts, promptMs, registerPromptGM } from "./triggers/prompt.mjs";
 import { registerRollLock } from "./triggers/roll-lock.mjs";
+import { registerAbilityUsed } from "./triggers/ability-used.mjs";
 import { registerExternalWrappers, registerForcedGate } from "./triggers/external.mjs";
 import { registerTrackers } from "./triggers/trackers.mjs";
 import { registerTurnOrder } from "./triggers/turn-order.mjs";
@@ -180,6 +183,7 @@ import { cleanup } from "./maintenance/cleanup.mjs";
 import { modeFor as actorModeFor } from "./engine/actor-category.mjs";
 import { registerPartLock } from "./ui/part-lock.mjs";
 import { registerFamilyApplyGuard } from "./ui/family-apply-guard.mjs";
+import { registerPersistentButtonLock } from "./ui/persistent-button-lock.mjs";
 import { registerTargetResultVeto } from "./compat/target-result-veto.mjs";
 import { registerNativeSummon } from "./summons/native.mjs";
 import { registerSourceDefeat } from "./turn/source-defeat.mjs";
@@ -703,6 +707,9 @@ Hooks.once("init", () => {
   safely("registerHeroTokenSpend", registerHeroTokenSpend);
   detectCompat();
   registerDstdLock();
+  // 1.2.2: the suite has priority over Combat Tools: its duplicate HIW / Judgement / Mark controls are hidden; the Director is asked about the overlapping switches.
+  safely("registerCtDuplicates", registerCtDuplicates);
+  safely("registerDsctOverlap", registerDsctOverlap);
   registerTestCardLock();
   // 0.13.0: Target Damage's panel folded under "Details"; Combat Tools' teleport messages for our rows folded.
   safely("registerDstdFold", registerDstdFold);
@@ -712,6 +719,8 @@ Hooks.once("init", () => {
   safely("registerPartLock", registerPartLock);
   // 2.2.1.1: Combat Tools' own apply-all row and per-target buttons on cards the box handles (decoration + capture guard).
   safely("registerFamilyApplyGuard", registerFamilyApplyGuard);
+  // 1.2.2: Draw Steel 1.2's native Persistent button is locked on cards the box handles (the suite asks at turn start).
+  safely("registerPersistentButtonLock", registerPersistentButtonLock);
   // 1.2.0: the system's and ctlib's per-target buttons are vetoed for rows the Automation box owns.
   safely("registerTargetResultVeto", registerTargetResultVeto);
   registerPromptDialog();
@@ -748,12 +757,14 @@ Hooks.once("init", () => {
   safely("registerPerformances", registerPerformances);
   safely("registerAuras", registerAuras);
   safely("registerFeatureEngine", registerFeatureEngine);
+  safely("registerCombatRun", registerCombatRun);
   safely("registerTemporaryResources", registerTemporaryResources);
   registerBudget();
   registerTriggerCards();
   registerPromptGM();
   registerIndicator();
   registerRollLock();
+  registerAbilityUsed();
   registerForcedGate();
   registerTrackers();
   // Milestone 6: BEFORE registerTurnOrder. The lifecycle awaits listeners in registration order, so the summon chain's

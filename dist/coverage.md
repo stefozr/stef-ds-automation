@@ -1,6 +1,6 @@
-# stef-ds-automation 1.2.1: coverage of Draw Steel 1.2.1
+# stef-ds-automation 1.2.2: coverage of Draw Steel 1.2.1
 
-177 overlays (14 monster-specific); 11 overlays with triggers, 2 with trackers, 6 with summons, 7 with areas, 9 with resource gains.
+177 overlays (14 monster-specific); 12 overlays with triggers, 2 with trackers, 6 with summons, 7 with areas, 9 with resource gains.
 "overlay" = the library adds automation (\* = the system describes nothing structured for it);
 "native" = only the system's own power roll effects; "manual" = nothing automated.
 
@@ -102,7 +102,7 @@ Acrobatics *, Blocking *, Choreography *, Dramatic Monologue *, Dramatic Reversa
 
 ## Generic feature rules
 
-48 overlays use version 1 feature rules.
+50 overlays use version 1 feature rules.
 
 | Feature or ability | Event | Recipients | Effects |
 |---|---|---|---|
@@ -125,6 +125,8 @@ Acrobatics *, Blocking *, Choreography *, Dramatic Monologue *, Dramatic Reversa
 | “Fire Up the Night” | turn.start | aura | concealment |
 | Goblin Mode | turn.start | encounter | system.movement.value |
 | I Work Better Alone | ability.beforeRoll | self | resource |
+| Judgement | damage.after | subject | condition |
+| Mark | damage.after | subject | condition |
 | Moonlight Sonata | round.start | aura | moonlight |
 | “Never-Ending Hero” | turn.start | aura | dying |
 | Null Field | aura.continuous | aura | condition |

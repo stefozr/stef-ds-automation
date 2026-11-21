@@ -19,6 +19,7 @@
  */
 import { loc } from "../constants.mjs";
 import { partOwnedBySuite } from "../ui/part-lock.mjs";
+import { userClickedRecently } from "../ui/user-click.mjs";
 import { getResolution } from "../engine/record.mjs";
 import { integrity } from "../engine/ledger.mjs";
 import { isTargetResultCard } from "./dstd.mjs";
@@ -81,7 +82,8 @@ function veto(part, action, context) {
     error("targetResultVeto", err);
   }
   if (!resolving && !isOwnedByRecord(part, action, context)) return true;
-  ui.notifications?.warn?.(loc(resolving ? "DSAUTO.Lock.Resolving" : "DSAUTO.Lock.PartOwned"));
+  // The veto still holds for a synthetic click (Combat Tools' autoApplyOwnAbilities); it toasts only after a real click on this card.
+  if (userClickedRecently(1000, part?.message?.id ?? null)) ui.notifications?.warn?.(loc(resolving ? "DSAUTO.Lock.Resolving" : "DSAUTO.Lock.PartOwned"));
   return false;
 }
 

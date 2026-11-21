@@ -21,6 +21,18 @@
  *    that would repeat one of our applied (or held) ops for that target is swallowed the same way: an `[[/apply]]`
  *    chip by its status (as Target Damage's apply rows were), every other kind only by the library ops we planned
  *    from the effect text. Our power-roll rows never come from the text, so its extra damage stays free (live §27).
+ * 7. 1.2.2: a chip whose source names `flat=<effectId>` (an enhanced copy's flat effect) is HIDDEN, not locked, once the
+ *    card's record holds any op of the kind that effect maps to (any status but a "notChosen" skip, an undone op too):
+ *    the Automation box already shows that row, so it must not appear a second time. The wrapper gets
+ *    `ds-auto-hidden-native` and the "; " Combat Tools puts between chips is blanked (restored on the next pass).
+ *    Combat Tools rebuilds a chip inside the same wrapper (refreshEnricher), so a render pass plus a light observer
+ *    on the card (for the wrapper class Combat Tools adds late) keeps it hidden; clicks on a hidden chip stay swallowed.
+ * 8. 1.2.2: the same for Combat Tools' TIERED power roll buttons (`dsctHeal`, `dsctTeleport`; tiered-effects.mjs builds them
+ *    with the flat heal / teleport button builders: `button.dsct-flat-heal-btn` / `button.dsct-flat-teleport-btn` in the
+ *    result part's footer). The suite always has priority: such a button is hidden (`ds-auto-hidden-native`) while the item
+ *    has a tiered effect of its kind and the card's record holds an op of that kind (same rule as `flatChipOp`). A control
+ *    whose kind has no op of ours stays visible (the fallback). Hiding and swallowing clicks on hidden controls do NOT
+ *    depend on `lockDstdRows`; only the locking of rows does.
  */
 import { CTLIB_ID, OP_STATUS, loc } from "../constants.mjs";
 import { dstdActive, dstdOnCard, dstdTargetKeyFromButton } from "../compat/dstd.mjs";
@@ -29,6 +41,7 @@ import { debug } from "../log.mjs";
 import { setting } from "../settings.mjs";
 import { effectiveUntil, getResolution } from "../engine/record.mjs";
 import { targetKey } from "../engine/keys.mjs";
+import { DSCT_FLAT, dsctCoveredTypes } from "../library/resolve.mjs";
 import { dstdRowIsHeal, dstdTargetUuids, markExternalHalf, markHalfDamage, tokenUuids } from "../triggers/external.mjs";
 
 const BUTTONS = '[data-dstd-action="applyDamage"], [data-dstd-action="applyStatus"], [data-dsct-dstd-cond]';
@@ -54,6 +67,13 @@ const ENRICHER_OPS = {
   teleport: { kinds: ["teleport"], same: fromText },
   cleanse: { kinds: ["cleanse"], same: fromText },
 };
+/** Library effect type of a Combat Tools flat effect -> the enricher kind (ENRICHER_OPS) whose ops it duplicates. */
+const FLAT_ENRICHER_KIND = { damage: "damage", heal: "heal", cleanse: "cleanse", condition: "apply", resource: "gain", teleport: "teleport", forced: "forced" };
+const FLAT_ID = /(?:^|\s)flat=([^\s]+)/;
+const HIDDEN_NATIVE = "ds-auto-hidden-native";
+/** Combat Tools' heal / teleport buttons (flat-special-effects.mjs:1216, :1524); tiered effects reuse these builders. */
+const TIERED_BUTTONS = "button.dsct-flat-heal-btn, button.dsct-flat-teleport-btn";
+const TIERED_KIND = { "dsct-flat-heal-btn": { enricher: "heal", type: "dsctHeal" }, "dsct-flat-teleport-btn": { enricher: "teleport", type: "dsctTeleport" } };
 /** The enricher's own link (Combat Tools' linkOf, advanced-enrichers.mjs:32): what it applies. */
 const enricherLink = ec => {
   const a = ec?.querySelector?.(":scope > a.roll-link, :scope > a.roll-link-group, :scope > a");
@@ -252,11 +272,15 @@ export function onCaptureClick(event) {
   event.preventDefault();
   event.stopImmediatePropagation();
   debug("lock.blocked", { messageId: blocked.messageId, opId: blocked.op.opId, held: !!blocked.op.held });
-  ui.notifications.warn(loc(blocked.warn));
+  // Synthetic clicks (Combat Tools' autoApplyOwnAbilities) are swallowed silently; only a real user click toasts.
+  if (event.isTrusted) ui.notifications.warn(loc(blocked.warn));
 }
 
 /** The lock that swallows this click, or null. */
 function lockedClick(event) {
+  // A hidden duplicate is swallowed whatever `lockDstdRows` says (only the locking of rows depends on it).
+  const hiddenOp = hiddenControlOp(event.target);
+  if (hiddenOp) return { ...hiddenOp, warn: "DSAUTO.Lock.AlreadyApplied" };
   if (!setting("lockDstdRows")) return null;
   const fm = event.target?.closest?.(`${FM_BUTTONS}, ${FM_ROW_APPLY}`);
   if (fm) {
@@ -335,6 +359,129 @@ export function decorateEnrichers(message, root) {
   }
 }
 
+/**
+ * Our op that already shows the row of a chip naming `flat=<effectId>` (an enhanced copy's flat effect), or null: any
+ * op of the mapped kind on this card, whatever its status, except one skipped as not chosen.
+ */
+export function flatChipOp(message, ec) {
+  const res = getResolution(message);
+  if (!res?.ops || !ec?.querySelector) return null;
+  const source = ec.querySelector("a[data-dsct-source]")?.dataset?.dsctSource ?? "";
+  const effectId = FLAT_ID.exec(source)?.[1];
+  if (!effectId) return null;
+  let type = null;
+  try {
+    const item = res.abilityUuid ? fromUuidSync(res.abilityUuid) : null;
+    type = item?.system?.effects?.get?.(effectId)?.type ?? null;
+  } catch (_err) { /* unresolved item: the chip stays */ }
+  const rule = ENRICHER_OPS[FLAT_ENRICHER_KIND[DSCT_FLAT[type]]];
+  if (!rule) return null;
+  return Object.values(res.ops).find(o => rule.kinds.includes(o.kind)
+    && !(o.status === OP_STATUS.SKIPPED && o.reason === "notChosen")) ?? null;
+}
+
+/**
+ * Our op that already shows the row of one of Combat Tools' tiered heal / teleport buttons, or null: the item has a tiered
+ * effect of the button's kind and the card holds any op of that kind, except one skipped as not chosen.
+ */
+export function tieredButtonOp(message, button) {
+  const res = getResolution(message);
+  if (!res?.ops || !button?.classList?.contains) return null;
+  const kind = Object.entries(TIERED_KIND).find(([cls]) => button.classList.contains(cls))?.[1];
+  const rule = kind && ENRICHER_OPS[kind.enricher];
+  if (!rule) return null;
+  // Combat Tools builds these buttons for its flat and its tiered heal / teleport effects alike (one builder).
+  let carries = false;
+  try {
+    const item = res.abilityUuid ? fromUuidSync(res.abilityUuid) : null;
+    carries = dsctCoveredTypes(item).has(kind.enricher);
+  } catch (_err) { /* unresolved item: the button stays */ }
+  if (!carries) return null;
+  return Object.values(res.ops).find(o => rule.kinds.includes(o.kind)
+    && !(o.status === OP_STATUS.SKIPPED && o.reason === "notChosen")) ?? null;
+}
+
+/** The op behind a hidden Combat Tools control (chip or tiered button) under a click target, or null. */
+function hiddenControlOp(target) {
+  const ec = target?.closest?.(ENRICHER);
+  if (ec?.dataset?.advKind && ec.classList?.contains(HIDDEN_NATIVE)) {
+    const message = messageFor(ec);
+    const op = message ? flatChipOp(message, ec) : null;
+    if (op) return { op, messageId: message.id };
+  }
+  const button = target?.closest?.(TIERED_BUTTONS);
+  if (button?.classList?.contains(HIDDEN_NATIVE)) {
+    const message = messageFor(button);
+    const op = message ? tieredButtonOp(message, button) : null;
+    if (op) return { op, messageId: message.id };
+  }
+  return null;
+}
+
+/** Text nodes whose "; " we blanked, per card element, so the next pass can restore them. */
+const BLANKED = new WeakMap();
+const SEP_AFTER = /^\s*;\s*/;
+const SEP_BEFORE = /;\s*$/;
+const isText = n => n?.nodeType === 3;
+
+/** Blank the "; " that joins a hidden chip to its neighbour: the one after it, else the one before. */
+function blankSeparator(ec, blanked) {
+  const next = ec.nextSibling;
+  if (isText(next) && SEP_AFTER.test(next.data)) {
+    blanked.set(next, next.data);
+    next.data = next.data.replace(SEP_AFTER, "");
+    return;
+  }
+  const prev = ec.previousSibling;
+  if (isText(prev) && SEP_BEFORE.test(prev.data)) {
+    blanked.set(prev, prev.data);
+    prev.data = prev.data.replace(SEP_BEFORE, "");
+  }
+}
+
+/** Hide the chips and tiered buttons whose row the Automation box shows (points 7, 8). Returns how many are hidden. Idempotent. */
+export function hideDuplicateChips(message, root) {
+  if (!root?.querySelectorAll || !message) return 0;
+  const old = BLANKED.get(root);
+  if (old) for (const [node, data] of old) node.data = data; // restore, then decide again from the record
+  const blanked = new Map();
+  BLANKED.set(root, blanked);
+  let n = 0;
+  for (const ec of root.querySelectorAll(ENRICHER)) {
+    if (flatChipOp(message, ec)) {
+      ec.classList.add(HIDDEN_NATIVE);
+      blankSeparator(ec, blanked);
+      n++;
+    } else if (ec.classList.contains(HIDDEN_NATIVE)) ec.classList.remove(HIDDEN_NATIVE);
+  }
+  for (const button of root.querySelectorAll(TIERED_BUTTONS)) {
+    if (tieredButtonOp(message, button)) {
+      button.classList.add(HIDDEN_NATIVE);
+      n++;
+    } else if (button.classList.contains(HIDDEN_NATIVE)) button.classList.remove(HIDDEN_NATIVE);
+  }
+  return n;
+}
+
+/** Keep the chips hidden while Combat Tools builds or rebuilds the card text (a short-lived observer on this card). */
+function watchChips(message, root) {
+  if (typeof MutationObserver !== "function" || !root?.nodeType) return;
+  let wasConnected = false;
+  let timer = null;
+  const obs = new MutationObserver(() => {
+    if (timer) return;
+    timer = setTimeout(() => {
+      timer = null;
+      if (root.isConnected) wasConnected = true;
+      else if (wasConnected) return obs.disconnect(); // the card left the chat log
+      hideDuplicateChips(message, root);
+      obs.takeRecords(); // our own class and text changes
+    }, 50);
+  });
+  obs.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  setTimeout(() => obs.disconnect(), 15000);
+}
+
 export function registerDstdLock() {
   document.addEventListener("click", onCaptureClick, true);
   Hooks.on("openDetachedWindow", (_id, win) => {
@@ -349,7 +496,12 @@ export function registerDstdLock() {
     if (!root || !getResolution(message)) return;
     setTimeout(() => decorateForced(message, root), 0);
     // Combat Tools builds advanced enricher faces when the enriched content renders (independent of Target Damage).
-    for (const ms of [0, 250, 600, 1500]) setTimeout(() => decorateEnrichers(message, liveRoot(message, root)), ms);
+    for (const ms of [0, 250, 600, 1500]) setTimeout(() => {
+      const live = liveRoot(message, root);
+      hideDuplicateChips(message, live);
+      decorateEnrichers(message, live);
+    }, ms);
+    watchChips(message, root);
   });
 
   Hooks.once("ready", () => {

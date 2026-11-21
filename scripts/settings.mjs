@@ -178,7 +178,10 @@ const DEFINITIONS = {
   forcedFallback: { menu: "movement", scope: "world", type: Boolean, default: true },
   // Milestone 4: ability library.
   libraryEnabled: { menu: "library", scope: "world", type: Boolean, default: true },
-  libraryDefersToCombatTools: { menu: "library", scope: "world", type: Boolean, default: true },
+  // Retired 1.2.2: the suite always has priority over Combat Tools. Kept registered (older worlds store it); nothing reads it.
+  // 1.2.2: signature (Combat Tools version + sorted overlapping switches) the Director dismissed with "Not now" (compat/dsct-overlap.mjs).
+  ctOverlapDismissed: { hidden: true, scope: "world", type: String, default: "" },
+  libraryDefersToCombatTools: { hidden: true, scope: "world", type: Boolean, default: true },
   resourceMode: { menu: "modes", scope: "world", type: String, default: "auto", choices: MODE_CHOICES },
   // Milestone 5: triggered actions.
   triggersEnabled: { menu: "triggers", scope: "world", type: Boolean, default: true },

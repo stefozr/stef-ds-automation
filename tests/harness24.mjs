@@ -21,7 +21,6 @@ registerPromptType("featureRule", handleFeaturePrompt);
 registerPromptType("movementChoice", async () => ({ declined: true }));
 foundry.data.operators.ForcedReplacement ??= { create: value => structuredClone(value) };
 for (const a of [hero, gobA, gobB]) { a.effects.clear(); a.statuses.clear(); a.flags = {}; a.items.clear(); a.system.stamina = { value: 40, max: 40, min: -10, temporary: 0 }; }
-await game.settings.set(MOD, "libraryDefersToCombatTools", false);
 await game.settings.set(MOD, "forcedMovementMode", "manual");
 await game.settings.set(MOD, "modeConditionNpc", "auto");
 game.scenes.contents = [scene];

@@ -394,6 +394,9 @@ function ownedAbility(name) {
   Hooks.callAll("dsAuto.settingsMenu", { notARegistry: true });
   assert.equal(entries.length, 0, "a registry without addMaintenance is ignored");
   Hooks.callAll("dsAuto.settingsMenu", registry);
+  // 1.2.2: the core's own Combat Tools overlap review registers on the same hook; only the medkit's entries are checked.
+  const own = entries.findIndex(e => e.id === "stef-ds-automation.ctOverlap");
+  if (own >= 0) entries.splice(own, 1);
   assert.deepEqual(entries.map(e => e.id), ["stef-ds-automation.coverage", "stef-ds-automation.customized"]);
   for (const e of entries) {
     assert.match(e.label, /^DSMEDKIT\.Maintenance\./);

@@ -18,7 +18,7 @@ export function isGainFeature(doc, api = coreApi()) {
 }
 
 /** Statuses of stef-ds-automation's library resolution, most specific first. */
-export const STATUSES = ["locked", "disabled", "outdated", "customized", "unavailable", "covered", "configurable", "automated", "native", "manual"];
+export const STATUSES = ["locked", "disabled", "outdated", "customized", "unavailable", "configurable", "automated", "native", "manual"];
 
 const ICONS = {
   locked: "fa-solid fa-lock",
@@ -26,7 +26,6 @@ const ICONS = {
   outdated: "fa-solid fa-clock-rotate-left",
   customized: "fa-solid fa-pen-ruler",
   unavailable: "fa-solid fa-plug-circle-xmark",
-  covered: "fa-solid fa-handshake",
   configurable: "fa-solid fa-sliders",
   automated: "fa-solid fa-wand-magic-sparkles",
   native: "fa-solid fa-gears",

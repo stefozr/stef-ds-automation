@@ -29,11 +29,13 @@ import { setting } from "../settings.mjs";
 import { stricterMode, typeOverride } from "../engine/actor-category.mjs";
 import { combatFor, uuidKey } from "../triggers/budget.mjs";
 import { distanceSquares, lineOfEffect, relation, tokenOnScene } from "../triggers/eligibility.mjs";
+import { carriesEffectOf } from "../triggers/carries.mjs";
 import { gainCandidates, gainsActive, liveAmount } from "./rules.mjs";
 import { resourceLevel } from "../features/mastery.mjs";
 import { auraActive } from "../features/auras.mjs";
 import { withResourceChain } from "./world-resources.mjs";
 
+export { carriesEffectOf };
 const GAIN_FLAG = () => C.GAIN_FLAG ?? "eventGains";
 const GAIN_ENC_FLAG = () => C.GAIN_ENC_FLAG ?? "eventGainsEncounter";
 const HOOK_PRE_GAIN = () => C.HOOKS?.preGain ?? "dsAuto.preGain";
@@ -249,32 +251,6 @@ function withinOf(n, cand, p, sceneId) {
   const other = tokenOf(p, sceneId);
   if (!cand.tokenDoc || !other) return false;
   return distanceSquares(cand.tokenDoc, other) <= Number(n);
-}
-
-/**
- * Does `actor` carry an enabled effect from the gainer's ability (CH8): its origin resolves to an item of the gainer
- * (or starts with the gainer's uuid) and its id is the effect id, or the origin item's dsid is the ability.
- */
-export function carriesEffectOf(actor, gainer, spec) {
-  if (!actor || !gainer?.uuid || !spec?.ability) return false;
-  let effects = [];
-  try {
-    effects = list(actor.appliedEffects ?? actor.effects);
-  } catch (_err) {
-    return false;
-  }
-  for (const e of effects) {
-    if (!e || e.disabled) continue;
-    const origin = typeof e.origin === "string" ? e.origin : null;
-    if (!origin) continue;
-    const doc = lookup(origin);
-    const owner = doc?.actor ?? (doc?.documentName === "Actor" ? doc : doc?.parent) ?? null;
-    const ours = (owner?.uuid && owner.uuid === gainer.uuid) || origin.startsWith(`${gainer.uuid}.`);
-    if (!ours) continue;
-    if (spec.effect && e.id === spec.effect) return true;
-    if (doc && itemDsid(doc) === spec.ability) return true;
-  }
-  return false;
 }
 
 /**

@@ -26,7 +26,6 @@ const limerick = feature("Revitalizing Limerick", hero, "ability", "revitalizing
 limerick.system.distance = { type: "aura", primary: 5 };
 limerick.system.effects = { contents: [{ type: "dsct.flatHeal" }] };
 game.modules.set("draw-steel-combat-tools", { active: true });
-await game.settings.set(MOD, "libraryDefersToCombatTools", true);
 await game.settings.set(MOD, "healingMode", "manual");
 await game.settings.set(MOD, "modeByActorType", { hero: "manual", npc: "manual" });
 await game.settings.set(MOD, "playerAuthoredMode", "manual");
@@ -90,6 +89,9 @@ w.users.player.query = async (name, payload) => {
 selection = [token.uuid];
 await executeRule(limerick, featureRules(limerick)[0], { id: "owner-test", sceneId: scene.id });
 assert.deepEqual(routed.map(r => r.payload.kind), ["targets", "recovery"]);
+// The suite has priority over Combat Tools (flat heal on the item): the recovery row is planned and offered, never left to it.
+// dsctCovered only lists the kind as information.
+assert.deepEqual([...(await imp("library/resolve.mjs")).dsctCoveredTypes(limerick)], ["heal"]);
 assert.equal(routed[1].payload.promptActorUuid, hero.uuid);
 // Receiving player must own the offered creature; sender must be the active GM.
 w.setUser(w.users.player);

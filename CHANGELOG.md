@@ -2,6 +2,72 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.2.2] - 2026-11-14
+
+### Fixed
+- The house-rule "Reroll (hero token)" button on ability cards works again on Draw Steel 1.2 cards with targets. It had
+  vanished from every targeted roll. Each target now gets its own new tier and damage from the one new 2d10 (the card's
+  applied rows are undone and rebuilt, one hero token is spent).
+- No more yellow "The Automation box applies and undoes this card." banner on every roll. Combat Tools' "auto-apply own
+  abilities" clicks Apply All by itself after each card. Those clicks are still blocked on cards the box handles, but
+  silently: the warning now shows only when you click a locked button yourself.
+- Once-per-round, once-per-encounter and once-per-turn features (Barbed Tail and the like) could stay "already used"
+  after an encounter was restarted or a round was set back, and then were never offered again in that round. Starting
+  a combat or setting its round back now starts these counts fresh.
+- An open Routines question (Troubadour performances) at round start held up everything that happens at the start
+  and end of a turn: the Persistent "Keep …?" ask, summon and area upkeep, ongoing damage and the like only came once
+  Routines was answered, often after the turn had moved on. Turn starts no longer wait for it, and the Routines
+  question now closes by itself after 2 minutes, keeping the current performances.
+
+- The Automation settings window's Save button gave no sign that it had saved: the window stayed open looking the
+  same. Save now closes the window (as Foundry's own settings do) and says "Automation settings saved." (or that
+  nothing changed). Settings that need a reload still ask for one.
+
+- Combat Tools enhanced abilities: Combat Tools'
+  chips in the card text ("15 Stamina", "Stand Up", …) are hidden when the Automation box already has the same row,
+  so nothing shows twice.
+- My Life for Yours (Combat Tools copy): after Combat Tools' Stand Up or Cleanse pick, the box shows one row,
+  "Spend 1 Wrath", that pays and then ends only what that pick allows (prone for Stand Up, a save-ends or
+  end-of-turn effect for Cleanse). Undo gives the Wrath back, Apply All never pays it, and a use already paid in the
+  damage reaction is not asked again.
+- Practical Magic (Combat Tools copy): its Damage and Teleport picks now plan their rows, and a pick Combat Tools
+  already asked (the creature from its target picker, the damage type from the roll window) answers the box's pick
+  row instead of asking again. If those answers do not fit the pick (out of range, a type not allowed), the row
+  still waits for you.
+
+### Added
+- Judgement (Censor) now covers the whole ability:
+  - When your judged foe uses a main action, you're asked whether to deal holy damage equal to twice your Presence.
+  - You can spend 1 Wrath for one of these options:
+    - Your judged foe takes a bane on its power roll. The roll waits for your answer.
+    - Potency -1 against the one creature your judged foe targets. This is offered only when its ability has a
+      potency.
+  - The Wrath option for a judged foe that starts to shift stays by hand, because Foundry has no separate shift move.
+  - When you damage your judged foe with a melee ability, it is taunted until the end of its next turn. This happens
+    on its own.
+  - The suite does all of this for every judgement it applies. A judgement that Combat Tools applied itself is left to
+    Combat Tools while its own Judgement automation is on, so nothing happens twice.
+- Mark (Tactician): when you damage your marked foe with a melee ability, it is taunted until the end of its next turn.
+- A one-time notice for the GM lists the Combat Tools switches that duplicate the suite: Hesitation is Weakness,
+  Judgement, Mark and "Apply my abilities automatically". One click turns them off; "Not now" hides the notice until
+  that list changes. Also under Automation settings → Maintenance → "Combat Tools overlap: review".
+
+### Changed
+- Verified with Draw Steel 1.2.2, Combat Tools 2.2.4, ctlib 2.1.3 and Battle Log 2.1.1.
+- The Automation Suite now always has priority over Combat Tools, and Combat Tools only steps in where the suite has
+  nothing:
+  - The setting "Library: leave Combat Tools' own automation alone" is gone. The suite always automates Combat Tools'
+    enhanced ability copies.
+  - Combat Tools' chips and heal/teleport buttons for anything the Automation box handles are hidden. Buttons for
+    things the box does not handle stay.
+  - Hesitation is Weakness is always offered by the suite. Combat Tools' own card for it is hidden.
+  - Combat Tools' "Apply Judgement" and "Apply Mark" buttons are hidden on cards where the Automation box applies
+    the Judged or Marked row. Before, they could add a second Judged or Mark (two edges).
+- Draw Steel 1.2's own "Persistent" button is hidden on ability cards the Automation box handles: the suite already
+  asks at the start of your turn whether to keep the ability and charges its cost then, so the button would charge
+  twice, and the Automation box shows the Persistent line itself. The box now shows that line only once (The Flesh,
+  a Crucible repeated it in a note). With the "Persistent abilities" setting turned off, the button works as before.
+
 ## [1.2.1] - 2026-11-10
 
 ### Changed

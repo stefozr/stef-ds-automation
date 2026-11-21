@@ -112,6 +112,15 @@ function endName(end) {
   return cfg?.abbreviation ? game.i18n.localize(cfg.abbreviation) : end;
 }
 
+/** 1.2.2: the hero's name for the resource a Combat Tools spend row takes ("Wrath"). */
+function spendResourceName(op) {
+  let named = null;
+  try {
+    named = op.spendCost?.payerUuid ? fromUuidSync(op.spendCost.payerUuid)?.system?.hero?.primary?.label : null;
+  } catch (_err) { /* gone */ }
+  return named || op.spendCost?.name || loc("DSAUTO.Entry.Resource.heroic");
+}
+
 function cleanseLabel(op) {
   const what = [...(op.statuses ?? []).map(statusName), ...(op.ends ?? []).map(endName)].join(", ");
   return op.count != null ? loc("DSAUTO.Card.CleanseCount", { count: op.count, what }) : loc("DSAUTO.Card.Cleanse", { what });
@@ -597,7 +606,8 @@ function opDetail(res, op) {
   }
   if (op.awaitingChoice) bits.push(loc("DSAUTO.Card.AwaitingChoice"));
   if (op.override && Object.keys(op.override).some(k => k !== "by" && k !== "at")) bits.push(loc("DSAUTO.Card.Edited"));
-  if (op.reason) bits.push(loc(`DSAUTO.Reason.${op.reason}`));
+  if (op.reason === "notEnoughResource" && op.spendCost) bits.push(loc("DSAUTO.Card.SpendShort", { cost: op.spendCost.amount, name: spendResourceName(op) }));
+  else if (op.reason) bits.push(loc(`DSAUTO.Reason.${op.reason}`));
   if (op.undoMode === "delta") bits.push(loc("DSAUTO.Card.UndoDelta"));
   if (op.undoMode === "positionKept") bits.push(loc("DSAUTO.Card.PositionKept"));
   if (op.grabsLost) bits.push(loc("DSAUTO.Card.GrabsLost", { count: op.grabsLost }));
@@ -682,6 +692,9 @@ function opView(message, res, op, surges, opWarnings, compact = false) {
     applyAction: pick ? "dsAutoPick" : zone ? "dsAutoZone" : (summonAction ?? (ownTeleport ? "dsAutoTeleport" : (choice ? "dsAutoEditApply" : "dsAutoApply"))),
     // The Summon button (Milestone 6), the Place button (Milestone 7) and the Pick button (Milestone 9) show their own
     // icon and tooltip.
+    // 1.2.2: a cleanse row that asks for a Combat Tools spend names it on its button ("Spend 1 Wrath").
+    spendButton: op.kind === "cleanse" && !!op.spendCost && op.status !== OP_STATUS.APPLIED
+      ? loc("DSAUTO.Card.SpendApply", { cost: op.spendCost.amount, name: spendResourceName(op) }) : "",
     summonButton: summon,
     zoneButton: zone,
     pickButton: pick,

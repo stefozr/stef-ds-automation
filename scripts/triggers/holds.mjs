@@ -24,6 +24,7 @@ import { causeNoteCount, noteDamageCause } from "../compat/death-tracker.mjs";
 import { effectiveAmount, immunityWeakness, opSource } from "../engine/damage.mjs";
 import { damageInFlight } from "../engine/engine.mjs";
 import { potencyApplies } from "../engine/plan.mjs";
+import { realTargets } from "../engine/record.mjs";
 import { debug, error, log } from "../log.mjs";
 import { setting } from "../settings.mjs";
 import { combatFor } from "./budget.mjs";
@@ -294,6 +295,8 @@ function buildDamageEvent(message, resLive, inst) {
       instanceKey: inst.key, amount: Number(src?.total ?? op0.amount ?? 0) || 0, type: src?.type ?? op0.type ?? "", halved: inst.halved,
       hasPotency: potencyMayChange(resLive, inst.targetKey), messageId: message.id,
       targetKey: inst.targetKey, external: false,
+      // 1.2.2: how many creatures the card targets (require.singleTarget).
+      targetCount: Object.keys(realTargets(resLive)).length,
     },
     at: serverNow(),
   };

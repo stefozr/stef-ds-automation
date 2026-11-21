@@ -1,10 +1,12 @@
 /**
  * Hesitation is Weakness (Milestone 5, docs/M5-DESIGN.md §3.10). On our `turnEnd` lifecycle event (active
  * GM), offer `turn.end` triggers and, when one is used, let its reactor take the next turn. Fire-and-forget:
- * the lifecycle queue never waits on a prompt (turn/lifecycle.mjs awaits its listeners). Stays off when
- * Combat Tools automates the ability itself (`dsctHandlesHiw`: DSCT registers its HIW hooks only when
- * `abilityAutomationEnabled`, a reload setting, is on and draw-steel-triggers is inactive, and checks
- * `hiwEnabled` live, DSCT/ability-automation/class-shadow/hesitation.mjs:55-57, 70).
+ * the lifecycle queue never waits on a prompt (turn/lifecycle.mjs awaits its listeners). 1.2.2: the suite has
+ * priority over Combat Tools, so it offers the ability whenever its own guards pass (`suiteRunsHiw`), even while
+ * Combat Tools' HIW is on (`dsctHandlesHiw`, now only reported by selfCheck: DSCT registers its HIW hooks only
+ * when `abilityAutomationEnabled`, a reload setting, is on and draw-steel-triggers is inactive, and checks
+ * `hiwEnabled` live, DSCT/ability-automation/class-shadow/hesitation.mjs:55-57, 70). ui/ct-duplicates.mjs hides
+ * Combat Tools' own HIW card while `suiteRunsHiw()` holds.
  *
  * - Only between turns, as the rules and Combat Tools have it: a turn started meanwhile (`updateCombat`
  *   with a turn, or a round change) cancels the open prompts (outcome cancelled, no cost).
@@ -80,7 +82,21 @@ export function registerTurnOrder() {
   });
 }
 
-/** DSCT posts its own HIW cards: active, abilityAutomationEnabled (snapshot at ready: requiresReload, review integration 12)
+/**
+ * 1.2.2: true when the suite's own Hesitation is Weakness would run: the trigger engine is active, an overlay uses
+ * `turn.end`, and the initiative mode is the default one. Needs no active GM (every client uses it to hide Combat
+ * Tools' duplicate card). Pure reads of cached state.
+ */
+export function suiteRunsHiw() {
+  try {
+    return !!triggersActive() && kindsInUse().has("turn.end") && !!game.combats?.isDefaultInitiativeMode;
+  } catch (err) {
+    error("hiw.suiteRuns", err);
+    return false;
+  }
+}
+
+/** Reporting only (selfCheck, 1.2.2). DSCT posts its own HIW cards: active, abilityAutomationEnabled (snapshot at ready: requiresReload, review integration 12)
  *  and hiwEnabled (live) (DSCT/ability-automation/class-shadow/hesitation.mjs:55-57, 70). */
 export function dsctHandlesHiw() {
   try {
@@ -107,7 +123,7 @@ function cancelHiw(combatId) {
 
 /**
  * Milestone 6 (Q19): offer Hesitation is Weakness for `actor` (the summoner) after a chained summon's turn ended with
- * nothing left. Same guards as the lifecycle path (active GM, overlays in use, not Combat Tools' HIW, default mode,
+ * nothing left. Same guards as the lifecycle path (active GM, overlays in use, default mode,
  * hero, between turns). Fire-and-forget: errors are logged, never thrown.
  */
 export function runHiwFor({ combat, combatant, actor, round } = {}) {
@@ -115,8 +131,7 @@ export function runHiwFor({ combat, combatant, actor, round } = {}) {
 }
 
 async function runHiw({ combat, combatant, actor, round } = {}) {
-  if (!isActiveGM() || !triggersActive() || !kindsInUse().has("turn.end")) return;   // zero cost without overlays
-  if (dsctHandlesHiw() || !game.combats?.isDefaultInitiativeMode) return;            // decision 10; DSM:3941-3943
+  if (!isActiveGM() || !suiteRunsHiw()) return;   // zero cost without overlays; default mode only (DSM:3941-3943)
   if (actor?.type !== "hero" || !combat || !combatant) return;
   const live = game.combats?.get?.(combat.id) ?? combat;
   // Between turns only: a turn already started (the Director activated someone) or the round moved on.

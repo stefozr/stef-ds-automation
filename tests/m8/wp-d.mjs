@@ -181,7 +181,7 @@ export default async function (ctx) {
       assert.ok(Cls, "class built once ApplicationV2 exists");
       assert.equal(menuMod.automationSettingsClass(), Cls, "built once");
       assert.equal(Cls.DEFAULT_OPTIONS.tag, "form");
-      assert.equal(Cls.DEFAULT_OPTIONS.form.closeOnSubmit, false);
+      assert.equal(Cls.DEFAULT_OPTIONS.form.closeOnSubmit, true);
       for (const a of ["resetTab", "resetAll", "runSelfCheck", "stripDry", "stripRun", "cleanupDry", "maintenanceEntry"]) {
         assert.equal(typeof Cls.DEFAULT_OPTIONS.actions[a], "function", `action ${a}`);
       }
@@ -222,7 +222,7 @@ export default async function (ctx) {
       assert.ok(compatSection.compat.info.length === 3 && compatSection.compat.modules.some(m => m.id === "draw-steel-combat-tools"));
       const maint = context.sections.find(s => s.id === "maintenance");
       assert.equal(maint.resettable, false);
-      assert.deepEqual(maint.maintenance.entries.map(e => e.id), ["medkit.coverage", "boom"], "valid entries only");
+      assert.deepEqual(maint.maintenance.entries.map(e => e.id).filter(id => id !== "stef-ds-automation.ctOverlap"), ["medkit.coverage", "boom"], "valid entries only (1.2.2: plus the Combat Tools overlap review)");
       assert.ok(!("run" in maint.maintenance.entries[0]), "run not in the template context");
       await Cls.DEFAULT_OPTIONS.actions.maintenanceEntry.call(app, {}, { dataset: { entryId: "medkit.coverage" } });
       assert.deepEqual(runs, ["coverage"], "the entry ran");

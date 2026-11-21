@@ -43,6 +43,7 @@ const OVERLAY_CLASS = "ds-auto-roll-lock-overlay";
 const DSCT_LOCKED_CLASS = "dsct-locked";
 const TICK_MS = 500;
 const MAX_EDGES = 2;
+const MAX_BANES = 2;
 const PENDING_MS = 600_000;
 
 /* Roller's client: app -> state */
@@ -69,6 +70,15 @@ function lookup(uuid) {
     return fromUuidSync(uuid);
   } catch (_err) {
     return null;
+  }
+}
+
+/** 1.2.2: any power roll (roll.before fires for every one; a trigger's require.damaging narrows it). */
+function powerRoll(item) {
+  try {
+    return !!item?.system?.power?.roll?.enabled;
+  } catch (_err) {
+    return false;
   }
 }
 
@@ -107,13 +117,13 @@ function onRender(app) {
   if (!setting("triggerRollLock") || !triggersActive()) return;
   const item = app?.options?.ability;
   const actor = item?.actor;
-  if (!actor || !app.element || !damagingRoll(item)) return;
+  if (!actor || !app.element || !powerRoll(item)) return;
   const token = actor.token ?? actor.getActiveTokens?.(false, true)?.[0] ?? null;
   const sceneId = token?.parent?.id ?? globalThis.canvas?.scene?.id ?? null;
-  if (!mayHold("roll.before", sceneId)) return;                        // nothing on that scene could react
+  if (!mayHold("roll.before", sceneId, { damaging: damagingRoll(item) })) return;   // nothing on that scene could react
 
   const st = {
-    dialogId: randomId(), locked: true, ours: [loc("DSAUTO.Trigger.RollLock.Checking")], holdId: null, gmId: null, edges: 0, pill: null, edgesBase: 0,
+    dialogId: randomId(), locked: true, ours: [loc("DSAUTO.Trigger.RollLock.Checking")], holdId: null, gmId: null, edges: 0, pill: null, edgesBase: 0, banes: 0, banePill: null, banesBase: 0,
     submitted: false, committed: false, closed: false, pills: false, observer: null, overlay: null, blocker: null,
     handler: null, guard: null, tick: null, deadline: clock.now() + promptMs() + 5_000,
   };
@@ -126,14 +136,16 @@ function onRender(app) {
       st.holdId = typeof r?.holdId === "string" ? r.holdId : null;
       st.gmId = typeof r?.gmId === "string" ? r.gmId : null;   // the GM that keeps the pending commit
       const edges = Math.min(MAX_EDGES, Math.max(0, Math.floor(Number(r?.edges) || 0)));
-      if (!st.closed && !st.submitted && edges > 0) st.edges = addEdges(app, st, { edges, sources: r?.sources ?? [] });
-      log("rollLock.answer", { dialogId: st.dialogId, holdId: st.holdId, edges: st.edges });
+      const banes = Math.min(MAX_BANES, Math.max(0, Math.floor(Number(r?.banes) || 0)));
+      if (!st.closed && !st.submitted && edges > 0) st.edges = addMods(app, st, "edge", { amount: edges, sources: r?.sources ?? [] });
+      if (!st.closed && !st.submitted && banes > 0) st.banes = addMods(app, st, "bane", { amount: banes, sources: r?.baneSources ?? [] });
+      log("rollLock.answer", { dialogId: st.dialogId, holdId: st.holdId, edges: st.edges, banes: st.banes });
     })
     .catch(err => debug("rollLock.relay", { dialogId: st.dialogId, why: String(err?.message ?? err) }))
     .finally(() => {
       try {
         if (st.locked) unlock(app, st);
-        if (st.holdId && !st.edges) done(st, false);                    // nothing was added: release it
+        if (st.holdId && !st.edges && !st.banes) done(st, false);                    // nothing was added: release it
       } catch (err) {
         error("triggers.rollLock.unlock", err);
       }
@@ -179,7 +191,7 @@ function lock(app, st) {
         return undefined;
       }
       st.submitted = true;
-      const kept = edgeKept(app, st);                                   // read before the handler rolls
+      const kept = modsKept(app, st);                                   // read before the handler rolls
       const out = await st.handler.apply(this, args);
       if (st.holdId) done(st, kept);                                    // the roll is made: commit the edge (or release it)
       return out;
@@ -261,7 +273,13 @@ function unlock(app, st) {
   // The form handler guard stays (it only commits from now on); it is restored on close.
 }
 
-function addEdges(app, st, { edges, sources }) {
+/**
+ * Put the answer's edges or banes on the held dialog. 1.2.2: banes go the same way as edges: a Combat Tools pill of kind
+ * "bane", else `context.modifiers.banes` (the same dialog select, 0-2, DSM:2221). Returns what was added.
+ */
+export function addMods(app, st, kind, { amount, sources }) {
+  const plural = kind === "bane" ? "banes" : "edges";
+  const cap = kind === "bane" ? MAX_BANES : MAX_EDGES;
   const abilities = [...new Set(sources.map(s => s?.ability).filter(Boolean))].join(", ");
   const names = [...new Set(sources.map(s => s?.name).filter(Boolean))].join(", ");
   if (st.pills) {
@@ -269,46 +287,89 @@ function addEdges(app, st, { edges, sources }) {
     // actor and item names are any owner's text, so they are escaped here.
     const before = new Set(Array.isArray(app._dsctSources) ? app._dsctSources : []);
     const added = dsctApi()?.rollDialog?.addPill?.(app, {
-      kind: "edge", amount: edges, reason: esc(abilities || loc("DSAUTO.Trigger.RollLock.Checking")), src: names ? esc(names) : null, scope: "global",
+      kind, amount, reason: esc(abilities || loc("DSAUTO.Trigger.RollLock.Checking")), src: names ? esc(names) : null, scope: "global",
     });
     if (added) {
       // Our pill (addExternalRollPill pushes it, roll-dialog-hooks.mjs:788-796): the roller may switch it off.
-      st.pill = (Array.isArray(app._dsctSources) ? app._dsctSources : []).find(p => !before.has(p)) ?? null;
-      return edges;
+      const pill = (Array.isArray(app._dsctSources) ? app._dsctSources : []).find(p => !before.has(p)) ?? null;
+      if (kind === "bane") st.banePill = pill; else st.pill = pill;
+      return amount;
     }
   }
   const context = app.options?.context;
   if (!context) return 0;
   context.modifiers ??= {};
-  // The dialog's global edges select only holds 0-2 (DSM:2221 modChoices): a higher value shows and submits
-  // as 0 on the first form change (DSM:2275-2296). Add only what fits; 0 releases the hold.
-  const cur = Math.max(0, Number(context.modifiers.edges) || 0);
-  const add = Math.max(0, Math.min(edges, MAX_EDGES - cur));
+  // The dialog's global selects hold 0-2 (DSM:2221 modChoices): a higher value shows and submits as 0 on the first form
+  // change (DSM:2275-2296). Add only what fits; 0 releases the hold.
+  const cur = Math.max(0, Number(context.modifiers[plural]) || 0);
+  const add = Math.max(0, Math.min(amount, cap - cur));
   if (!add) return 0;
-  context.modifiers.edges = cur + add;
-  st.edgesBase = cur;
+  context.modifiers[plural] = cur + add;
+  if (kind === "bane") st.banesBase = cur; else st.edgesBase = cur;
   app.render?.();
   return add;
 }
 
 /**
- * Is the edge still on the roll as it is submitted? The roller can switch Combat Tools' pill off (its click
- * handler, roll-dialog-hooks.mjs:573-583) or lower the dialog's edges select: the roll goes out without it, and
- * the reaction is released, never charged (§3.11, decision 1/7; third review). Unknown: kept.
+ * Are the edges and banes still on the roll as it is submitted? The roller can switch Combat Tools' pill off (its click
+ * handler, roll-dialog-hooks.mjs:573-583) or lower the dialog's select: the roll goes out without it, and the reaction
+ * is released, never charged (§3.11, decision 1/7; third review). Unknown: kept. 1.2.2: true when any of them is kept.
  */
-function edgeKept(app, st) {
-  if (!(st.edges > 0)) return false;
-  try {
-    if (st.pills) {
-      if (!st.pill) return true;   // not found in Combat Tools' sources: as before
-      const sources = app._dsctSources;
-      return st.pill.enabled !== false && (!Array.isArray(sources) || sources.includes(st.pill));
+export function modsKept(app, st) {
+  const one = (kind, count, base, pill) => {
+    if (!(count > 0)) return false;
+    try {
+      if (st.pills) {
+        if (!pill) return true;   // not found in Combat Tools' sources: as before
+        const sources = app._dsctSources;
+        return pill.enabled !== false && (!Array.isArray(sources) || sources.includes(pill));
+      }
+      const value = Number(app.options?.context?.modifiers?.[kind === "bane" ? "banes" : "edges"]);
+      return !Number.isFinite(value) || value >= (Number(base) || 0) + count;
+    } catch (_err) {
+      return true;
     }
-    const edges = Number(app.options?.context?.modifiers?.edges);
-    return !Number.isFinite(edges) || edges >= (Number(st.edgesBase) || 0) + st.edges;
-  } catch (_err) {
-    return true;
+  };
+  return one("edge", st.edges, st.edgesBase, st.pill) || one("bane", st.banes, st.banesBase, st.banePill);
+}
+
+/**
+ * GM side (pure, tests): total edges and banes of the used decisions, each capped at 2; a decision beyond the cap, or of a
+ * roll skipped meanwhile, is moot.
+ * @returns {{edges: number, banes: number, sources: object[], baneSources: object[], held: object[], effects: Map}}
+ */
+export function tallyRollMods(decisions, { aborted = false, release = releaseDecisions } = {}) {
+  const out = { edges: 0, banes: 0, sources: [], baneSources: [], held: [], effects: new Map() };
+  for (const d of decisions ?? []) {
+    if (d?.outcome !== "used") continue;
+    const steps = d.steps ?? [];
+    const amount = type => Math.max(0, ...steps.filter(s => s?.type === type).map(s => Number(s.amount) || 0));
+    const e = amount("edge");
+    const b = amount("bane");
+    const room = (e > 0 && out.edges < MAX_EDGES) || (b > 0 && out.banes < MAX_BANES);
+    // Double edge is the maximum; a roll skipped meanwhile takes nothing.
+    if (!room || aborted) {
+      d.outcome = "moot";
+      d.why = aborted ? "skipped" : "edgeCap";
+      release([d]);
+      continue;
+    }
+    const src = { name: d.candidate?.reactor?.name ?? "", ability: d.candidate?.item?.name ?? "" };
+    const fx = {};
+    if (e > 0 && out.edges < MAX_EDGES) {
+      out.edges = Math.min(MAX_EDGES, out.edges + e);
+      out.sources.push(src);
+      fx.edges = e;
+    }
+    if (b > 0 && out.banes < MAX_BANES) {
+      out.banes = Math.min(MAX_BANES, out.banes + b);
+      out.baneSources.push(src);
+      fx.banes = b;
+    }
+    out.held.push(d);
+    out.effects.set(d.id, fx);
   }
+  return out;
 }
 
 function done(st, applied) {
@@ -391,7 +452,7 @@ function dropPending(combatId, why) {
   }
 }
 
-const NO_EDGE = Object.freeze({ ok: true, holdId: null, edges: 0, sources: [] });
+const NO_EDGE = Object.freeze({ ok: true, holdId: null, edges: 0, banes: 0, sources: [], baneSources: [] });
 
 /** Active GM (relay action "preRoll"). */
 export async function handlePreRoll(req, user) {
@@ -423,40 +484,24 @@ export async function handlePreRoll(req, user) {
   } finally {
     preRolls.delete(r.dialogId);
   }
-  let edges = 0;
-  const sources = [];
-  const held = [];
-  const effects = new Map();
+  let tally;
   try {
-    for (const d of decisions ?? []) {
-      if (d?.outcome !== "used") continue;
-      const e = Math.max(0, ...(d.steps ?? []).filter(s => s?.type === "edge").map(s => Number(s.amount) || 0));
-      // Double edge is the maximum; a roll skipped meanwhile takes nothing.
-      if (edges >= MAX_EDGES || e <= 0 || controller.signal.aborted) {
-        d.outcome = "moot";
-        d.why = controller.signal.aborted ? "skipped" : "edgeCap";
-        releaseDecisions([d]);
-        continue;
-      }
-      edges = Math.min(MAX_EDGES, edges + e);
-      sources.push({ name: d.candidate?.reactor?.name ?? "", ability: d.candidate?.item?.name ?? "" });
-      held.push(d);
-      effects.set(d.id, { edges: e });
-    }
+    tally = tallyRollMods(decisions, { aborted: controller.signal.aborted });
     reportDecisions(decisions ?? []);
   } catch (err) {
     error("triggers.preRoll", err);
-    releaseDecisions(held);
-    return { ...NO_EDGE, sources: [] };
+    releaseDecisions(decisions);
+    return { ...NO_EDGE, sources: [], baneSources: [] };
   }
-  if (!held.length) return { ok: true, holdId: null, edges: 0, sources: [] };
+  const { edges, banes, sources, baneSources, held, effects } = tally;
+  if (!held.length) return { ok: true, holdId: null, edges: 0, banes: 0, sources: [], baneSources: [] };
   const holdId = randomId();
   pending.set(holdId, {
     holdId, kind: "preRoll", userId: user?.id ?? null, decisions: held, effects, expires: clock.now() + PENDING_MS,
     timer: clock.setTimeout(() => releasePending(holdId, "expired"), PENDING_MS),
   });
-  log("preRoll.held", { holdId, edges, sources: sources.map(s => `${s.ability} (${s.name})`) });
-  return { ok: true, holdId, edges, sources };
+  log("preRoll.held", { holdId, edges, banes, sources: [...sources, ...baneSources].map(s => s.ability + " (" + s.name + ")") });
+  return { ok: true, holdId, edges, banes, sources, baneSources };
 }
 
 export async function handlePreRollCancel(req, user) {

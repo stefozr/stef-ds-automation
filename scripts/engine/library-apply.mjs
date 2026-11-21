@@ -138,9 +138,46 @@ export async function applyCleanse(message, res, op) {
   }
   if (op.count != null) chosen = chosen.slice(0, op.count);
   const removed = chosen.map(e => e.toObject());
-  await actor.deleteEmbeddedDocuments("ActiveEffect", chosen.map(e => e.id));
+  // 1.2.2: the spend of the picked Combat Tools effect (library/ct-spend.mjs) is paid here, once the row will really end
+  // something and before it does; undo gives it back (undoCleanse).
+  let spendPaid = null;
+  if (op.spendCost) {
+    spendPaid = await payHeroicSpend(op.spendCost);
+    if (!spendPaid) return { status: OP_STATUS.SKIPPED, reason: "notEnoughResource" };
+  }
+  try {
+    await actor.deleteEmbeddedDocuments("ActiveEffect", chosen.map(e => e.id));
+  } catch (err) {
+    if (spendPaid) await refundHeroicSpend(spendPaid).catch(e => error("library.spendRefund", e));
+    throw err;
+  }
   const moveCauseOpId = op.afterMoveEffect ? Object.values(res.ops).find(o => o.libEffect === op.afterMoveEffect && o.targetKeys?.includes(op.targetKeys[0]) && o.status === OP_STATUS.APPLIED)?.opId : null;
-  return { status: OP_STATUS.APPLIED, removed, removedNames: chosen.map(e => e.name), moveCauseOpId };
+  return { status: OP_STATUS.APPLIED, removed, removedNames: chosen.map(e => e.name), moveCauseOpId, ...(spendPaid ? { spendPaid } : {}) };
+}
+
+/**
+ * Take a Combat Tools spend (`{amount, payerUuid}`) from the payer's heroic resource on its resource chain.
+ * @returns {Promise<{payerUuid: string, amount: number, before: number, after: number}|null>} null when the payer is short.
+ */
+async function payHeroicSpend({ amount, payerUuid }) {
+  const payer = payerUuid ? fromUuidSync(payerUuid) : null;
+  const path = payer ? resourcePath(payer, "heroic") : null;
+  const cost = Number(amount) || 0;
+  if (!payer || !path || cost < 1) return null;
+  return withResourceChain(payer.uuid, async () => {
+    const before = Number(get(payer, path) ?? 0) || 0;
+    if (before < cost) return null;
+    await payer.update({ [path]: before - cost });
+    return { payerUuid: payer.uuid, amount: cost, before, after: before - cost };
+  });
+}
+
+/** Give a paid Combat Tools spend back (what is left plus the amount, so later gains and spends stay). */
+async function refundHeroicSpend(paid) {
+  const payer = paid?.payerUuid ? fromUuidSync(paid.payerUuid) : null;
+  const path = payer ? resourcePath(payer, "heroic") : null;
+  if (!payer || !path) return;
+  await withResourceChain(payer.uuid, () => payer.update({ [path]: (Number(get(payer, path) ?? 0) || 0) + Number(paid.amount) }));
 }
 
 export async function undoCleanse(res, op) {
@@ -148,7 +185,8 @@ export async function undoCleanse(res, op) {
   if (!actor) return { status: OP_STATUS.FAILED, reason: "targetMissing" };
   const back = (op.removed ?? []).filter(d => d?._id && !actor.effects.has(d._id));
   if (back.length) await actor.createEmbeddedDocuments("ActiveEffect", back, { keepId: true });
-  return { status: OP_STATUS.UNDONE };
+  if (op.spendPaid) await refundHeroicSpend(op.spendPaid);
+  return { status: OP_STATUS.UNDONE, ...(op.spendPaid ? { spendPaid: null } : {}) };
 }
 
 /* -------------------------------------------- */

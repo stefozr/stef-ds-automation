@@ -64,6 +64,8 @@
           <button type="button" class="ds-auto-icon-btn ds-auto-summon-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Summon.ChooseTitle"}}" aria-label="{{localize "DSAUTO.Summon.ChooseTitle"}}"><i class="fa-solid fa-person-circle-plus" inert></i></button>
           {{else if op.zoneButton}}
           <button type="button" class="ds-auto-icon-btn ds-auto-zone-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Zone.PlaceTitle"}}" aria-label="{{localize "DSAUTO.Zone.PlaceTitle"}}"><i class="fa-solid fa-draw-polygon" inert></i></button>
+          {{else if op.spendButton}}
+          <button type="button" class="ds-auto-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{op.spendButton}}"><i class="fa-solid fa-play" inert></i> {{op.spendButton}}</button>
           {{else if op.pickButton}}
           <button type="button" class="ds-auto-icon-btn ds-auto-pick-btn" data-action="{{op.applyAction}}" data-op-id="{{op.opId}}" data-tooltip="{{localize "DSAUTO.Pick.Button"}}" aria-label="{{localize "DSAUTO.Pick.Button"}}"><i class="fa-solid fa-crosshairs" inert></i></button>
           {{else}}

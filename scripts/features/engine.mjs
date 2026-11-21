@@ -8,7 +8,6 @@ import { activePerformances, canPerform, performanceRoundReady } from "./perform
 /** Item feature rules share the ordinary plan, GM writer, record cards and Undo. */
 import { MODULE_ID, QUERY_PROMPT, HOOKS, OP_STATUS } from "../constants.mjs";
 import { setting } from "../settings.mjs";
-import { dsctCoveredTypes } from "../library/resolve.mjs";
 import { automationFor, validateAutomation } from "../library/custom.mjs";
 import { findOverlay } from "../library/registry.mjs";
 import { libraryOps, useState } from "../engine/library-plan.mjs";
@@ -20,7 +19,9 @@ import { featureSettingKey, withTypeOverride, typeOverride, stricterMode } from 
 import { isActiveGM } from "../engine/engine.mjs";
 import { onTurnEvent, onRoundEvent, currentActivation } from "../turn/lifecycle.mjs";
 import { ownersOf } from "../triggers/prompt.mjs";
-import { tokenOnScene, relation, distanceSquares, incapacitated } from "../triggers/eligibility.mjs";
+import { tokenOnScene, relation, distanceSquares, incapacitated, requirementsMet } from "../triggers/eligibility.mjs";
+import { carriesEffectOf } from "../triggers/carries.mjs";
+import { ctYieldFlag } from "../compat/dsct.mjs";
 import { routePrompt, registerPromptType } from "../relay/prompt-router.mjs";
 import { worldValue } from "../resources/world-resources.mjs";
 import { error, debug } from "../log.mjs";
@@ -42,6 +43,29 @@ export function featureRules(item) {
   if (a?.aura && !auraActive(item)) return [];
   if (a?.performance && (!activePerformances(item.actor ?? {}).includes(item.uuid) || !canPerform(item.actor ?? {}))) return [];
   return a && validateAutomation(a).ok ? a.rules : [];
+}
+
+/**
+ * 1.2.2: the event requirements of a rule that need the owner: `dealer: "self"` (the damage came from the rule's owner),
+ * `melee: true` (a melee ability, keyword "melee"; one that is also "ranged" counts only within its melee reach), and
+ * `subjectEffect {ability, effect?}` (the event subject carries that effect applied by the owner: judged, marked).
+ */
+export function ruleEventMatches(item, rule, event = {}) {
+  const req = rule.require ?? {};
+  if (req.dealer === "self") {
+    const dealer = event.source?.actorUuid ? fromUuidSync(event.source.actorUuid) : null;
+    if (!dealer || (dealer !== item.actor && dealer.uuid !== item.actor?.uuid)) return false;
+  }
+  if (req.melee) {
+    const subject = eventToken(event.subject, event.sceneId);
+    if (!requirementsMet({ require: { fromAbility: true, keywords: ["melee"], meleeReach: true } }, event, { subjectToken: subject })) return false;
+  }
+  if (req.subjectEffect) {
+    const subject = event.subject?.actorUuid ? fromUuidSync(event.subject.actorUuid) : eventToken(event.subject, event.sceneId)?.actor;
+    // 1.2.2: `yieldsTo`: a judged / marked effect Combat Tools made is left to Combat Tools' own extras while they are on.
+    if (!carriesEffectOf(subject, item.actor, req.subjectEffect, { skipCtFlag: ctYieldFlag(rule.yieldsTo) })) return false;
+  }
+  return true;
 }
 export function featuresWantAfter(sceneId = null) {
   if (setting("enabled") === false || setting("libraryEnabled") === false) return false;
@@ -95,11 +119,48 @@ export function ruleTargets(item, rule, event = {}) {
 }
 export function frequencyKey(rule, event, combat = game.combat) {
   if (!combat) return null;
-  const prefix = `${combat.id}:`;
+  // The run id changes when the combat is started again or its round is set back, so marks written before never match.
+  const prefix = `${combat.id}:${combat.flags?.[MODULE_ID]?.run ?? "0"}:`;
   if (rule.once === "round") return `${prefix}round:${combat.round}`;
   if (rule.once === "encounter") return `${prefix}encounter`;
   if (rule.once === "turn") return `${prefix}turn:${event.combatantId ?? combat.combatant?.id}:${event.activation ?? currentActivation(combat.id, combat.combatant?.id)?.n ?? combat.turn}`;
   return null;
+}
+
+const runChange = () => ({
+  [`flags.${MODULE_ID}.run`]: foundry.utils.randomID(),
+  [`flags.${MODULE_ID}.encounterRuleUses`]: new foundry.data.operators.ForcedDeletion(),
+  [`flags.${MODULE_ID}.encounterRuleMessages`]: new foundry.data.operators.ForcedDeletion(),
+});
+/**
+ * A combat "run" ends when the combat starts (again) or its round goes down (rewind, reset): the run id is rotated and the
+ * encounter claims are dropped, so once-per-round / encounter / turn marks of the old run no longer count. Active GM only.
+ */
+export function registerCombatRun() {
+  Hooks.on("combatStart", combat => {
+    try {
+      if (isActiveGM() && combat?.update) combat.update(runChange()).catch(err => error("combatRun.start", err));
+    } catch (err) { error("combatRun.start", err); }
+  });
+  Hooks.on("preUpdateCombat", (combat, changes, options) => {
+    try {
+      if (!changes || !("round" in changes) || !(changes.round < combat.round)) return;
+      options.dsAutoPrevRound = combat.round;
+      // The writer is the active GM: rotate in the same update (the clients see the new round and run together).
+      if (isActiveGM()) {
+        changes.flags ??= {};
+        changes.flags[MODULE_ID] ??= {};
+        Object.assign(changes.flags[MODULE_ID], { run: foundry.utils.randomID(), encounterRuleUses: new foundry.data.operators.ForcedDeletion(), encounterRuleMessages: new foundry.data.operators.ForcedDeletion() });
+      }
+    } catch (err) { error("combatRun.pre", err); }
+  });
+  Hooks.on("updateCombat", (combat, changes, options) => {
+    try {
+      const prev = options?.dsAutoPrevRound;
+      if (prev == null || !(combat.round < prev) || !isActiveGM() || changes?.flags?.[MODULE_ID]?.run || changes?.[`flags.${MODULE_ID}.run`]) return;
+      combat.update(runChange()).catch(err => error("combatRun.update", err));
+    } catch (err) { error("combatRun.update", err); }
+  });
 }
 
 /**
@@ -187,13 +248,16 @@ export async function handleFeaturePrompt(payload, { user } = {}) {
       if (recoveryTargets && selected.length > payload.limit) throw new Error(game.i18n.format("DSAUTO.Feature.RecoveryTargets", { limit: payload.limit }));
       return selected;
     } } };
-  const ids = recoveryTargets ? (await recoveryDialog("prompt", options)).answer : await foundry.applications.api.DialogV2.prompt(options);
+  // Recovery targets and the Troubadour's Routines question (kind "performances") time out after 120 s: no ids = "maintain current".
+  const timed = recoveryTargets || payload.kind === "performances";
+  const ids = timed ? (await recoveryDialog("prompt", options)).answer : await foundry.applications.api.DialogV2.prompt(options);
   return { ids: Array.isArray(ids) ? ids.slice(0, payload.limit ?? ids.length) : [] };
 }
 
 export async function executeRule(item, rule, event = {}) {
   if (!isActiveGM() || !item?.actor || item.flags?.[MODULE_ID]?.disabled) return null;
   if (event.source?.featureChain?.includes(item.uuid)) return null;
+  if (!ruleEventMatches(item, rule, event)) return null;
   if (event.id) {
     const previous = list(game.messages).find(message => {
       const record = message.flags?.[MODULE_ID]?.resolution;
@@ -287,8 +351,7 @@ export async function executeRule(item, rule, event = {}) {
     const targets = Object.fromEntries(tokens.map(doc => { const t = targetFromTokenDoc(doc); return [t.key, { ...t, ...(event.targetRecords?.[t.key] ?? {}), tier: event.targetRecords?.[t.key]?.tier ?? event.tier ?? null }]; }));
     const source = tokenOf(item.actor, event.sceneId);
     const warnings = [];
-    const covered = setting("libraryDefersToCombatTools") ? dsctCoveredTypes(item) : new Set();
-    const effects = special.effects.filter(e => e.type !== "modifier" && !covered.has(e.type));
+    const effects = special.effects.filter(e => e.type !== "modifier");
     let selfKey = null;
     if (source && special.effects.some(e => e.targets === "self")) {
       const self = targetFromTokenDoc(source);
@@ -372,16 +435,24 @@ async function expireRules(combat, end, actor = null) {
     if (info?.combatId === combat.id && info.end === end && (!actor || effect.parent.uuid === actor.uuid)) await effect.delete();
   }
 }
-export function registerFeatureEngine() {
-  registerPromptType("featureRule", handleFeaturePrompt);
-  onTurnEvent(e => schedule(async () => {
+/**
+ * The lifecycle turn listener. The turn work is queued on the feature chain (serialized with the round work, errors logged)
+ * and NOT returned: the lifecycle awaits its listeners in order, and the chain can sit behind a feature question (Routines at
+ * round start, askFeature mid-chain) that waits for a player, which would stall every later turn listener (Persistent upkeep, ...).
+ */
+export function onFeatureTurnEvent(e) {
+  schedule(async () => {
     await expireAuraTurn(e);
     if (e.event === "turnEnd" && e.actor?.flags?.[MODULE_ID]?.temporaryResources) await removeTemporaryResources(e.actor, Object.keys(e.actor.flags[MODULE_ID].temporaryResources).filter(id => e.actor.flags[MODULE_ID].temporaryResources[id].end === "turnEnd"));
     if (e.event === "turnEnd") await expireRules(e.combat, "turnEnd", e.actor);
     const token = e.combatant?.token;
     await runFeatureEvents([{ id: `${e.combat.id}:${e.combatant.id}:${e.activation}:${e.event}`, kind: e.event === "turnStart" ? "turn.start" : "turn.end",
       combatantId: e.combatant.id, activation: e.activation, sceneId: token?.parent?.id, subject: { actorUuid: e.actor?.uuid, tokenUuid: token?.uuid } }]);
-  }));
+  }).catch(() => {});   // already logged by the chain
+}
+export function registerFeatureEngine() {
+  registerPromptType("featureRule", handleFeaturePrompt);
+  onTurnEvent(onFeatureTurnEvent);
   onRoundEvent(e => schedule(async () => {
     if (e.event === "roundStart") await performanceRoundReady(e.combat, e.round);
     if (e.event === "roundEnd") await expireRules(e.combat, "roundEnd");

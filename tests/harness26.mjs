@@ -250,8 +250,8 @@ const lockedState = el => el.disabled && el.classes.has("ds-auto-locked");
   game.messages.set(msg.id, msg);
   const d = dom();
   d.root.dataset.messageId = msg.id;
-  const click = target => {
-    const ev = { target, prevented: false, stopped: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; } };
+  const click = (target, isTrusted = true) => {
+    const ev = { target, isTrusted, prevented: false, stopped: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; } };
     guard.onCaptureClick(ev);
     return ev;
   };
@@ -261,6 +261,12 @@ const lockedState = el => el.disabled && el.classes.has("ds-auto-locked");
   assert.deepEqual(warns, ["DSAUTO.Lock.PartOwned"], "warned once with the lock text");
   click(d.sections[P].fm);
   assert.equal(warns.length, 1, "repeated clicks in a burst warn once");
+  const n = warns.length;
+  ev = click(d.sections[P].fm, false);
+  assert.ok(ev.prevented && ev.stopped, "synthetic click swallowed");
+  ev = click(d.go, false);
+  assert.ok(ev.prevented && ev.stopped, "synthetic apply-all swallowed");
+  assert.equal(warns.length, n, "synthetic clicks (autoApplyOwnAbilities) never toast");
   ev = click(d.go);
   assert.ok(ev.prevented && warns.at(-1) === "DSAUTO.Lock.BoxOwnsCard", "apply-all swallowed");
   ev = click(d.sections[Q].fm);

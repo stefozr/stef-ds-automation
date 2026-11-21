@@ -537,7 +537,7 @@ const VALID = {
   preRoll: r => isObject(r) && shortId(r.dialogId) && uuid(r.abilityUuid) && uuid(r.actorUuid) && optionalUuid(r.tokenUuid),
   preRollCancel: r => isObject(r) && shortId(r.dialogId),
   preRollDone: r => isObject(r) && shortId(r.holdId) && typeof r.applied === "boolean",
-  moveGate: m => isObject(m) && uuid(m.tokenUuid) && (m.kind === "move" || m.kind === "forced")
+  moveGate: m => isObject(m) && uuid(m.tokenUuid) && (m.kind === "move" || m.kind === "forced") && (m.shifting == null || typeof m.shifting === "boolean")
     && (m.movementId == null || shortId(m.movementId)) && (m.type == null || (typeof m.type === "string" && m.type.length <= 20))
     && (m.distance == null || (Number.isFinite(m.distance) && m.distance >= 0 && m.distance <= 100)),
   fmActive: f => isObject(f) && optionalUuid(f.targetTokenUuid) && optionalUuid(f.sourceTokenUuid) && optionalUuid(f.sourceActorUuid)
@@ -597,8 +597,11 @@ async function handleTriggerAction(action, payload, user) {
     case "preRoll": {
       if (!mayRequestHold(user, lookup(data.actorUuid))) throw deny(user, action, null, { actorUuid: data.actorUuid });
       const out = await handlePreRoll(data, user);
-      logAllowed(user, action, null, { dialogId: data.dialogId, edges: out?.edges ?? 0 });
-      return { ok: true, holdId: out?.holdId ?? null, edges: out?.edges ?? 0, sources: out?.sources ?? [], gmId: game.userId };
+      logAllowed(user, action, null, { dialogId: data.dialogId, edges: out?.edges ?? 0, banes: out?.banes ?? 0 });
+      return {
+        ok: true, holdId: out?.holdId ?? null, edges: out?.edges ?? 0, banes: out?.banes ?? 0, sources: out?.sources ?? [],
+        baneSources: out?.baneSources ?? [], gmId: game.userId,
+      };
     }
     case "preRollCancel":
       await handlePreRollCancel(data, user);

@@ -1,8 +1,8 @@
 {
   "key": "ability:magma-titan",
   "name": "Magma Titan",
-  "version": "1.0.1",
-  "notes": "By hand: the token's new size, the slide out of the space, restrained without room, the doubled-Reason fire bonus and rolling the best characteristic. Kept: 2 Recoveries at your turn start.",
+  "version": "1.0.2",
+  "notes": "By hand: the token's new size, the slide out of the space, restrained without room, the doubled-Reason fire bonus, rolling the best characteristic, the target's 2 Recoveries at your turn start.",
   "effects": [
     {
       "id": "titan",

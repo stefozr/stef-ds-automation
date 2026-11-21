@@ -899,7 +899,7 @@ const WAVE2 = [
   // The library registers; without a started combat nothing changes either.
   const reg = api.library.registerSource({ id: "stef-ds-automation.library", priority: 50, overlays: WAVE2 });
   assert.deepEqual([reg.accepted, reg.rejected], [11, 0], "the wave-2 overlays pass the core schema");
-  assert.deepEqual([...kindsInUse()].sort(), ["damage.after", "damage.before", "roll.before", "turn.end"]);
+  assert.deepEqual([...kindsInUse()].sort(), ["ability.used", "damage.after", "damage.before", "roll.before", "turn.end"], "1.2.2: Judgement adds ability.used");
   await fresh({ reactors: [parry, reflexes] });
   combat.started = false;
   const msg2 = post(spear, tBorin, 10);
@@ -1837,12 +1837,13 @@ Hooks.on("dsAuto.trackerZero", (info, outcome) => zeroSeen.push({ creature: info
   assert.equal(opsOf(card).find(o => o.kind === "resource")?.amount, -1, "Insight 1");
   assert.equal(dorian.system.hero.primary.value, 1);
   combat.turn = null;
-  // Combat Tools automates it: no prompt from us.
+  // 1.2.2: Combat Tools' own HIW is on, the suite has priority and still offers it (ui/ct-duplicates.mjs hides CT's card).
   await fresh({ reactors: [hiw] });
   game.settings.set("draw-steel-combat-tools", "hiwEnabled", true);
   await heroTurn(borin);
   await settle(100);
-  assert.equal(dialogs.length, 0, "DSCT hiwEnabled: no prompt");
+  assert.equal(triggerDialogs("Dorian").length, 1, "DSCT hiwEnabled: the suite still offers it");
+  game.settings.set("draw-steel-combat-tools", "hiwEnabled", false);
   // A turn started meanwhile: the prompt is cancelled, nothing paid; the lifecycle queue never waits on it.
   await fresh({ reactors: [hiw] });
   answerFn = () => undefined;

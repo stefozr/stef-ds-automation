@@ -59,7 +59,7 @@ import { applyModifier, applyRuleDuration } from "./modifiers.mjs";
  * - Persistent (M9, docs/M9-DESIGN.md §C): the resolve write carries `persistent` (persistent/registry.mjs
  *   persistentRecord; a fresh card is matched against a pending free re-roll there), indexed on HOOKS.resolved.
  */
-import { CTLIB_ID, DSTD_ID, HOOKS, MODULE_ID, OP_STATUS } from "../constants.mjs";
+import { CTLIB_ID, DSCT_ID, DSTD_ID, HOOKS, MODULE_ID, OP_STATUS } from "../constants.mjs";
 import { ctlibActive, ctlibCoverage, damageBatch } from "../compat/ctlib.mjs";
 import { keepCardCause, noteCardCause } from "../compat/death-tracker.mjs";
 import { dstdActive, dstdCoveredTokens, dstdTargetTokenUuids } from "../compat/dstd.mjs";
@@ -85,6 +85,7 @@ import { undoOp as undoOneOp } from "./undo.mjs";
 import { adoptionUpdate } from "./seed.mjs";
 import { cardTier, useState } from "./library-plan.mjs";
 import { chooseAssignment, dsctPickedOption } from "../library/choose-compat.mjs";
+import { ctPickAnswer } from "../library/ct-pick.mjs";
 import { resolveAbility } from "../library/resolve.mjs";
 import {
   MAX_SURGES, POTENCY_SURGE_COST, availableSurges, liveSurgeOps, paySurges, potencySurgePatch, potencySurgeable, refundSurges,
@@ -944,7 +945,6 @@ export async function resolveMessage(message, { force = false, targets: newTarge
       self: cardTier(parts), noPowerRoll,
     });
     warnings.push(...plan.warnings);
-    if (lib.dsctCovered.length) warnings.push({ code: "libraryDefersToCombatTools" });
     // Milestone 7 (§3.9): a villain action used again this encounter, or a second one this round (banner warnings).
     if (setting("villainActionTracking") !== false) warnings.push(...villainWarnings(item, message));
     // Without a power roll, targets that get nothing are only noise. A summon's anchor (origin target) is kept: the
@@ -1106,7 +1106,7 @@ export async function resolveMessage(message, { force = false, targets: newTarge
       await applyOps(current, out.autoMoves, { userId: getResolution(current)?.resolvedBy ?? game.userId });
     }
     // Milestone 9 (D2): ask the user's owner for the picks of this card's pick rows (once per row; never awaited).
-    await offerPicks(game.messages.get(message.id) ?? message, { recordPick, notePicksAsked });
+    await offerPicks(await answerPicksFromCt(game.messages.get(message.id) ?? message), { recordPick, notePicksAsked });
     return getResolution(game.messages.get(message.id) ?? message);
   });
 }
@@ -1263,7 +1263,7 @@ export async function chooseOption(message, group, option, { userId = game.userI
     // Movement goes after the write, as on resolution.
     if (out?.moveIds?.length) await applyOps(game.messages.get(message.id) ?? message, out.moveIds, { userId });
     // Milestone 9 (D2): the picked option's pick rows are offered now.
-    if (out) await offerPicks(game.messages.get(message.id) ?? message, { recordPick, notePicksAsked });
+    if (out) await offerPicks(await answerPicksFromCt(game.messages.get(message.id) ?? message), { recordPick, notePicksAsked });
     return out;
   });
 }
@@ -1312,6 +1312,36 @@ export async function recordPick(message, opId, { tokenUuids = [], damageType = 
     if (out) await resolveMessage(game.messages.get(message.id) ?? message, { force: true, reason: "pick" });
     return out;
   });
+}
+
+/**
+ * 1.2.2: answer the card's waiting pick rows from what Combat Tools already asked on it (library/ct-pick.mjs: its target
+ * picker's `useTargets`, its roll dialog's `flatDmgTypes`), through recordPick: the same check, record and history as a
+ * pick by the user. A row without a usable or valid answer stays waiting (offerPicks asks for it). Active GM.
+ * @returns {Promise<ChatMessage>} the card, current
+ */
+async function answerPicksFromCt(message) {
+  try {
+    const open = Object.values(getResolution(message)?.ops ?? {}).filter(op => op.kind === "pick" && op.status === OP_STATUS.PENDING && !op.awaitingChoice);
+    if (!open.length || !isActiveGM()) return message;
+    const res = getResolution(message);
+    const item = res.synthetic ? null : await fromUuid(res.abilityUuid ?? "").catch(() => null);
+    if (!item) return message;
+    for (const op of open) {
+      const current = game.messages.get(message.id) ?? message;
+      const answer = ctPickAnswer(item, current, op, chooseAssignment(item, current));
+      if (!answer) continue;
+      try {
+        await recordPick(current, op.opId, answer, { userId: getResolution(current)?.resolvedBy ?? game.userId });
+        log("pick.ct", { messageId: message.id, opId: op.opId });
+      } catch (err) {
+        log("pick.ctRefused", { messageId: message.id, opId: op.opId, why: String(err?.message ?? err) });
+      }
+    }
+  } catch (err) {
+    error("pick.ct", err, { messageId: message?.id });
+  }
+  return game.messages.get(message.id) ?? message;
 }
 
 /**
@@ -1751,6 +1781,10 @@ export function onUpdateChatMessage(message, changed, options, userId) {
   // 0.16.0: a hero-token reroll replaces the result parts and resolves the card again itself.
   if (res && changed?.system?.parts && !options?.[MODULE_ID]?.heroReroll) appendNewRolls(message).catch(err => error("newRolls", err));
   if (!res?.resolvedAt) return;
+  // 1.2.2: Combat Tools' answers (target, damage type) arriving after our resolve answer the waiting pick rows.
+  if (changed?.flags?.[DSCT_ID]?.useTargets || changed?.flags?.[DSCT_ID]?.flatDmgTypes) {
+    answerPicksFromCt(message).catch(err => error("pick.ct", err, { messageId: message.id }));
+  }
   // Integrity is checked inside the locked handlers below: our own write is signed only after this
   // hook ran for it.
 

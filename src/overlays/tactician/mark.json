@@ -1,12 +1,23 @@
 {
   "key": "ability:mark",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "Mark",
-  "notes": "Mark benefits (focus spends) and the taunt after melee damage stay by hand.",
+  "notes": "Mark benefits (focus spends) stay by hand.",
   "effects": [
     { "id": "marked", "type": "condition", "effect": "YW2JEdoDPd0XlaII" }
   ],
   "trackers": [
     { "id": "marked", "effect": "YW2JEdoDPd0XlaII", "onZero": "retarget", "endPrevious": true, "endOnSourceDying": true }
-  ]
+  ],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "taunt", "event": "damage.after", "targets": "subject", "label": "Taunted by your melee hit",
+        "require": { "subject": "creature", "dealer": "self", "melee": true, "subjectEffect": { "ability": "mark", "effect": "YW2JEdoDPd0XlaII" } },
+        "effects": [{ "id": "taunted", "type": "condition", "status": "taunted", "end": "turn" }]
+      }
+    ],
+    "suppress": []
+  }
 }

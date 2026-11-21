@@ -52,7 +52,9 @@ export function targetedOps(res) {
 export const PLACED_KINDS = new Set(["summon", "zone"]);
 
 /** Rows only their own button applies: "Apply all" and the footer count leave them out (Milestone 7, re-exported by the engine). */
-export const ownButtonOnly = op => PLACED_KINDS.has(op?.kind) || (op?.kind === "gain" && !!op.gain?.confirm);
+// 1.2.2: and a cleanse row that asks for the spend of a Combat Tools pick (the spend is never taken by "Apply all").
+export const ownButtonOnly = op => PLACED_KINDS.has(op?.kind) || (op?.kind === "gain" && !!op.gain?.confirm)
+  || (op?.kind === "cleanse" && !!op.spendCost);
 
 /** Ops in display/application order. */
 export function sortedOps(res) {

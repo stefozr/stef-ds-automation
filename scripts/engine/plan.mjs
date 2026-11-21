@@ -20,7 +20,6 @@ import { areaOnly, pickedOnly } from "./record.mjs";
 import { effectDisplay, effectStatuses, nativeEffects } from "./native.mjs";
 import { effectShows } from "../library/choose-compat.mjs";
 import { isAlly, libraryOps, resourcePath, userRecordOf } from "./library-plan.mjs";
-import { dsctCoveredTypes } from "../library/resolve.mjs";
 import { featureSettingKey, typeOverride, withTypeOverride } from "./actor-category.mjs";
 
 /** Resources a native `resource` power-roll effect may give (Milestone 7, §3.6). */
@@ -162,8 +161,6 @@ export function buildPlan({
   native.conditions = native.conditions.filter(e => nativeShows(e.preId, e.preName));
   native.forced = native.forced.filter(e => nativeShows(e.preId, e.name));
   native.resources = (native.resources ?? []).filter(e => nativeShows(e.preId, e.name));
-  // Milestone 7: Combat Tools' flat resource automation keeps priority (no native resource rows).
-  const dsctResources = native.resources.length && setting("libraryDefersToCombatTools") && dsctCoveredTypes(item).has("resource");
   // Picks on the card make the old "choose" gate unnecessary for what is left.
   if (picked) native.chooseGated = false;
   // `native.filter`: the native rows are for one side only (an ability that spares allies). The other
@@ -321,7 +318,7 @@ export function buildPlan({
     }
 
     // Native resource gains of this tier (Milestone 7, §3.6): "gain N surges" for the target.
-    for (const eff of dsctResources ? [] : native.resources) {
+    for (const eff of native.resources) {
       const td = eff.tiers?.[t.tier];
       if (!td?.amount || !NATIVE_RESOURCES.has(td.type)) continue;
       const mode = decideMode("resource", actor, t.tokenUuid);

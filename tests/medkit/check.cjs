@@ -29,7 +29,7 @@ for (const f of files.filter(f => /\.(mjs|hbs)$/.test(f))) {
   for (const m of fs.readFileSync(f, "utf8").matchAll(/["'`](DSMEDKIT\.[A-Za-z0-9_.]+)["'`]/g)) used.add(m[1]);
 }
 // Dynamic keys: statuses, layers, types, resources, effect lines, actions, confirm, hints.
-for (const s of ["locked", "disabled", "outdated", "customized", "unavailable", "covered", "configurable", "automated", "native", "manual"]) { used.add(`DSMEDKIT.Status.${s}.label`); used.add(`DSMEDKIT.Status.${s}.hint`); }
+for (const s of ["locked", "disabled", "outdated", "customized", "unavailable", "configurable", "automated", "native", "manual"]) { used.add(`DSMEDKIT.Status.${s}.label`); used.add(`DSMEDKIT.Status.${s}.hint`); }
 for (const l of ["disabled", "detached", "overlay", "native", "none"]) used.add(`DSMEDKIT.Layer.${l}`);
 for (const t of ["damage", "heal", "condition", "cleanse", "resource", "forced", "teleport", "note"]) used.add(`DSMEDKIT.Type.${t}`);
 for (const r of ["surge", "heroic", "epic", "recovery"]) used.add(`DSMEDKIT.Resource.${r}`);
@@ -47,7 +47,7 @@ for (const k of ["resync", "reset"]) { used.add(`DSMEDKIT.Confirm.${k}`); used.a
   for (const k of ["Configured", "ConfiguredOne"]) used.add(`DSMEDKIT.Editor.${k}`);
 }
 // Triggers (describe.mjs): event kinds and subjects of stef-ds-automation's taxonomy (M5-DESIGN §5.6).
-for (const k of ["damageBefore", "damageAfter", "rollBefore", "turnStart", "turnEnd", "forcedBefore", "moveBefore"]) used.add(`DSMEDKIT.Trigger.Event.${k}`);
+for (const k of ["damageBefore", "damageAfter", "rollBefore", "turnStart", "turnEnd", "forcedBefore", "moveBefore", "abilityUsed"]) used.add(`DSMEDKIT.Trigger.Event.${k}`);
 for (const k of ["self", "ally", "selfOrAlly", "enemy", "creature", "selfOrCreature"]) used.add(`DSMEDKIT.Trigger.Subject.${k}`);
 // Summons (describe.mjs, actor-medkit.mjs; core 0.8.0, M6-DESIGN §5.4): turn words and ends, the
 // ends read from the core's schema so a new one cannot be missed.

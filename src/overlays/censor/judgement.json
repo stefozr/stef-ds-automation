@@ -1,12 +1,46 @@
 {
   "key": "ability:judgement",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "Judgement",
-  "notes": "Holy damage on a main action and the wrath options are taken by hand.",
+  "notes": "By hand: the Wrath option when a judged foe shifts (Foundry has no shift move), and another censor's judgement ending yours. One Wrath option per trigger: decline a second prompt.",
   "effects": [
     { "id": "judged", "type": "condition", "effect": "MHQDlicbxXquwduc" }
   ],
   "trackers": [
     { "id": "judged", "effect": "MHQDlicbxXquwduc", "onZero": "retarget", "endPrevious": true, "endOnSourceDying": false }
-  ]
+  ],
+  "triggers": [
+    {
+      "id": "holy", "event": "ability.used", "subject": "enemy", "free": true, "range": "unlimited", "cost": 0,
+      "yieldsTo": "judgementAutomation",
+      "require": { "actionType": "main", "subjectEffect": { "ability": "judgement", "effect": "MHQDlicbxXquwduc" } },
+      "label": "Your judged foe used a main action: holy damage",
+      "steps": [{ "type": "damage", "value": "2*@P", "damageType": "holy" }]
+    },
+    {
+      "id": "bane", "event": "roll.before", "subject": "enemy", "free": true, "range": 10, "cost": 1,
+      "yieldsTo": "judgementAutomation",
+      "require": { "damaging": false, "subjectEffect": { "ability": "judgement", "effect": "MHQDlicbxXquwduc" } },
+      "label": "Spend 1 Wrath: bane on your judged foe's power roll",
+      "steps": [{ "type": "bane", "amount": 1 }]
+    },
+    {
+      "id": "potency", "event": "damage.before", "subject": "selfOrCreature", "free": true, "range": "unlimited", "cost": 1,
+      "yieldsTo": "judgementAutomation",
+      "require": { "singleTarget": true, "sourceEffect": { "ability": "judgement", "effect": "MHQDlicbxXquwduc" } },
+      "label": "Spend 1 Wrath: your judged foe's potency -1",
+      "steps": [{ "type": "potency", "delta": -1, "scope": "one" }]
+    }
+  ],
+  "automation": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "taunt", "event": "damage.after", "targets": "subject", "label": "Taunted by your melee hit", "yieldsTo": "judgementAutomation",
+        "require": { "subject": "creature", "dealer": "self", "melee": true, "subjectEffect": { "ability": "judgement", "effect": "MHQDlicbxXquwduc" } },
+        "effects": [{ "id": "taunted", "type": "condition", "status": "taunted", "end": "turn" }]
+      }
+    ],
+    "suppress": []
+  }
 }

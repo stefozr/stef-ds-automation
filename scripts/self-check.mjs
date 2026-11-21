@@ -12,7 +12,7 @@
  *
  * i18n keys: DSAUTO.SelfCheck.{partType, relay, queryUsers, noActiveGM, libraryInvalid, entryTypes, libWrapper,
  * takeDamage, promptTrigger, promptUpkeep, promptPersistent, zoneType, gridDistance, gainsStandDown, wrappers, nativeWithDsct, devBuild,
- * menu, unverifiedVersion, advancedEnrichers, autoApplyOwn, dsctHandlers} (English in PROBLEM_TEXT, placeholders as written there).
+ * menu, unverifiedVersion, advancedEnrichers, autoApplyOwn, dsctHandlers, ctOverlap} (English in PROBLEM_TEXT, placeholders as written there).
  * 0.16.0: the Combat Tools family's versions against the verified list (`familyVersions`, problem `unverifiedVersion`).
  * 0.17.0: the forced-movement path bridge is retired (its `forcedBridge` row with it).
  * 1.2.0: `dstdOnSystem12` (Target Damage is active on Draw Steel 1.2: turn it off).
@@ -45,6 +45,7 @@ import { openTallies } from "./zones/engine.mjs";
 import { openZoneUpkeeps } from "./zones/upkeep.mjs";
 import { nativeSummonStatus } from "./summons/native.mjs";
 import * as dsct from "./compat/dsct.mjs";
+import { overlapSummary } from "./compat/dsct-overlap.mjs";
 import { dstdActive } from "./compat/dstd.mjs";
 import * as plan from "./engine/plan.mjs";
 
@@ -79,6 +80,7 @@ export const PROBLEM_TEXT = Object.freeze({
   advancedEnrichers: "Combat Tools' Advanced Enrichers are on: their Apply chips on automated cards are locked once Automation Suite applied, but Combat Tools' own auto-apply of enrichers is not. Turn the setting off if effects land twice.",
   autoApplyOwn: "Combat Tools auto-applies this client's own abilities (\"autoApplyOwnAbilities\"): on Draw Steel 1.2 it runs Combat Tools' whole Apply All on every card this client posts, and its enricher auto-apply writes without a click. Automation Suite blocks its clicks on rows the Automation box owns, but keep this setting off.",
   dstdOnSystem12: "Target Damage is active on Draw Steel 1.2: turn it off (the system's per-target sections replace it).",
+  ctOverlap: "Combat Tools also automates these, which Automation Suite already does: {list}. Turn them off so nothing happens twice (Automation settings, Maintenance, \"Combat Tools overlap: review\").",
   dsctHandlers: "Another module took over Combat Tools' {list}: Automation Suite's forced moves and teleports through Combat Tools may answer differently.",
 });
 
@@ -351,6 +353,9 @@ export function selfCheck() {
   report.dsctForeignHandlers = dsct.dsctForeignHandlers();
   if (report.dsctAdvancedEnrichers === true) found.push(problem("advancedEnrichers"));
   if (report.dsctAutoApplyOwn === true) found.push(problem("autoApplyOwn"));
+  // 1.2.2: Combat Tools switches that duplicate the suite (compat/dsct-overlap.mjs).
+  report.dsctOverlap = overlapSummary() || "(none)";
+  if (report.dsctOverlap !== "(none)") found.push(problem("ctOverlap", { list: report.dsctOverlap }));
   if (report.dsctForeignHandlers.length) found.push(problem("dsctHandlers", { list: report.dsctForeignHandlers.join(", ") }));
   // 1.2.0: Target Damage next to the system's per-target sections (our Target Damage paths stand down on those cards).
   if (compat.targetResult && dstdActive()) found.push(problem("dstdOnSystem12"));

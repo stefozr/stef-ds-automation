@@ -202,8 +202,8 @@ for (const k of ["turn", "save", "encounter", "respite"]) used.add(`DSAUTO.Entry
 for (const k of ["noAnswer", "noOwner"]) used.add(`DSAUTO.Save.Note.${k}`);
 // Milestone 5 (docs/M5-DESIGN.md §5.6): trigger outcomes, event sentences and step words.
 for (const k of ["declined", "timedOut", "noAnswer", "closed", "moot"]) used.add(`DSAUTO.Trigger.Outcome.${k}`);
-for (const k of ["damageBefore", "damageAfter", "rollBefore", "turnStart", "turnEnd", "forcedBefore", "moveBefore", "zero"]) used.add(`DSAUTO.Trigger.Dialog.Event.${k}`);
-for (const k of ["halve", "potency", "edge1", "edge2", "use", "freeStrike", "takeTurnNext", "retarget"]) used.add(`DSAUTO.Trigger.Step.${k}`);
+for (const k of ["damageBefore", "damageAfter", "rollBefore", "turnStart", "turnEnd", "forcedBefore", "moveBefore", "abilityUsed", "zero"]) used.add(`DSAUTO.Trigger.Dialog.Event.${k}`);
+for (const k of ["halve", "potency", "edge1", "edge2", "bane1", "bane2", "speedZero", "damage", "use", "freeStrike", "takeTurnNext", "retarget"]) used.add(`DSAUTO.Trigger.Step.${k}`);
 // Milestone 6 (docs/M6-DESIGN.md §5.6): removal reasons, picker and square reasons (returned as values by
 // summons/squares.mjs), the summon entry field choices.
 for (const k of ["dismiss", "undo", "death", "encounterEnd", "expired"]) used.add(`DSAUTO.Summon.Removal.${k}`);
@@ -306,6 +306,22 @@ if (!(manifest.relationships?.requires ?? []).some(r => r.id === "lib-wrapper"))
 // 6. Reserved names (RESERVED_RULES and reservedProblems are defined at the top of this file).
 for (const f of files.filter(f => /\.(mjs|hbs)$/.test(f) && !f.split(path.sep).includes("tests"))) {
   for (const p of reservedProblems(fs.readFileSync(f, "utf8"), { template: f.endsWith(".hbs") })) fail(`${path.relative(ROOT, f)}: reserved name: ${p}`);
+}
+
+// 7. Persistent shown once (1.2.2): the Automation box writes the Persistent line from the overlay's `persistent`
+// record; an overlay with `persistent` must not restate it in its notes ("Kept ..." anywhere in the notes).
+{
+  const dir = path.join(ROOT, "src/overlays");
+  const overlays = fs.existsSync(dir) ? walk(dir).filter(f => f.endsWith(".json")) : [];
+  let n = 0;
+  for (const f of overlays) {
+    let o;
+    try { o = JSON.parse(fs.readFileSync(f, "utf8")); } catch { continue; }
+    if (!o?.persistent) continue;
+    n++;
+    if (/\bKept\b/.test(String(o.notes ?? ""))) fail(`${path.relative(ROOT, f)}: notes restate the Persistent line ("Kept"); the Automation box already shows it`);
+  }
+  console.log(`persistent notes: ${n} overlays checked`);
 }
 
 console.log(failures ? `\n${failures} problem(s)` : "\nall checks passed");

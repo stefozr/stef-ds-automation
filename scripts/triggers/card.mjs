@@ -36,12 +36,13 @@ import { dsctBudgetEffects, release, releaseDebit, switchToOurs, uuidKey } from 
 import { serverNow } from "./engine.mjs";
 import { potencyFails, potencyStatus, summarize } from "./holds.mjs";
 import { ownersOf, promptMs, runFollowUp } from "./prompt.mjs";
-import { spendEffectDoc } from "./eligibility.mjs";
+import { spendEffectDoc, strikeTargetOf } from "./eligibility.mjs";
+import { evaluateInt } from "../library/formula.mjs";
 
 /** `followUps[].userId` of a free strike whose striker's players are offline with `triggerFallback` "skip". */
 export const SKIP_USER = "skip";
 /** Steps whose effect lands by itself (the card stays when a follow-up fails). */
-const HOLD_STEPS = new Set(["halve", "potency", "edge", "takeTurnNext"]);
+const HOLD_STEPS = new Set(["halve", "potency", "edge", "bane", "takeTurnNext", "speedZero", "damage"]);
 const REPORTS = new Set(["useStarted", "useCancelled", "followUpFailed"]);
 const FREE_STRIKE_DSIDS = new Set(["melee-free-strike", "ranged-free-strike"]);
 /** How long after its follow-ups started the GM accepts their reports (watch windows + slack). */
@@ -154,13 +155,22 @@ export function stepSummary(decision, effects) {
       case "edge":
         out.push(loc("DSAUTO.Trigger.Card.Edge", { count: fx.edges ?? s.amount ?? 1, target: subject }));
         break;
+      case "bane":
+        out.push(loc("DSAUTO.Trigger.Card.Bane", { count: fx.banes ?? s.amount ?? 1, target: subject }));
+        break;
+      case "speedZero":
+        out.push(loc("DSAUTO.Trigger.Card.SpeedZero", { target: subject }));
+        break;
+      case "damage":
+        out.push(loc("DSAUTO.Trigger.Card.Damage", { target: subject, value: shownDamage(s, c), type: s.damageType ?? "" }).replace(/\s+/g, " ").trim());
+        break;
       case "use": {
         const target = s.targets === "source" ? source : (s.targets === "none" ? c.reactor.name : subject);
         out.push(loc("DSAUTO.Trigger.Card.Use", { ability: c.item.name, target }));
         break;
       }
       case "freeStrike":
-        out.push(loc("DSAUTO.Trigger.Card.FreeStrike", { name: s.by === "reactor" ? c.reactor.name : subject, target: source }));
+        out.push(loc("DSAUTO.Trigger.Card.FreeStrike", { name: s.by === "reactor" ? c.reactor.name : subject, target: strikeTargetOf(c.event).name || source }));
         break;
       case "takeTurnNext":
         out.push(loc("DSAUTO.Trigger.Card.TakeTurn"));
@@ -173,6 +183,41 @@ export function stepSummary(decision, effects) {
     }
   }
   return [...new Set(out)];
+}
+
+/** 1.2.2: a damage step's amount as the reactor will deal it ("4", not "2*@P"); the formula itself when it cannot be read. */
+export function shownDamage(s, c) {
+  const v = evaluateInt(s?.value, lookup(c?.item?.uuid), {}, { min: 0, max: 500 });
+  return v == null ? String(s?.value ?? "") : String(v);
+}
+
+/**
+ * 1.2.2: the op rows of a decision's `damage` and `speedZero` steps (on the subject; the caller sets targetKeys). A damage row is a
+ * library-style row (`lib: true`: the amount lives in the GM-signed record, immunities and weaknesses apply as for any
+ * damage); speed 0 is a modifier row (engine/modifiers.mjs applyModifier): an ActiveEffect overriding system.movement.value
+ * with 0, ended at the end of the subject's turn (`featureEnd: "turnEnd"`, features/engine.mjs expireRules), undone with the card.
+ */
+export function stepOps(decision, reactor, _effects = {}) {
+  const c = decision?.candidate;
+  const item = lookup(c?.item?.uuid);
+  const out = [];
+  for (const s of decision?.steps ?? []) {
+    const id = n => opId("trigger", n, c?.trigger?.id ?? "t", c?.event?.id ?? "e");
+    if (s.type === "damage") {
+      const amount = evaluateInt(s.value, item, {}, { min: 0, max: 500 });
+      const base = { opId: id("damage"), kind: "damage", mode: "auto", lib: true, type: s.damageType ?? "", ignoredImmunities: [], aoe: false, label: c.item.name };
+      out.push(amount == null
+        ? { ...base, amount: 0, status: OP_STATUS.FAILED, reason: "formulaInvalid" }
+        : { ...base, amount, status: OP_STATUS.PENDING });
+    } else if (s.type === "speedZero") {
+      out.push({
+        opId: id("speed"), kind: "modifier", mode: "auto", status: OP_STATUS.PENDING, property: "system.movement.value", value: 0,
+        modifierMode: "override", modifierId: "speed-zero", featureItemUuid: c.item.uuid, ruleId: c.trigger?.id ?? "trigger",
+        featureEnd: "turnEnd", label: c.item.name,
+      });
+    }
+  }
+  return out;
 }
 
 /**
@@ -196,6 +241,7 @@ export async function postTriggerCard(decision, { origin = null, effects = {}, w
       ?? { key: uuidKey(reactor.uuid), tokenUuid: null, actorUuid: reactor.uuid, name: reactor.name, img: reactor.img ?? null };
     const key = target.key;
     const ops = {};
+    const targets = { [key]: target };
     let order = 0;
     const add = (id, op) => {
       ops[id] = { opId: id, order: order++, targetKeys: [key], tier: null, ...op };
@@ -211,6 +257,14 @@ export async function postTriggerCard(decision, { origin = null, effects = {}, w
       actorUuid: reactor.uuid, ability: c.item.name, itemUuid: c.item.uuid, dsctMode: dsctModeOf(d, reactor),
     });
     if (c.bleeding) add(opId("trigger", "bleed", key), { kind: "note", mode: "manual", status: OP_STATUS.PENDING, noApply: true, text: loc("DSAUTO.Trigger.Card.Bleeding") });
+    // 1.2.2: damage and speedZero steps are rows on the subject's own target record (applied, recorded and undoable like any op).
+    for (const op of stepOps(d, reactor, effects)) {
+      const subjectDoc = lookup(c.event?.subject?.tokenUuid);
+      const t = targetFromTokenDoc(subjectDoc);
+      if (!t) continue;
+      if (!targets[t.key]) targets[t.key] = t;
+      ops[op.opId] = { order: order++, tier: null, ...op, targetKeys: [t.key] };
+    }
     stepSummary(d, effects).forEach((text, i) => add(opId("trigger", "note", i, key), { kind: "note", mode: "manual", status: OP_STATUS.PENDING, noApply: true, text }));
     const ev = c.event ?? {};
     const meta = {
@@ -228,7 +282,7 @@ export async function postTriggerCard(decision, { origin = null, effects = {}, w
     };
     r = await postRecordCard({
       title: loc("DSAUTO.Trigger.Card.Title", { ability: c.item.name, name: reactor.name }), sourceActor: reactor,
-      sourceTokenUuid: tokenDoc?.uuid ?? null, targets: { [key]: target }, ops, modes: { trigger: "auto" }, meta, shape: "trigger",
+      sourceTokenUuid: tokenDoc?.uuid ?? null, targets, ops, modes: { trigger: "auto" }, meta, shape: "trigger",
       warnings: (warnings ?? []).map(w => ({ ...w, targetKey: w.targetKey ?? key })), user: game.user,
     });
     log("trigger.card", { messageId: r?.messageId ?? null, reactor: reactor.name, ability: c.item.name, pay, budget: c.budget });
@@ -325,12 +379,13 @@ export async function runFollowUps(decision, { triggerMessageId, plan } = {}) {
         });
       } else if (p.kind === "freeStrike") {
         const strikerUuid = p.step?.by === "reactor" ? c.reactor.actorUuid : c.event?.subject?.actorUuid;
+        const strikeAt = strikeTargetOf(c.event);
         const striker = lookup(strikerUuid);
         r = await runFollowUp(user, {
-          kind: "freeStrike", runId: newId(), triggerMessageId, actorUuid: strikerUuid ?? null, againstTokenUuid: c.event?.source?.tokenUuid ?? null,
+          kind: "freeStrike", runId: newId(), triggerMessageId, actorUuid: strikerUuid ?? null, againstTokenUuid: strikeAt.tokenUuid ?? null,
           title: loc("DSAUTO.Trigger.Dialog.FreeStrikeTitle"),
           intro: loc("DSAUTO.Trigger.Dialog.FreeStrikeIntro", {
-            reactor: c.reactor.name, ability: c.item.name, striker: striker?.name ?? c.event?.subject?.name ?? "", target: c.event?.source?.name ?? "",
+            reactor: c.reactor.name, ability: c.item.name, striker: striker?.name ?? c.event?.subject?.name ?? "", target: strikeAt.name ?? "",
           }),
           timeoutMs: T, deadline: serverNow() + T,
         });

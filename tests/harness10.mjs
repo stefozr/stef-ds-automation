@@ -2068,7 +2068,7 @@ const SETTINGS = {
   triggersEnabled: false, triggerPromptSeconds: 20, triggerFallback: "director", triggerNpcs: true, deferToTriggersModule: true,
   triggerExternalDamage: true, summonMode: "auto", summonPlacement: "pick", summonTurnChain: true, summonUpkeepSeconds: 30,
   resourceGains: "auto", heroTokenPrompt: true, maliceReminders: true, villainActionTracking: true, zoneMode: "auto", zoneDamage: "auto",
-  libraryDefersToCombatTools: true, respectDstdApplications: true,
+  respectDstdApplications: true,
 };
 async function fresh({ tokens = 0, maliceValue = 0 } = {}) {
   await settleAll(10);
@@ -3160,12 +3160,12 @@ const recordMod = await imp("engine/record.mjs");
   render(messages.get(msg.id), player, root);
   assert.equal(btn.disabled, true, "the system's gainResource button is disabled");
   assert.equal(btn.dataset.tooltip, "DSAUTO.Lock.GainApplied");
-  // Combat Tools' flat resource automation on the item keeps priority: no native rows.
+  // Combat Tools' flat resource automation on the item does not take the rows: the suite always plans them.
   battleCry.system.effects = { contents: [{ type: "dsct.flatResource" }] };
   const msg2 = useCard(battleCry, { targets: [tBen], tier: 1 });
   await idle();
   await settleAll();
-  assert.equal(Object.values(getResolution(msg2)?.ops ?? {}).filter(o => o.kind === "resource").length, 0, "dsct.flatResource: no rows");
+  assert.equal(Object.values(getResolution(msg2)?.ops ?? {}).filter(o => o.kind === "resource").length, 1, "dsct.flatResource: the native row is still planned");
   battleCry.system.effects = { contents: [] };
   // An overlay that replaces the native effect: no native rows.
   api.library.registerSource({ id: "h17", priority: 90, overlays: [{ key: "ability:battle-cry", version: "1.0.0", name: "Battle Cry", native: { suppress: ["resPRE0000000001"] }, effects: [{ id: "n", type: "note", text: "By hand" }] }] });
@@ -3244,13 +3244,31 @@ const tokenAnswer = (outcome) => { answerFn = rec => (rec.kind === "herotoken" ?
   assert.equal(borin.system.stamina.value, 3);
   console.log("ok H18a spend: heal row first, tokens and Stamina, waiting banner, not editable, undo all, re-ask, cascade");
 
-  // A preApplyOp veto of the damage: the heal is undone at once (damageNotApplied), tokens back.
+  // A preApplyOp veto of the damage. With a damage.after rule in play (1.2.2: the library's Judgement / Mark taunts) the
+  // pre-pass asks the hook first and the hero-token step skips the vetoed row: no ask, no heal row, nothing spent.
   await nextRound(c);
   await activate(c, tWarrior);
   log.sent.length = 0;
   const veto = Hooks.on(HOOKS.preApplyOp, (_m, op) => (op.kind === "damage" && !op.heroToken ? false : undefined));
-  const vm = await hit(spear, tBorin, 5);
+  const nm = await hit(spear, tBorin, 5);
   Hooks.off(HOOKS.preApplyOp, veto);
+  assert.equal(tokenAsks().length, 0, "a vetoed hit never asks");
+  assert.deepEqual(heroRows(nm), [], "no heal row for a vetoed hit");
+  assert.equal(dmgOps(nm)[0].reason, "hookVetoed");
+  assert.equal(heroTokens(), 3, "nothing spent");
+  assert.equal(borin.system.stamina.value, 3);
+  // A damage row that fails after the heal was applied (the pre-pass cannot know): the heal is undone at once
+  // (damageNotApplied), tokens back.
+  await nextRound(c);
+  await activate(c, tWarrior);
+  log.sent.length = 0;
+  const realModify = borin.modifyTokenAttribute;
+  borin.modifyTokenAttribute = function (attr, amount, ...rest) {
+    if (Number(amount) < 0) throw new Error("damage refused");
+    return realModify.call(this, attr, amount, ...rest);
+  };
+  let vm;
+  try { vm = await hit(spear, tBorin, 5); } finally { borin.modifyTokenAttribute = realModify; }
   const vh = heroRows(vm)[0];
   assert.ok(vh, "the heal row exists");
   assert.equal(vh.status, "undone");

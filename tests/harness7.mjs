@@ -248,19 +248,17 @@ function useNoRoll(item, targets = [], { shown = [] } = {}) {
   o.flags = { "stef-ds-automation": { lock: true } };
   assert.equal(lib.status(o), "locked");
   o.flags = {};
-  // Combat Tools automates heals and teleports itself on this item: only those kinds are left to it.
+  // Combat Tools automates heals itself on this item: the suite has priority and still plans both effects. The heal is
+  // listed in dsctCovered as information only.
   game.modules.set("draw-steel-combat-tools", { active: true, api: {} });
   const d = ability({ name: "Layer D", special: [{ id: "dsctflat00000001", type: "dsct.flatHeal" }] });
-  let r = lib.resolve(d);
-  assert.deepEqual(r.effects.map(e => e.type), ["teleport"]);
+  const r = lib.resolve(d);
+  assert.equal(r.effects.length, 2);
+  assert.ok(r.effects.some(e => e.type === "teleport"), "the teleport is ours");
   assert.deepEqual(r.dsctCovered, ["heal"]);
-  assert.equal(r.status, "automated", "the teleport is still ours");
-  // Combat Tools covers every library effect: the overlay adds nothing ("covered", not "automated").
+  assert.equal(r.status, "automated");
   const all = ability({ name: "Layer D", special: [{ id: "dsctflat00000001", type: "dsct.flatHeal" }, { id: "dsctflat00000002", type: "dsct.flatTeleport" }] });
-  assert.deepEqual([lib.resolve(all).effects.length, lib.status(all)], [0, "covered"]);
-  await set("libraryDefersToCombatTools", false);
-  assert.equal(lib.resolve(d).effects.length, 2);
-  await set("libraryDefersToCombatTools", true);
+  assert.deepEqual([lib.resolve(all).effects.length, lib.status(all)], [2, "automated"], "never \"covered\": every effect is planned");
   game.modules.delete("draw-steel-combat-tools");
   await set("libraryEnabled", false);
   assert.equal(lib.status(o), "manual", "library off: overlays ignored");

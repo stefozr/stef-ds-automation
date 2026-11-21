@@ -25,7 +25,6 @@ for (const a of [hero, gobA, gobB]) { a.effects.clear(); a.statuses.clear(); a.f
 hero.getRollData = () => ({ chr: 3, M: 3, A: 2, R: 2, I: 2, P: 2 });
 game.settings.set(MOD, "playerAuthoredMode", "manual");
 game.settings.set(MOD, "modeConditionNpc", "auto");
-game.settings.set(MOD, "libraryDefersToCombatTools", false);
 const target = targetFromTokenDoc(token), res = { targets: { [target.key]: target } };
 hero.system.recoveries = { value: 3, max: 5, recoveryValue: 10 };
 hero.system.stamina = { value: 10, max: 50, min: 0, temporary: 0 };

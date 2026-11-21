@@ -7,6 +7,18 @@ export function dsctApi() {
   return dsctActive() ? (game.modules.get(DSCT_ID)?.api ?? null) : null;
 }
 
+/** 1.2.2: Combat Tools is active and its world setting `key` is on (a trigger / rule `yieldsTo` it: it does the job). */
+export const ctYields = key => !!key && dsctActive() && dsctSetting(key, false) === true;
+
+/**
+ * 1.2.2: the flag Combat Tools puts on the effects it makes for this automation (`flags.draw-steel-combat-tools.judgement`
+ * / `.mark`, read by its own Judgement / Mark extras, tactical-effects.mjs), while that automation is on; else null.
+ * Combat Tools' extras fire only for ITS flagged effects, so a trigger or rule that `yieldsTo` it stands down per effect:
+ * a judged / marked effect of Combat Tools' is left to Combat Tools, the suite's own effects keep the suite's extras.
+ */
+const CT_EFFECT_FLAG = { judgementAutomation: "judgement", markAutomation: "mark" };
+export const ctYieldFlag = key => (ctYields(key) ? (CT_EFFECT_FLAG[key] ?? null) : null);
+
 export function dsctSetting(key, fallback = undefined) {
   if (!dsctActive()) return fallback;
   try {

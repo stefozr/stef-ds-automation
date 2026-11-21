@@ -12,7 +12,8 @@
  * 2. Capture click guard (every client, document level): a click on those controls, or on a per-target button of a part
  *    the card is still resolving / the box owns a covering row of, is swallowed. A synthetic `.click()` goes through the
  *    capture phase too, so Combat Tools' Apply All and `autoApplyOwnAbilities` cannot apply twice (or race a pending op).
- *    Undone, skipped and external rows stay clickable (a manual apply after an undo is intended).
+ *    Undone, skipped and external rows stay clickable (a manual apply after an undo is intended). Only a trusted (real
+ *    user) click toasts the warning; Combat Tools' synthetic auto-apply clicks are swallowed silently (ui/user-click.mjs).
  *
  * "Handled by the box" (`cardHandled`): the suite is enabled, the card has our record, and the record is still resolving
  * (`isResolving`) or holds at least one op of any status.
@@ -25,6 +26,7 @@ import { isResolving } from "../compat/target-result-veto.mjs";
 import { error } from "../log.mjs";
 import { setting } from "../settings.mjs";
 import { lock, ownedOps } from "./part-lock.mjs";
+import { registerUserClickTracker } from "./user-click.mjs";
 
 /** Combat Tools' apply-all controls (card footer row and minion squad header). */
 export const APPLY_ALL_CONTROLS = ".dsct-apply-all-go, .dsct-apply-all-undo, .dsct-squad12-btn-go, .dsct-squad12-btn-undo";
@@ -162,7 +164,7 @@ export function onCaptureClick(event) {
     if (!decision) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    warnOnce(message.id, decision.key);
+    if (event.isTrusted) warnOnce(message.id, decision.key);
   } catch (err) {
     error("familyGuard.click", err);
   }
@@ -171,6 +173,7 @@ export function onCaptureClick(event) {
 /** init: the capture guard on every client and the decoration after Combat Tools built its row. */
 export function registerFamilyApplyGuard() {
   if (typeof globalThis.document?.addEventListener !== "function" || typeof globalThis.Hooks?.on !== "function") return;
+  registerUserClickTracker();
   document.addEventListener("click", onCaptureClick, true);
   Hooks.on("openDetachedWindow", (_id, win) => {
     try {

@@ -23,6 +23,7 @@ import { OP_STATUS } from "../constants.mjs";
 import { setting } from "../settings.mjs";
 import { log } from "../log.mjs";
 import { effectShows } from "../library/choose-compat.mjs";
+import { ctPickedSpends, triggerPaidSpend } from "../library/ct-spend.mjs";
 import { evaluateInt } from "../library/formula.mjs";
 import { SUMMON_DEFAULTS, ZONE_DEFAULTS, effectForTier, summonActorUuid } from "../library/schema.mjs";
 import { zoneArea } from "../zones/shapes.mjs";
@@ -133,7 +134,14 @@ export function useState(message, item) {
     if (e?.type === "spend") spend = true;
     if (e?.type === "strained") strained = true;
   }
-  return { spend, strained, persistent: [...shown].some(id => item?.system?.effects?.get?.(id)?.type === "persistent") };
+  // 1.2.2: a Combat Tools copy keeps the spend on the picked flat effect (library/ct-spend.mjs): the overlay effects
+  // gated `when.spend` of that kind wait for it (libraryOps). Only looked up when the pick keeps such a spend.
+  const ctSpend = spend ? [] : ctPickedSpends(item, message);
+  const ctPaid = ctSpend.length ? triggerPaidSpend(message, item) : false;
+  return {
+    spend, strained, persistent: [...shown].some(id => item?.system?.effects?.get?.(id)?.type === "persistent"),
+    ...(ctSpend.length ? { ctSpend, ctPaid } : {}),
+  };
 }
 
 /**
@@ -178,7 +186,13 @@ export function libraryOps({ lib, item, targets, selfKey, self, use, assignment,
 
   for (const effect of lib.effects ?? []) {
     // Conditions on what the user chose.
-    if (effect.when?.spend != null && effect.when.spend !== use.spend) continue;
+    // 1.2.2: `when.spend` effects of the kind a Combat Tools pick keeps with a spend of its own plan as a row that asks
+    // for the spend (`spendGate`), or applies as paid when our damage trigger already took it.
+    let spendGate = null;
+    if (effect.when?.spend === true && !use.spend) {
+      spendGate = (use.ctSpend ?? []).find(s => s.type === effect.type) ?? null;
+      if (!spendGate) continue;
+    } else if (effect.when?.spend != null && effect.when.spend !== use.spend) continue;
     if (effect.when?.strained != null && effect.when.strained !== use.strained) continue;
     if (effect.when?.config && !lib.config?.[effect.when.config]) continue;
     // 1.1.1: an ally of the user within N squares of the card's first real target.
@@ -214,7 +228,10 @@ export function libraryOps({ lib, item, targets, selfKey, self, use, assignment,
       }
       const tier = t.tier ?? null;
       if (effect.tiers?.length && (tier == null || !effect.tiers.includes(tier))) continue;
-      if (tier == null && !noPowerRoll && effect.targets !== "self") continue; // no tier yet: native warns
+      // 1.2.2: not for a row of a choice group on a card that rolled no tier at all (Practical Magic: Combat Tools' Damage
+      // pick has no power roll; the picked option's rows are the card).
+      const tierless = !!effect.choice && self.tier == null;
+      if (tier == null && !noPowerRoll && effect.targets !== "self" && !tierless) continue; // no tier yet: native warns
       const actor = fromUuidSync(t.actorUuid);
       if (!actor) continue;
       const eff = effectForTier(effect, tier);
@@ -244,7 +261,7 @@ export function libraryOps({ lib, item, targets, selfKey, self, use, assignment,
         case "damage": op = damageRow(base, pickedType ? { ...eff, damageType: pickedType } : eff, item, actor, ctx); break;
         case "heal": op = healRow(base, eff, item, actor, ctx, eff.spender === "self" ? fromUuidSync(userRecord?.actorUuid ?? "") : null); break;
         case "condition": op = conditionRow(base, eff, item, actor, use); break;
-        case "cleanse": op = cleanseRow(base, eff, actor); break;
+        case "cleanse": op = cleanseRow(base, eff, actor, spendGate, { item, userRecord, use }); break;
         case "resource": op = resourceRow(base, eff, item, actor, ctx); break;
         case "teleport": op = teleportRow(base, eff, item, t, ctx); break;
         case "note": op = { ...base, kind: "note", noApply: true, text: eff.text }; break;
@@ -415,8 +432,31 @@ function conditionRow(base, eff, item, actor, _use) {
   return op;
 }
 
-function cleanseRow(base, eff, actor) {
+/**
+ * 1.2.2: the cleanse spec narrowed to what the picked Combat Tools flat effect names (Stand Up: its statusFilter;
+ * Cleanse: its expiryFilter, as the ends of the overlay effect whose expiry event it lists). Empty filters keep the spec.
+ */
+function narrowedSpec(eff, gate) {
   const spec = { statuses: [...(eff.statuses ?? [])], ends: [...(eff.ends ?? [])] };
+  if (!gate) return spec;
+  if (gate.statusFilter?.length) {
+    spec.statuses = [...gate.statusFilter];
+    spec.ends = [];
+  } else if (gate.expiryFilter?.length) {
+    spec.statuses = [];
+    spec.ends = spec.ends.filter(end => gate.expiryFilter.includes(endExpiry(end)));
+  }
+  return spec;
+}
+
+/** The hero resource a Combat Tools spend takes: the heroic resource of the ability's user (path and name). */
+export function spendResourceOf(payer) {
+  const primary = payer?.system?.hero?.primary;
+  return primary ? { value: Number(primary.value) || 0, name: primary.label || "" } : null;
+}
+
+function cleanseRow(base, eff, actor, gate = null, { item = null, userRecord = null, use = null } = {}) {
+  const spec = narrowedSpec(eff, gate);
   const op = { ...base, kind: "cleanse", ...spec, count: eff.count ?? null, afterMoveEffect: eff.afterMove ?? null };
   const found = cleanseCandidates(actor, spec).length;
   op.candidates = found;
@@ -427,6 +467,14 @@ function cleanseRow(base, eff, actor) {
   }
   // More effects than may end: someone chooses which (Apply asks); never by itself.
   if (op.count != null && found > op.count) op.reason = "chooseEffects";
+  if (gate && !use?.ctPaid) {
+    // 1.2.2: the spend of the picked Combat Tools effect is asked by this row (Apply pays it, applyCleanse), never silently.
+    const payer = fromUuidSync(userRecord?.actorUuid ?? "") ?? item?.actor ?? null;
+    const have = spendResourceOf(payer);
+    op.spendCost = { resource: "heroic", amount: gate.cost, payerUuid: payer?.uuid ?? null, name: have?.name ?? "" };
+    if (!have || have.value < gate.cost) return { ...op, status: OP_STATUS.SKIPPED, reason: "notEnoughResource" };
+    if (op.mode === "auto") op.mode = "prompt";
+  }
   return op;
 }
 

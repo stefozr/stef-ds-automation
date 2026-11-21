@@ -34,7 +34,7 @@ import { requestOp } from "../relay/queries.mjs";
 import { debug, error, log } from "../log.mjs";
 import { setting } from "../settings.mjs";
 import { combatFor, debit, markUsed, release, releaseDebit, reserve } from "./budget.mjs";
-import { followUpPlan, postTriggerCard, runFollowUps } from "./card.mjs";
+import { followUpPlan, postTriggerCard, runFollowUps, shownDamage } from "./card.mjs";
 import { canPay, evaluate, resourceName, resourceValue } from "./eligibility.mjs";
 import { cancelPrompt, clock, promptMs, promptReactor, recipientFor, withReactorQueue } from "./prompt.mjs";
 import { effectNote, eventKey, realStep } from "./taxonomy.mjs";
@@ -87,6 +87,7 @@ export const serverNow = () => game.time?.serverTime ?? Date.now();
 let generation = 0;
 const itemCache = new WeakMap(); // item -> {gen, value}
 let kindsCache = null; // {gen, kinds}
+let optOutCache = null; // {gen, value}
 const stampKinds = new Set(); // event kinds seen in detach stamps (flags["stef-ds-automation"].overlay.triggers)
 let stampsScanned = false;
 
@@ -101,6 +102,8 @@ function normalizeTrigger(t) {
     subject: "self", range: "ability", loe: true, require: {},
     ...(String(t?.event ?? "").startsWith("damage.") ? { attacker: "any" } : {}),
     ...t,
+    // 1.2.2: a roll.before trigger that does not mention `damaging` keeps the old damaging-only behaviour.
+    ...(t?.event === "roll.before" ? { require: { damaging: true, ...(t.require ?? {}) } } : {}),
     steps: (t?.steps ?? []).map(s => ({
       ...s,
       ...(s.type === "potency" ? { scope: s.scope ?? "all" } : {}),
@@ -110,9 +113,29 @@ function normalizeTrigger(t) {
   };
 }
 
+let stampOptOut = false; // a detach stamp has a roll.before trigger with require.damaging false
+
+const optsOut = t => t?.event === "roll.before" && t.require?.damaging === false;
+
 function stampTriggerKinds(item) {
   const stamp = item?.flags?.[MODULE_ID]?.overlay;
-  for (const t of Array.isArray(stamp?.triggers) ? stamp.triggers : []) if (t?.event) stampKinds.add(t.event);
+  for (const t of Array.isArray(stamp?.triggers) ? stamp.triggers : []) {
+    if (t?.event) stampKinds.add(t.event);
+    if (optsOut(t)) stampOptOut = true;
+  }
+}
+
+/** 1.2.2: does any overlay (or stamp) declare a roll.before trigger for non-damaging power rolls? (cached per generation) */
+function nonDamagingRollsInUse() {
+  if (optOutCache?.gen === generation) return optOutCache.value || stampOptOut;
+  let value = false;
+  try {
+    for (const o of allOverlays()) if ((Array.isArray(o?.triggers) ? o.triggers : []).some(optsOut)) value = true;
+  } catch (err) {
+    debug("trigger.optOut", { error: String(err?.message ?? err) });
+  }
+  optOutCache = { gen: generation, value };
+  return value || stampOptOut;
 }
 
 /** {triggers, trackers} of an ability item from resolveAbility (cached per item and cache generation). */
@@ -128,7 +151,7 @@ export function itemTriggers(item) {
       triggers: (Array.isArray(r?.triggers) ? r.triggers : []).map(normalizeTrigger),
       trackers: (Array.isArray(r?.trackers) ? r.trackers : []).map(k => ({ endPrevious: true, endOnSourceDying: false, ...k })),
     };
-    if (r?.layer === "detached") for (const t of value.triggers) stampKinds.add(t.event);
+    if (r?.layer === "detached") for (const t of value.triggers) { stampKinds.add(t.event); if (optsOut(t)) stampOptOut = true; }
   } catch (err) {
     debug("trigger.itemTriggers", { item: item?.name, error: String(err?.message ?? err) });
   }
@@ -201,12 +224,15 @@ export function sceneReactors(sceneId, kind) {
 }
 
 /** Cheap local gate for wrappers and the roll lock (any client): could anything on that scene react? */
-export function mayHold(kind, sceneId) {
+export function mayHold(kind, sceneId, { damaging = true } = {}) {
   try {
+    // 1.2.2: a non-damaging power roll can only be reacted to by a trigger that opted out of require.damaging.
+    if (kind === "roll.before" && damaging === false && !nonDamagingRollsInUse()) return false;
     if (kind === "damage.after" && featuresWantAfter(sceneId)) return true;
     if (!triggersActive() || !kindsInUse().has(kind)) return false;
     if (!setting("triggersOutsideCombat") && !combatFor(sceneId)?.started) return false;
-    const { reactors, unknown } = scanScene(sceneId, kind);
+    const { unknown, reactors: all } = scanScene(sceneId, kind);
+    const reactors = kind === "roll.before" && damaging === false ? all.filter(r => optsOut(r.trigger)) : all;
     return reactors.length > 0 || (unknown > 0 && !game.user?.isGM);
   } catch (_err) {
     return false;
@@ -299,6 +325,9 @@ function stepText(s, c) {
   switch (s.type) {
     case "halve": return loc("DSAUTO.Trigger.Step.halve");
     case "potency": return loc("DSAUTO.Trigger.Step.potency", { delta: signed(s.delta) });
+    case "bane": return Number(s.amount) >= 2 ? loc("DSAUTO.Trigger.Step.bane2") : loc("DSAUTO.Trigger.Step.bane1");
+    case "speedZero": return loc("DSAUTO.Trigger.Step.speedZero");
+    case "damage": return loc("DSAUTO.Trigger.Step.damage", { value: shownDamage(s, c), type: s.damageType ?? "" }).replace(/\s+/g, " ").trim();
     case "edge": return Number(s.amount) >= 2 ? loc("DSAUTO.Trigger.Step.edge2") : loc("DSAUTO.Trigger.Step.edge1");
     case "use": return loc("DSAUTO.Trigger.Step.use", { ability: c.item.name });
     case "freeStrike": return loc("DSAUTO.Trigger.Step.freeStrike");
@@ -322,7 +351,7 @@ function stepsText(c, resource) {
 export function eventText(ev) {
   const source = ev?.source?.name || loc("DSAUTO.Trigger.Dialog.UnknownSource");
   const amount = ev?.damage ? (ev.damage.finalAmount ?? ev.damage.amount ?? 0) : 0;
-  const ability = ev?.roll ? (lookup(ev.roll.abilityUuid)?.name ?? "") : "";
+  const ability = ev?.roll ? (lookup(ev.roll.abilityUuid)?.name ?? "") : (ev?.ability ? (lookup(ev.ability.itemUuid)?.name ?? "") : "");
   return loc(`DSAUTO.Trigger.Dialog.Event.${eventKey(ev?.kind ?? "")}`, { subject: ev?.subject?.name ?? "", amount, source, ability });
 }
 
@@ -676,7 +705,7 @@ export function listTriggers(actor) {
   return out;
 }
 
-const CACHE_SETTINGS = new Set([`${MODULE_ID}.libraryEnabled`, `${MODULE_ID}.libraryDefersToCombatTools`]);
+const CACHE_SETTINGS = new Set([`${MODULE_ID}.libraryEnabled`]);
 
 /**
  * Does an actor update change what library/identity.mjs monsterKeys reads (name, `flags.stef-ds-automation.monsterKey`

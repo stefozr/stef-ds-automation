@@ -8,9 +8,9 @@
  * An overlay may suppress native power roll effects by id (it replaces them), and limit the native rows to
  * one side (`native.filter`: an ability that spares allies).
  *
- * Combat Tools coexistence (setting `libraryDefersToCombatTools`): when the item carries Combat Tools'
- * own automation of a kind (`dsct.flat*` special effects: buttons on the card), library effects of that
- * kind are left to Combat Tools.
+ * Combat Tools coexistence: the suite always has priority. When the item carries Combat Tools' own automation of a
+ * kind (`dsct.flat*` special effects, `dsctHeal` / `dsctTeleport` tiered effects), the suite still plans every effect
+ * and hides Combat Tools' duplicate controls on the card (ui/dstd-lock.mjs). `dsctCovered` only lists those kinds.
  *
  * Milestone 5: an overlay's `triggers` and `trackers` are overlay-level data (not effects or entries); a
  * detached item keeps them in its detach stamp. They are not seeded (`automatable` ignores them): the
@@ -18,7 +18,7 @@
  *
  * Milestone 6: `summon` is an effect type of every layer (overlay effect, detached `dsAuto.summon` entry).
  * It counts as automatable like any non-note effect, and Combat Tools has no flat summon kind (DSCT_FLAT),
- * so a summon is never "covered".
+ * so a summon never shares a kind with it.
  *
  * Milestone 9: an overlay's `persistent` (Persistent upkeep, persistent/registry.mjs) is overlay-level data like the
  * triggers; a detached item keeps it in its detach stamp. A re-roll or a hold counts as added automation.
@@ -32,7 +32,7 @@ import { findOverlay } from "./registry.mjs";
 import { compareVersions } from "./schema.mjs";
 
 /** Combat Tools flat effect type -> the library effect type it automates. */
-const DSCT_FLAT = {
+export const DSCT_FLAT = {
   "dsct.flatDamage": "damage",
   "dsct.flatHeal": "heal",
   "dsct.flatCleanse": "cleanse",
@@ -105,7 +105,6 @@ export function resolveAbility(item) {
   const usable = overlay && modulesMet(overlay) ? overlay : null;
   const entries = on ? itemEntries(item) : [];
   const detached = !!flags.overlay?.detached || entries.length > 0;
-  const covered = setting("libraryDefersToCombatTools") ? dsctCoveredTypes(item) : new Set();
   const out = {
     key, layer: "none", status: "manual", overlay: overlay ?? null, effects: [], suppress: new Set(), nativeFilter: null, config: {},
     choices: [], dsctCovered: [], disabled: !!flags.disabled, locked: !!flags.lock, outdated: false,
@@ -155,12 +154,8 @@ export function resolveAbility(item) {
       out.suppress = new Set(automation.suppress ?? []);
     } else if (automation.suppress?.length) out.suppress = new Set([...out.suppress, ...automation.suppress]);
   }
-  // Combat Tools automates some kinds itself.
-  if (covered.size && out.effects.length) {
-    const before = out.effects.length;
-    out.effects = out.effects.filter(e => !covered.has(e.type) || e.type === "note");
-    if (out.effects.length < before) out.dsctCovered = [...covered];
-  }
+  // Information only: the kinds Combat Tools' copy of the item also has buttons for (the suite's rows win).
+  out.dsctCovered = [...dsctCoveredTypes(item)];
   if (out.disabled) {
     out.layer = "disabled";
     out.effects = [];
@@ -178,21 +173,14 @@ export function resolveAbility(item) {
 
 /**
  * Medkit status, most specific first:
- *   locked > disabled > outdated > customized > unavailable > covered > configurable > automated > native > manual
- * "covered": the overlay adds nothing here because Combat Tools automates every one of its effects on
- * this item (only notes are left). Triggers and trackers (Milestone 5) always count as added.
+ *   locked > disabled > outdated > customized > unavailable > configurable > automated > native > manual
  */
 function statusOf(r, overlay, flags, item) {
   if (r.locked) return "locked";
   if (r.disabled) return "disabled";
   if (r.layer === "detached") return r.outdated ? "outdated" : "customized";
   if (overlay && !modulesMet(overlay)) return "unavailable";
-  if (r.layer === "overlay") {
-    const adds = !!r.automation?.rules?.length || r.effects.some(e => e.type !== "note") || r.suppress.size || r.nativeFilter || r.choices.length || r.triggers.length || r.trackers.length
-      || (r.persistent?.keep ?? []).some(k => k !== "manual");
-    if (r.dsctCovered.length && !adds) return "covered";
-    return overlay.config?.length ? "configurable" : "automated";
-  }
+  if (r.layer === "overlay") return overlay.config?.length ? "configurable" : "automated";
   if (r.layer === "native") return "native";
   return "manual";
 }
