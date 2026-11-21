@@ -1,4 +1,4 @@
-# stef-ds-automation 1.2.2: coverage of Draw Steel 1.2.1
+# stef-ds-automation 1.2.3: coverage of Draw Steel 1.2.1
 
 177 overlays (14 monster-specific); 12 overlays with triggers, 2 with trackers, 6 with summons, 7 with areas, 9 with resource gains.
 "overlay" = the library adds automation (\* = the system describes nothing structured for it);

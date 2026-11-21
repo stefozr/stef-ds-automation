@@ -5,17 +5,26 @@ another module's flags or settings: it reads them, calls the module's public API
 then writes its own data), and locks or annotates buttons in the chat card only on the client that shows them.
 `api.selfCheck()` prints the other modules' settings that matter (the "foreign" table).
 
-Source contracts reviewed (M8 live coexistence testing remains pending): Combat Tools 1.2.3, ctlib 1.2.1, Target Damage 1.0.8, Death Tracker 1.1.3, Battle Log 1.3.0,
-Stef's Quality of Life Improvements 1.0.0, on Draw Steel 1.1.2 and Foundry 14.368.
+Versions this was last checked against (automation 1.2.2): Combat Tools 2.2.4, ctlib 2.1.3, Battle Log 2.1.1,
+Death Tracker 2.0.1, Target Damage 1.0.8, Draw Steel 1.2.2, Foundry 14.370. The contract list behind this page is
+kept in the audit baseline (`D:/FoundryVTT/Audit/baselines/2026-11-21_ds1.2.2_ct2.2.4/contracts.json`).
+
+**The rule: the suite has priority over Combat Tools.** Where the Automation box handles something, Combat Tools'
+duplicate control is hidden on our side. Combat Tools stays the fallback for kinds the suite does not cover. The suite
+never changes a Combat Tools setting by itself; it only does so when the GM clicks the overlap notice.
 
 ## Draw Steel: Combat Tools (`draw-steel-combat-tools`)
 
 | | |
 |---|---|
-| Reads | Settings `conditionsEnabled`, `forcedMovementEnabled`, `abilityAutomationEnabled`, `squadToolsEnabled`, `squadSimultaneousTurns`, `pairSimultaneousTurns`, `autoSquadLabelsEnabled`, `squadLabelApplyEffects`, `hiwEnabled`, `autoTriggeredActionsEnabled`, `judgementAutomation`, `markAutomation`, `abilityTemplateCleanup`, `abilityTemplateSeconds`, `rollDialogPillUI`; its message flags for "choose one" picks; its item flags (its own automation of an ability); its "Unspent Triggered Action" effect and its Judgement / Mark effect flags. |
-| Calls | Its API for frightened, taunted and grabbed (setting **Targeted conditions** = Automatic and its conditions on), forced movement (push, pull, slide, collisions, undo by its log), the square picker (self teleports, slides) and squad turn labels. |
-| Stands down | Where an ability carries Combat Tools' own automation of a kind (heal, cleanse, teleport ...), the library leaves that kind to it (setting **Library: leave Combat Tools' own automation alone**). Its own Hesitation is Weakness, Judgement and Mark automation are left alone when on. |
-| Locks | Its "Push 2" style buttons and Apply All on results our rows already applied. |
+| Reads | Settings `abilityAutomationEnabled`, `autoApplyOwnAbilities`, `abilityTargetingEnabled`, `areaPicker`, `abilityTemplateCleanup`, `abilityTemplateSeconds`, `appliedEffectEnabled`, `applyDamageEnabled`, `flatEffectsEnabled`, `advancedEnrichers`, `conditionsEnabled`, `frightenedEnabled`, `tauntedEnabled`, `grabEnabled`, `forcedMovementEnabled`, `allowCrookedPushPull`, `gmBypassesSizeCheck`, `stealthSystemEnabled`, `neutralFoesHostile`, `squadToolsEnabled`, `squadSimultaneousTurns`, `pairSimultaneousTurns`, `autoSquadLabelsEnabled`, `squadLabelApplyEffects`, `autoTriggeredActionsEnabled`, `rollDialogPillUI`, `hiwEnabled`, `judgementAutomation`, `markAutomation`. Message flags (`useTargets`, `lastFmMoveId`, `flatDmgTypes` ...), item flags (`effectType`, its own automation of an ability), and the effect flags `judgement`, `mark`, `aura`, `stealth`. Its "Unspent Triggered Action" effect. |
+| Calls | Its API: `applyFrightened`, `applyTaunted`, `grab` / `endGrab`, `forcedMovement` (push, pull, slide, collisions, undo by its log), `isFMActive`, `bypassNextFmGate`, `allowOutOfRange`, `teleport`, `getValidTargets`, `colorTokenPicker` (the square picker), `squadLabels`, `rollDialog` / `setRollDialogLock`, `stealth`. It listens to the hooks `dsct.preForcedMovement` and `dsct.forcedMovement`, and imports its forced-movement engine, `teleport.mjs` and `combat-reveal.mjs`. |
+| Built into the suite | Hesitation is Weakness, Judgement (all of it: the holy damage, the Wrath bane / potency option, the taunt) and Mark (the taunt) are done by the suite. Combat Tools' own cards and buttons for them are hidden where the box has the row. A judgement that Combat Tools applied itself is left to it while its Judgement automation is on. |
+| Hides | Its chips in card text ("15 Stamina", "Stand Up" ...), its flat and tiered heal / teleport buttons, "Apply Judgement" and "Apply Mark", and its own Hesitation is Weakness card, wherever the Automation box already has the same row. Buttons for things the box does not handle stay. |
+| Copies | The suite always automates Combat Tools' enhanced ability copies. My Life for Yours shows one "Spend 1 Wrath" row after its Stand Up or Cleanse pick. Practical Magic's Damage and Teleport picks plan their rows, and answers already given in Combat Tools' target picker or roll window are reused. |
+| Fallback | For kinds the suite does not cover, Combat Tools' own automation and buttons stay and work as before. |
+| Locks | Its "Push 2" style buttons and Apply All on results our rows already applied (silently on cards the box handles; a warning only when you click). |
+| GM overlap notice | A one-time notice (and Automation settings, Maintenance, "Combat Tools overlap: review") lists the Combat Tools switches that duplicate the suite: Hesitation is Weakness, Judgement, Mark and "Apply my abilities automatically". One click turns them off; "Not now" hides it until the list changes. |
 | Overlaps | With **Targeted conditions** = Native while Combat Tools' conditions are on, both may represent the same condition (the self-check warns). Combat Tools takes over the token HUD toggle of frightened / taunted / grabbed while active, so a native effect of ours is ended with `api.endTargeted` or by deleting the effect. Its cover immunity can be used up by another hit during a hold. |
 
 ## ctlib (`draw-steel-ctlib`)
@@ -45,7 +54,7 @@ Stef's Quality of Life Improvements 1.0.0, on Draw Steel 1.1.2 and Foundry 14.36
 
 | | |
 |---|---|
-| Reads | Settings `resourceLog`, `resourceLogTokenCards` (self-check only). |
+| Reads | Settings `resourceLog`, `resourceLogTokenCards` (self-check only). The qol module also reads `collapsibleAbilities`. |
 | Overlaps | Damage from other buttons that we halve during a hold is logged unhalved. |
 
 ## Draw Steel: Triggers (`draw-steel-triggers`)
@@ -66,6 +75,12 @@ Stef's Quality of Life Improvements 1.0.0, on Draw Steel 1.1.2 and Foundry 14.36
 |---|---|
 | Read by it | Its teleport fix asks `api.library.find` and the setting `libraryEnabled`, and leaves abilities the library teleports to us. |
 | Overlaps | Its "Undo Last Activation" restores the heroic resource to its old value even when a gain row stays applied: undo the gain row first, or add the erased gain back on the sheet afterwards and leave its applied row unchanged. |
+
+## Draw Steel: Combat Tracker (`draw-steel-combat-tracker`)
+
+| | |
+|---|---|
+| Read by qol | The qol tracker dock reads its settings `alignLeft` and `resizableWidth` and imports its `scripts/combat-dock.mjs`. Only tested versions are patched (qol `VERIFIED_VERSIONS`). |
 
 ## Draw Steel Plus (`draw-steel-plus`)
 

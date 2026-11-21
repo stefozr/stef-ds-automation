@@ -2,6 +2,18 @@
 
 All notable changes to Stef's Automation Suite for Draw Steel. Dates are YYYY-MM-DD.
 
+## [1.2.3] - 2026-11-21
+
+### Fixed
+- Combat Tools' buttons for rows the Automation box already applied (for example "Grabbed") sometimes stayed
+  unlocked on a player's card when another module rebuilt part of the card after it was drawn. Clicks on them were
+  still blocked, but the button looked usable. The card is now watched and its buttons are locked again whenever its
+  content changes.
+
+### Docs
+- `docs/COEXISTENCE.md` brought up to date for Combat Tools 2.2.4, ctlib 2.1.3, Battle Log 2.1.1 and Draw Steel 1.2.2,
+  including the suite-priority rule, what the suite hides and builds in, and the GM overlap notice.
+
 ## [1.2.2] - 2026-11-14
 
 ### Fixed

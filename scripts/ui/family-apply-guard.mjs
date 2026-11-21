@@ -194,5 +194,33 @@ export function registerFamilyApplyGuard() {
         }
       }, ms);
     }
+    watchCard(message.id, root);
   });
+}
+
+const watched = new WeakSet();
+/**
+ * Other modules rebuild parts of a rendered card later without a new render hook (Battle Log's target panel, slow clients
+ * where the parts arrive after the 700 ms look): decorate again whenever the card's content changes. lock() only touches
+ * attributes, so the observer (childList only) does not wake itself.
+ */
+function watchCard(messageId, root) {
+  if (typeof globalThis.MutationObserver !== "function" || !root?.nodeType || watched.has(root)) return;
+  watched.add(root);
+  let timer = null, shown = false;
+  const observer = new MutationObserver(() => {
+    // The hook runs before the card is in the chat log: stop only once a shown card was replaced (re-render).
+    if (root.isConnected) shown = true;
+    else if (shown) { observer.disconnect(); return; }
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      try {
+        const message = game.messages?.get?.(messageId);
+        if (message) decorateFamily(message, root);
+      } catch (err) {
+        error("familyGuard.watch", err, { messageId });
+      }
+    }, 50);
+  });
+  observer.observe(root, { childList: true, subtree: true });
 }
